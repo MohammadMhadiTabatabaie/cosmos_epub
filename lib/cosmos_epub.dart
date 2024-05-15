@@ -23,7 +23,7 @@ class CosmosEpub {
       {required String localPath,
       required BuildContext context,
       required String bookId,
-      Color accentColor = Colors.indigoAccent,
+      Color accentColor = Colors.red,
       Function(int currentPage, int totalPages)? onPageFlip,
       Function(int lastPageIndex)? onLastPage,
       String chapterListTitle = 'Table of Contents',
