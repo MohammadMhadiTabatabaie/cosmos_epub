@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       useInheritedMediaQuery: true,
-      title: 'CosmosEpub 💫 Reader Example',
+      title: '',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
         appBarTheme: AppBarTheme(
@@ -49,9 +49,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _openEpubReader(BuildContext context) async {
     await CosmosEpub.openAssetBook(
-        assetPath: 'assets/book.epub',
+        assetPath: 'assets/jak.epub',
         context: context,
-        bookId: '3',
+        bookId: '10',
         onPageFlip: (int currentPage, int totalPages) {
           print(currentPage);
         },
@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('CosmosEpub 💫 Reader Example'),
+        title: Text(''),
       ),
       body: Center(
         child: ElevatedButton(
