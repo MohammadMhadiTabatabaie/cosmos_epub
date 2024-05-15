@@ -16,5 +16,6 @@ class Assets {
   static const String fontsLiterataVar = 'assets/fonts/Literata-Var.ttf';
   static const String fontsLoraVar = 'assets/fonts/Lora-Var.ttf';
   static const String fontsUbuntuVar = 'assets/fonts/Ubuntu-Var.ttf';
+  static const String fontsIRANSans = 'assets/fonts/IRANSansXFaNum-Regular.ttf';
 
 }

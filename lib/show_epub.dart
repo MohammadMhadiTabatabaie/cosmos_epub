@@ -21,8 +21,9 @@ late BookProgressSingleton bookProgress;
 const double DESIGN_WIDTH = 375;
 const double DESIGN_HEIGHT = 812;
 
-String selectedFont = 'Segoe';
+String selectedFont = 'IRANSans';
 List<String> fontNames = [
+  "IRANSans"
   "Segoe",
   "Alegreya",
   "Amazon Ember",
@@ -554,344 +555,346 @@ class ShowEpubState extends State<ShowEpub> {
         onWillPop: backPress,
         child: Scaffold(
           backgroundColor: backColor,
-          body: SafeArea(
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    Expanded(
-                        child: Stack(
-                      children: [
-                        FutureBuilder<void>(
-                            future: loadChapterFuture,
-                            builder: (context, snapshot) {
-                              switch (snapshot.connectionState) {
-                                case ConnectionState.waiting:
-                                  {
-                                    // Otherwise, display a loading indicator.
-                                    return Center(
-                                        child: CupertinoActivityIndicator(
-                                      color: Theme.of(context).primaryColor,
-                                      radius: 30.r,
-                                    ));
-                                  }
-                                default:
-                                  {
-                                    if (widget.shouldOpenDrawer) {
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                        openTableOfContents();
-                                      });
-
-                                      widget.shouldOpenDrawer = false;
+          body: Directionality(textDirection: TextDirection.rtl,
+            child: SafeArea(
+              child: Stack(
+                children: [
+                  Column(
+                    children: [
+                      Expanded(
+                          child: Stack(
+                        children: [
+                          FutureBuilder<void>(
+                              future: loadChapterFuture,
+                              builder: (context, snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.waiting:
+                                    {
+                                      // Otherwise, display a loading indicator.
+                                      return Center(
+                                          child: CupertinoActivityIndicator(
+                                        color: Theme.of(context).primaryColor,
+                                        radius: 30.r,
+                                      ));
                                     }
-                                    return PagingWidget(
-                                      textContent,
-                                      innerHtmlContent,
-
-                                      ///Do we need this to the production
-                                      lastWidget: null,
-                                      starterPageIndex: bookProgress
-                                              .getBookProgress(bookId)
-                                              .currentPageIndex ??
-                                          0,
-                                      style: TextStyle(
-                                          backgroundColor: backColor,
-                                          fontSize: _fontSize.sp,
-                                          fontFamily: selectedTextStyle,
-                                          package: 'cosmos_epub',
-                                          color: fontColor),
-                                      handlerCallback: (ctrl) {
-                                        controllerPaging = ctrl;
-                                      },
-                                      onTextTap: () {
-                                        if (showHeader) {
-                                          showHeader = false;
-                                        } else {
-                                          showHeader = true;
-                                        }
-                                        updateUI();
-                                      },
-                                      onPageFlip: (currentPage, totalPages) {
-                                        if (widget.onPageFlip != null) {
-                                          widget.onPageFlip!(
-                                              currentPage, totalPages);
-                                        }
-
-                                        if (currentPage == totalPages - 1) {
-                                          bookProgress.setCurrentPageIndex(
-                                              bookId, 0);
-                                        } else {
-                                          bookProgress.setCurrentPageIndex(
-                                              bookId, currentPage);
-                                        }
-
-                                        if (isLastPage) {
-                                          showHeader = true;
-                                        } else {
-                                          lastSwipe = 0;
-                                        }
-
-                                        isLastPage = false;
-                                        updateUI();
-
-                                        if (currentPage == 0) {
-                                          prevSwipe++;
-                                          if (prevSwipe > 1) {
-                                            prevChapter();
+                                  default:
+                                    {
+                                      if (widget.shouldOpenDrawer) {
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          openTableOfContents();
+                                        });
+            
+                                        widget.shouldOpenDrawer = false;
+                                      }
+                                      return PagingWidget(
+                                        textContent,
+                                        innerHtmlContent,
+            
+                                        ///Do we need this to the production
+                                        lastWidget: null,
+                                        starterPageIndex: bookProgress
+                                                .getBookProgress(bookId)
+                                                .currentPageIndex ??
+                                            0,
+                                        style: TextStyle(
+                                            backgroundColor: backColor,
+                                            fontSize: _fontSize.sp,
+                                            fontFamily: selectedTextStyle,
+                                            package: 'cosmos_epub',
+                                            color: fontColor),
+                                        handlerCallback: (ctrl) {
+                                          controllerPaging = ctrl;
+                                        },
+                                        onTextTap: () {
+                                          if (showHeader) {
+                                            showHeader = false;
+                                          } else {
+                                            showHeader = true;
                                           }
-                                        } else {
-                                          prevSwipe = 0;
-                                        }
-                                      },
-                                      onLastPage: (index, totalPages) async {
-                                        if (widget.onLastPage != null) {
-                                          widget.onLastPage!(index);
-                                        }
-
-                                        if (totalPages > 1) {
-                                          lastSwipe++;
-                                        } else {
-                                          lastSwipe = 2;
-                                        }
-
-                                        if (lastSwipe > 1) {
-                                          nextChapter();
-                                        }
-
-                                        isLastPage = true;
-
-                                        updateUI();
-                                      },
-                                      chapterTitle: chaptersList[bookProgress
+                                          updateUI();
+                                        },
+                                        onPageFlip: (currentPage, totalPages) {
+                                          if (widget.onPageFlip != null) {
+                                            widget.onPageFlip!(
+                                                currentPage, totalPages);
+                                          }
+            
+                                          if (currentPage == totalPages - 1) {
+                                            bookProgress.setCurrentPageIndex(
+                                                bookId, 0);
+                                          } else {
+                                            bookProgress.setCurrentPageIndex(
+                                                bookId, currentPage);
+                                          }
+            
+                                          if (isLastPage) {
+                                            showHeader = true;
+                                          } else {
+                                            lastSwipe = 0;
+                                          }
+            
+                                          isLastPage = false;
+                                          updateUI();
+            
+                                          if (currentPage == 0) {
+                                            prevSwipe++;
+                                            if (prevSwipe > 1) {
+                                              prevChapter();
+                                            }
+                                          } else {
+                                            prevSwipe = 0;
+                                          }
+                                        },
+                                        onLastPage: (index, totalPages) async {
+                                          if (widget.onLastPage != null) {
+                                            widget.onLastPage!(index);
+                                          }
+            
+                                          if (totalPages > 1) {
+                                            lastSwipe++;
+                                          } else {
+                                            lastSwipe = 2;
+                                          }
+            
+                                          if (lastSwipe > 1) {
+                                            nextChapter();
+                                          }
+            
+                                          isLastPage = true;
+            
+                                          updateUI();
+                                        },
+                                        chapterTitle: chaptersList[bookProgress
+                                                    .getBookProgress(bookId)
+                                                    .currentChapterIndex ??
+                                                0]
+                                            .chapter,
+                                        totalChapters: chaptersList.length,
+                                      );
+                                    }
+                                }
+                              }),
+                          //)
+            
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Visibility(
+                              visible: showBrightnessWidget,
+                              child: Container(
+                                  height: 150.h,
+                                  width: 30.w,
+                                  alignment: Alignment.bottomCenter,
+                                  margin:
+                                      EdgeInsets.only(bottom: 40.h, right: 15.w),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.brightness_7,
+                                        size: 14.h,
+                                        color: fontColor,
+                                      ),
+                                      SizedBox(
+                                        height: 120.h,
+                                        width: 30.w,
+                                        child: RotatedBox(
+                                            quarterTurns: -1,
+                                            child: SliderTheme(
+                                                data: SliderThemeData(
+                                                  activeTrackColor:
+                                                      staticThemeId == 4
+                                                          ? Colors.white
+                                                          : Colors.blue,
+                                                  disabledThumbColor:
+                                                      Colors.transparent,
+                                                  inactiveTrackColor: Colors.grey
+                                                      .withOpacity(0.5),
+                                                  trackHeight: 5.0,
+            
+                                                  thumbColor: staticThemeId == 4
+                                                      ? Colors.grey
+                                                          .withOpacity(0.8)
+                                                      : Colors.blue,
+                                                  thumbShape:
+                                                      RoundSliderThumbShape(
+                                                          enabledThumbRadius:
+                                                              0.r),
+                                                  // Adjust the size of the thumb
+                                                  overlayShape:
+                                                      RoundSliderOverlayShape(
+                                                          overlayRadius: 10
+                                                              .r), // Adjust the size of the overlay
+                                                ),
+                                                child: Slider(
+                                                  value: brightnessLevel,
+                                                  min: 0.0,
+                                                  max: 1.0,
+                                                  onChangeEnd: (double value) {
+                                                    setBrightness(value);
+                                                  },
+                                                  onChanged: (double value) {
+                                                    setState(() {
+                                                      brightnessLevel = value;
+                                                    });
+                                                  },
+                                                ))),
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                          )
+                        ],
+                      )),
+                      AnimatedContainer(
+                        height: showHeader ? 40.h : 0,
+                        duration: const Duration(milliseconds: 100),
+                        color: backColor,
+                        child: Container(
+                          height: 40.h,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: backColor,
+                            border: Border(
+                              top: BorderSide(
+                                  width: 3.w, color: widget.accentColor),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              SizedBox(
+                                width: 5.w,
+                              ),
+                              Visibility(
+                                visible: showPrevious,
+                                child: IconButton(
+                                    onPressed: () {
+                                      prevChapter();
+                                    },
+                                    icon: Icon(
+                                      Icons.arrow_back_ios,
+                                      size: 15.h,
+                                      color: fontColor,
+                                    )),
+                              ),
+                              SizedBox(
+                                width: 5.w,
+                              ),
+                              Expanded(
+                                flex: 10,
+                                child: Text(
+                                  chaptersList.isNotEmpty
+                                      ? chaptersList[bookProgress
                                                   .getBookProgress(bookId)
                                                   .currentChapterIndex ??
                                               0]
-                                          .chapter,
-                                      totalChapters: chaptersList.length,
-                                    );
-                                  }
-                              }
-                            }),
-                        //)
-
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Visibility(
-                            visible: showBrightnessWidget,
-                            child: Container(
-                                height: 150.h,
-                                width: 30.w,
-                                alignment: Alignment.bottomCenter,
-                                margin:
-                                    EdgeInsets.only(bottom: 40.h, right: 15.w),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons.brightness_7,
-                                      size: 14.h,
-                                      color: fontColor,
-                                    ),
-                                    SizedBox(
-                                      height: 120.h,
-                                      width: 30.w,
-                                      child: RotatedBox(
-                                          quarterTurns: -1,
-                                          child: SliderTheme(
-                                              data: SliderThemeData(
-                                                activeTrackColor:
-                                                    staticThemeId == 4
-                                                        ? Colors.white
-                                                        : Colors.blue,
-                                                disabledThumbColor:
-                                                    Colors.transparent,
-                                                inactiveTrackColor: Colors.grey
-                                                    .withOpacity(0.5),
-                                                trackHeight: 5.0,
-
-                                                thumbColor: staticThemeId == 4
-                                                    ? Colors.grey
-                                                        .withOpacity(0.8)
-                                                    : Colors.blue,
-                                                thumbShape:
-                                                    RoundSliderThumbShape(
-                                                        enabledThumbRadius:
-                                                            0.r),
-                                                // Adjust the size of the thumb
-                                                overlayShape:
-                                                    RoundSliderOverlayShape(
-                                                        overlayRadius: 10
-                                                            .r), // Adjust the size of the overlay
-                                              ),
-                                              child: Slider(
-                                                value: brightnessLevel,
-                                                min: 0.0,
-                                                max: 1.0,
-                                                onChangeEnd: (double value) {
-                                                  setBrightness(value);
-                                                },
-                                                onChanged: (double value) {
-                                                  setState(() {
-                                                    brightnessLevel = value;
-                                                  });
-                                                },
-                                              ))),
-                                    ),
-                                  ],
-                                )),
-                          ),
-                        )
-                      ],
-                    )),
-                    AnimatedContainer(
-                      height: showHeader ? 40.h : 0,
-                      duration: const Duration(milliseconds: 100),
-                      color: backColor,
-                      child: Container(
-                        height: 40.h,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: backColor,
-                          border: Border(
-                            top: BorderSide(
-                                width: 3.w, color: widget.accentColor),
+                                          .chapter
+                                      : 'Loading...',
+                                  maxLines: 1,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 13.sp,
+                                      overflow: TextOverflow.ellipsis,
+                                      fontFamily: selectedTextStyle,
+                                      package: 'cosmos_epub',
+                                      fontWeight: FontWeight.bold,
+                                      color: fontColor),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 5.w,
+                              ),
+                              Visibility(
+                                  visible: showNext,
+                                  child: IconButton(
+                                      onPressed: () {
+                                        nextChapter();
+                                      },
+                                      icon: Icon(
+                                        Icons.arrow_forward_ios_rounded,
+                                        size: 15.h,
+                                        color: fontColor,
+                                      ))),
+                              SizedBox(
+                                width: 5.w,
+                              ),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            SizedBox(
-                              width: 5.w,
-                            ),
-                            Visibility(
-                              visible: showPrevious,
-                              child: IconButton(
-                                  onPressed: () {
-                                    prevChapter();
-                                  },
-                                  icon: Icon(
-                                    Icons.arrow_back_ios,
-                                    size: 15.h,
-                                    color: fontColor,
-                                  )),
-                            ),
-                            SizedBox(
-                              width: 5.w,
-                            ),
-                            Expanded(
-                              flex: 10,
-                              child: Text(
-                                chaptersList.isNotEmpty
-                                    ? chaptersList[bookProgress
-                                                .getBookProgress(bookId)
-                                                .currentChapterIndex ??
-                                            0]
-                                        .chapter
-                                    : 'Loading...',
-                                maxLines: 1,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 13.sp,
-                                    overflow: TextOverflow.ellipsis,
-                                    fontFamily: selectedTextStyle,
-                                    package: 'cosmos_epub',
-                                    fontWeight: FontWeight.bold,
-                                    color: fontColor),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 5.w,
-                            ),
-                            Visibility(
-                                visible: showNext,
-                                child: IconButton(
-                                    onPressed: () {
-                                      nextChapter();
-                                    },
-                                    icon: Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 15.h,
+                      ),
+                    ],
+                  ),
+                  AnimatedContainer(
+                    height: showHeader ? 50.h : 0,
+                    duration: const Duration(milliseconds: 100),
+                    color: backColor,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 3.h),
+                      child: AppBar(
+                        centerTitle: true,
+                        title: Text(
+                          bookTitle,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.sp,
+                              color: fontColor),
+                        ),
+                        backgroundColor: backColor,
+                        shape: Border(
+                            bottom: BorderSide(
+                                color: widget.accentColor, width: 3.h)),
+                        elevation: 0,
+                        leading: IconButton(
+                          onPressed: openTableOfContents,
+                          icon: Icon(
+                            Icons.menu,
+                            color: fontColor,
+                            size: 20.h,
+                          ),
+                        ),
+                        actions: [
+                          InkWell(
+                              onTap: () {
+                                updateFontSettings();
+                              },
+                              child: Container(
+                                width: 40.w,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Aa",
+                                  style: TextStyle(
+                                      fontSize: 18.sp,
                                       color: fontColor,
-                                    ))),
-                            SizedBox(
-                              width: 5.w,
-                            ),
-                          ],
-                        ),
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              )),
+                          SizedBox(
+                            width: 5.w,
+                          ),
+                          InkWell(
+                              onTap: () async {
+                                setState(() {
+                                  showBrightnessWidget = true;
+                                });
+                                await Future.delayed(const Duration(seconds: 7));
+                                setState(() {
+                                  showBrightnessWidget = false;
+                                });
+                              },
+                              child: Icon(
+                                Icons.brightness_high_sharp,
+                                size: 20.h,
+                                color: fontColor,
+                              )),
+                          SizedBox(
+                            width: 10.w,
+                          )
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                AnimatedContainer(
-                  height: showHeader ? 50.h : 0,
-                  duration: const Duration(milliseconds: 100),
-                  color: backColor,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 3.h),
-                    child: AppBar(
-                      centerTitle: true,
-                      title: Text(
-                        bookTitle,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.sp,
-                            color: fontColor),
-                      ),
-                      backgroundColor: backColor,
-                      shape: Border(
-                          bottom: BorderSide(
-                              color: widget.accentColor, width: 3.h)),
-                      elevation: 0,
-                      leading: IconButton(
-                        onPressed: openTableOfContents,
-                        icon: Icon(
-                          Icons.menu,
-                          color: fontColor,
-                          size: 20.h,
-                        ),
-                      ),
-                      actions: [
-                        InkWell(
-                            onTap: () {
-                              updateFontSettings();
-                            },
-                            child: Container(
-                              width: 40.w,
-                              alignment: Alignment.center,
-                              child: Text(
-                                "Aa",
-                                style: TextStyle(
-                                    fontSize: 18.sp,
-                                    color: fontColor,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            )),
-                        SizedBox(
-                          width: 5.w,
-                        ),
-                        InkWell(
-                            onTap: () async {
-                              setState(() {
-                                showBrightnessWidget = true;
-                              });
-                              await Future.delayed(const Duration(seconds: 7));
-                              setState(() {
-                                showBrightnessWidget = false;
-                              });
-                            },
-                            child: Icon(
-                              Icons.brightness_high_sharp,
-                              size: 20.h,
-                              color: fontColor,
-                            )),
-                        SizedBox(
-                          width: 10.w,
-                        )
-                      ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ));

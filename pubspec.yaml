@@ -84,6 +84,9 @@ flutter:
     - family: Ubuntu
       fonts:
         - asset: assets/fonts/Ubuntu-Var.ttf
+    - family: IRANSans
+      fonts:
+        - asset: assets/fonts/IRANSansXFaNum-Regular.ttf
 
   # To add assets to your package, add an assets section, like this:
   # assets:
