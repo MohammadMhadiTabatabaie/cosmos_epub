@@ -279,215 +279,217 @@ class ShowEpubState extends State<ShowEpub> {
                 topLeft: Radius.circular(20.r),
                 topRight: Radius.circular(20.r))),
         builder: (context) {
-          return SingleChildScrollView(
-              child: StatefulBuilder(
-                  builder: (BuildContext context, setState) => SizedBox(
-                        height: 170.h,
-                        child: Column(
-                          children: [
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: 10.h, vertical: 8.w),
-                              height: 45.h,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      updateTheme(1);
-                                    },
-                                    child: CircleButton(
-                                      backColor: cVioletishColor,
-                                      fontColor: Colors.black,
-                                      id: 1,
-                                      accentColor: widget.accentColor,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 10.w,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      updateTheme(2);
-                                    },
-                                    child: CircleButton(
-                                      backColor: cBluishColor,
-                                      fontColor: Colors.black,
-                                      id: 2,
-                                      accentColor: widget.accentColor,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 10.w,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      updateTheme(3);
-                                    },
-                                    child: CircleButton(
-                                      id: 3,
-                                      backColor: Colors.white,
-                                      fontColor: Colors.black,
-                                      accentColor: widget.accentColor,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 10.w,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      updateTheme(4);
-                                    },
-                                    child: CircleButton(
-                                      id: 4,
-                                      backColor: Colors.black,
-                                      fontColor: Colors.white,
-                                      accentColor: widget.accentColor,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 10.w,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      updateTheme(5);
-                                    },
-                                    child: CircleButton(
-                                      id: 5,
-                                      backColor: cPinkishColor,
-                                      fontColor: Colors.black,
-                                      accentColor: widget.accentColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Divider(
-                              thickness: 1.h,
-                              height: 0,
-                              indent: 0,
-                              color: Colors.grey,
-                            ),
-                            Expanded(
-                              child: Container(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 20.h),
-                                  child: Column(
-                                    children: [
-                                      StatefulBuilder(
-                                        builder: (BuildContext context,
-                                                StateSetter setState) =>
-                                            Theme(
-                                          data: Theme.of(context)
-                                              .copyWith(canvasColor: backColor),
-                                          child: DropdownButtonHideUnderline(
-                                            child: DropdownButton<String>(
-                                                value: selectedFont,
-                                                isExpanded: true,
-                                                menuMaxHeight: 400.h,
-                                                onChanged: (newValue) {
-                                                  selectedFont =
-                                                      newValue ?? 'Segoe';
-
-                                                  selectedTextStyle = fontNames
-                                                      .where((element) =>
-                                                          element ==
-                                                          selectedFont)
-                                                      .first;
-
-                                                  gs.write(
-                                                      libFont, selectedFont);
-
-                                                  ///For updating inside
-                                                  setState(() {});
-                                                  controllerPaging.paginate();
-                                                  updateUI();
-                                                },
-                                                items: fontNames.map<
-                                                    DropdownMenuItem<
-                                                        String>>((String font) {
-                                                  return DropdownMenuItem<
-                                                      String>(
-                                                    value: font,
-                                                    child: Text(
-                                                      font,
-                                                      style: TextStyle(
-                                                          color: selectedFont ==
-                                                                  font
-                                                              ? widget
-                                                                  .accentColor
-                                                              : fontColor,
-                                                          package:
-                                                              'cosmos_epub',
-                                                          fontSize:
-                                                              context.isTablet
-                                                                  ? 10.sp
-                                                                  : 15.sp,
-                                                          fontWeight:
-                                                              selectedFont ==
-                                                                      font
-                                                                  ? FontWeight
-                                                                      .bold
-                                                                  : FontWeight
-                                                                      .normal,
-                                                          fontFamily: font),
-                                                    ),
-                                                  );
-                                                }).toList()),
-                                          ),
-                                        ),
+          return Directionality(textDirection: TextDirection.rtl,
+            child: SingleChildScrollView(
+                child: StatefulBuilder(
+                    builder: (BuildContext context, setState) => SizedBox(
+                          height: 170.h,
+                          child: Column(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.symmetric(
+                                    horizontal: 10.h, vertical: 8.w),
+                                height: 45.h,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        updateTheme(1);
+                                      },
+                                      child: CircleButton(
+                                        backColor: cVioletishColor,
+                                        fontColor: Colors.black,
+                                        id: 1,
+                                        accentColor: widget.accentColor,
                                       ),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            "Aa",
-                                            style: TextStyle(
-                                                fontSize: 15.sp,
-                                                color: fontColor,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Expanded(
-                                            child: Slider(
-                                              activeColor: staticThemeId == 4
-                                                  ? Colors.grey.withOpacity(0.8)
-                                                  : Colors.blue,
-                                              value: _fontSizeProgress,
-                                              min: 15.0,
-                                              max: 30.0,
-                                              onChangeEnd: (double value) {
-                                                _fontSize = value;
-
-                                                gs.write(
-                                                    libFontSize, _fontSize);
-
-                                                ///For updating outside
-                                                updateUI();
-                                                controllerPaging.paginate();
-                                              },
-                                              onChanged: (double value) {
-                                                ///For updating widget's inside
-                                                setState(() {
-                                                  _fontSizeProgress = value;
-                                                });
-                                              },
+                                    ),
+                                    SizedBox(
+                                      width: 10.w,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        updateTheme(2);
+                                      },
+                                      child: CircleButton(
+                                        backColor: cBluishColor,
+                                        fontColor: Colors.black,
+                                        id: 2,
+                                        accentColor: widget.accentColor,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10.w,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        updateTheme(3);
+                                      },
+                                      child: CircleButton(
+                                        id: 3,
+                                        backColor: Colors.white,
+                                        fontColor: Colors.black,
+                                        accentColor: widget.accentColor,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10.w,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        updateTheme(4);
+                                      },
+                                      child: CircleButton(
+                                        id: 4,
+                                        backColor: Colors.black,
+                                        fontColor: Colors.white,
+                                        accentColor: widget.accentColor,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10.w,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        updateTheme(5);
+                                      },
+                                      child: CircleButton(
+                                        id: 5,
+                                        backColor: cPinkishColor,
+                                        fontColor: Colors.black,
+                                        accentColor: widget.accentColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Divider(
+                                thickness: 1.h,
+                                height: 0,
+                                indent: 0,
+                                color: Colors.grey,
+                              ),
+                              Expanded(
+                                child: Container(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 20.h),
+                                    child: Column(
+                                      children: [
+                                        StatefulBuilder(
+                                          builder: (BuildContext context,
+                                                  StateSetter setState) =>
+                                              Theme(
+                                            data: Theme.of(context)
+                                                .copyWith(canvasColor: backColor),
+                                            child: DropdownButtonHideUnderline(
+                                              child: DropdownButton<String>(
+                                                  value: selectedFont,
+                                                  isExpanded: true,
+                                                  menuMaxHeight: 400.h,
+                                                  onChanged: (newValue) {
+                                                    selectedFont =
+                                                        newValue ?? 'IRANSans';
+            
+                                                    selectedTextStyle = fontNames
+                                                        .where((element) =>
+                                                            element ==
+                                                            selectedFont)
+                                                        .first;
+            
+                                                    gs.write(
+                                                        libFont, selectedFont);
+            
+                                                    ///For updating inside
+                                                    setState(() {});
+                                                    controllerPaging.paginate();
+                                                    updateUI();
+                                                  },
+                                                  items: fontNames.map<
+                                                      DropdownMenuItem<
+                                                          String>>((String font) {
+                                                    return DropdownMenuItem<
+                                                        String>(
+                                                      value: font,
+                                                      child: Text(
+                                                        font,
+                                                        style: TextStyle(
+                                                            color: selectedFont ==
+                                                                    font
+                                                                ? widget
+                                                                    .accentColor
+                                                                : fontColor,
+                                                            package:
+                                                                'cosmos_epub',
+                                                            fontSize:
+                                                                context.isTablet
+                                                                    ? 10.sp
+                                                                    : 15.sp,
+                                                            fontWeight:
+                                                                selectedFont ==
+                                                                        font
+                                                                    ? FontWeight
+                                                                        .bold
+                                                                    : FontWeight
+                                                                        .normal,
+                                                            fontFamily: font),
+                                                      ),
+                                                    );
+                                                  }).toList()),
                                             ),
                                           ),
-                                          Text(
-                                            "Aa",
-                                            style: TextStyle(
-                                                color: fontColor,
-                                                fontSize: 20.sp,
-                                                fontWeight: FontWeight.bold),
-                                          )
-                                        ],
-                                      )
-                                    ],
-                                  )),
-                            ),
-                          ],
-                        ),
-                      )));
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Aa",
+                                              style: TextStyle(
+                                                  fontSize: 15.sp,
+                                                  color: fontColor,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Expanded(
+                                              child: Slider(
+                                                activeColor: staticThemeId == 4
+                                                    ? Colors.grey.withOpacity(0.8)
+                                                    : Colors.blue,
+                                                value: _fontSizeProgress,
+                                                min: 15.0,
+                                                max: 30.0,
+                                                onChangeEnd: (double value) {
+                                                  _fontSize = value;
+            
+                                                  gs.write(
+                                                      libFontSize, _fontSize);
+            
+                                                  ///For updating outside
+                                                  updateUI();
+                                                  controllerPaging.paginate();
+                                                },
+                                                onChanged: (double value) {
+                                                  ///For updating widget's inside
+                                                  setState(() {
+                                                    _fontSizeProgress = value;
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                            Text(
+                                              "Aa",
+                                              style: TextStyle(
+                                                  color: fontColor,
+                                                  fontSize: 20.sp,
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    )),
+                              ),
+                            ],
+                          ),
+                        ))),
+          );
         });
   }
 

@@ -232,27 +232,25 @@ class PageFlipWidgetState extends State<PageFlipWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(textDirection: TextDirection.rtl,
-      child: LayoutBuilder(
-        builder: (context, dimens) => GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (details) {},
-          onTapUp: (details) {},
-          onPanDown: (details) {},
-          onPanEnd: (details) {},
-          onTapCancel: () {},
-          onHorizontalDragCancel: () => _isForward = null,
-          onHorizontalDragUpdate: (details) => _turnPage(details, dimens),
-          onHorizontalDragEnd: (details) => _onDragFinish(),
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              if (widget.lastPage != null) ...[
-                widget.lastPage!,
-              ],
-              if (pages.isNotEmpty) ...pages else ...[const SizedBox.shrink()],
+    return LayoutBuilder(
+      builder: (context, dimens) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (details) {},
+        onTapUp: (details) {},
+        onPanDown: (details) {},
+        onPanEnd: (details) {},
+        onTapCancel: () {},
+        onHorizontalDragCancel: () => _isForward = null,
+        onHorizontalDragUpdate: (details) => _turnPage(details, dimens),
+        onHorizontalDragEnd: (details) => _onDragFinish(),
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            if (widget.lastPage != null) ...[
+              widget.lastPage!,
             ],
-          ),
+            if (pages.isNotEmpty) ...pages else ...[const SizedBox.shrink()],
+          ],
         ),
       ),
     );
