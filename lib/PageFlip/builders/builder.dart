@@ -51,39 +51,41 @@ class PageFlipBuilderState extends State<PageFlipBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: currentPage,
-      builder: (context, value, child) {
-        if (imageData[widget.pageIndex] != null && value >= 0) {
-          return CustomPaint(
-            painter: PageFlipEffect(
-              amount: widget.amount,
-              image: imageData[widget.pageIndex]!,
-              backgroundColor: widget.backgroundColor,
-              isRightSwipe: widget.isRightSwipe,
-            ),
-            size: Size.infinite,
-          );
-        } else {
-          if (value == widget.pageIndex || (value == (widget.pageIndex + 1))) {
-            WidgetsBinding.instance.addPostFrameCallback(
-              (timeStamp) => _captureImage(timeStamp, currentPageIndex.value),
-            );
-          }
-          if (widget.pageIndex == currentPageIndex.value ||
-              (widget.pageIndex == (currentPageIndex.value + 1))) {
-            return ColoredBox(
-              color: widget.backgroundColor ?? Colors.black12,
-              child: RepaintBoundary(
-                key: _boundaryKey,
-                child: widget.child,
+    return Directionality(textDirection: TextDirection.rtl,
+      child: ValueListenableBuilder(
+        valueListenable: currentPage,
+        builder: (context, value, child) {
+          if (imageData[widget.pageIndex] != null && value >= 0) {
+            return CustomPaint(
+              painter: PageFlipEffect(
+                amount: widget.amount,
+                image: imageData[widget.pageIndex]!,
+                backgroundColor: widget.backgroundColor,
+                isRightSwipe: widget.isRightSwipe,
               ),
+              size: Size.infinite,
             );
           } else {
-            return Container();
+            if (value == widget.pageIndex || (value == (widget.pageIndex + 1))) {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (timeStamp) => _captureImage(timeStamp, currentPageIndex.value),
+              );
+            }
+            if (widget.pageIndex == currentPageIndex.value ||
+                (widget.pageIndex == (currentPageIndex.value + 1))) {
+              return ColoredBox(
+                color: widget.backgroundColor ?? Colors.black12,
+                child: RepaintBoundary(
+                  key: _boundaryKey,
+                  child: widget.child,
+                ),
+              );
+            } else {
+              return Container();
+            }
           }
-        }
-      },
+        },
+      ),
     );
   }
 }

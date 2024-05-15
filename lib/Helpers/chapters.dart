@@ -38,7 +38,7 @@ class ChaptersList extends StatelessWidget {
               )),
           centerTitle: true,
           title: Text(
-            chapterListTitle,
+            'فهرست',
             style: TextStyle(
                 fontWeight: FontWeight.bold, color: accentColor, fontSize: 15.sp),
           ),

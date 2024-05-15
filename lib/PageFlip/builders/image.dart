@@ -105,7 +105,7 @@ class _PageFlipImageState extends State<PageFlipImage> {
           amount: widget.amount,
           image: _imageInfo!.image,
           backgroundColor: widget.backgroundColor,
-          isRightSwipe: widget.isRightSwipe,
+          isRightSwipe: false//widget.isRightSwipe,
         ),
         size: Size.infinite,
       );
