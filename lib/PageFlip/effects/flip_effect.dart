@@ -9,7 +9,7 @@ class PageFlipEffect extends CustomPainter {
     required this.image,
     this.backgroundColor,
     this.radius = 0.18,
-     this.isRightSwipe=false,
+     this.isRightSwipe,
   }) : super(repaint: amount);
 
   final Animation<double> amount;
