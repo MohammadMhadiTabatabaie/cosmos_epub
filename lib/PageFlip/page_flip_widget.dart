@@ -8,14 +8,14 @@ import 'builders/builder.dart';
 class PageFlipWidget extends StatefulWidget {
   PageFlipWidget(
       {Key? key,
-      this.duration = const Duration(milliseconds: 450),
-      this.cutoffForward = 0.8,
-      this.cutoffPrevious = 0.1,
-      this.backgroundColor = Colors.white,
+      this.duration = const Duration(milliseconds: 100),
+      this.cutoffForward = 0.8,//0.8
+      this.cutoffPrevious = 0.1, //0.1
+      this.backgroundColor = Colors.transparent,
       required this.children,
       this.initialIndex = 0,
       this.lastPage,
-      this.isRightSwipe = false,
+    required  this.isRightSwipe ,
       required this.onPageFlip})
       : assert(initialIndex < children.length,
             'initialIndex cannot be greater than children length'),

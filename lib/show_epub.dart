@@ -21,9 +21,9 @@ late BookProgressSingleton bookProgress;
 const double DESIGN_WIDTH = 375;
 const double DESIGN_HEIGHT = 812;
 
-String selectedFont = 'IRANSans';
+String selectedFont = 'Segoe';
 List<String> fontNames = [
-  "IRANSans"
+//  "IRANSans",
   "Segoe",
   "Alegreya",
   "Amazon Ember",
@@ -114,10 +114,15 @@ class ShowEpubState extends State<ShowEpub> {
     epubBook = widget.epubBook;
     // allFonts = GoogleFonts.asMap().cast<String, String>();
     // fontNames = allFonts.keys.toList();
-    // selectedTextStyle = GoogleFonts.getFont(selectedFont).fontFamily!;
-    selectedTextStyle =
-        fontNames.where((element) => element == selectedFont).first;
-
+    //selectedTextStyle = GoogleFonts.getFont(selectedFont).fontFamily!;
+    //     selectedTextStyle =
+       // fontNames.where((element) => element == selectedFont).first;
+    selectedTextStyle = fontNames.firstWhere(
+  (element) => element == selectedFont,
+  orElse: () => 'IRANSans', 
+);
+   
+    print(fontNames);
     getTitleFromXhtml();
     reLoadChapter(init: true);
 
@@ -279,7 +284,8 @@ class ShowEpubState extends State<ShowEpub> {
                 topLeft: Radius.circular(20.r),
                 topRight: Radius.circular(20.r))),
         builder: (context) {
-          return Directionality(textDirection: TextDirection.rtl,
+          return Directionality(
+            textDirection: TextDirection.rtl,
             child: SingleChildScrollView(
                 child: StatefulBuilder(
                     builder: (BuildContext context, setState) => SizedBox(
@@ -380,8 +386,8 @@ class ShowEpubState extends State<ShowEpub> {
                                           builder: (BuildContext context,
                                                   StateSetter setState) =>
                                               Theme(
-                                            data: Theme.of(context)
-                                                .copyWith(canvasColor: backColor),
+                                            data: Theme.of(context).copyWith(
+                                                canvasColor: backColor),
                                             child: DropdownButtonHideUnderline(
                                               child: DropdownButton<String>(
                                                   value: selectedFont,
@@ -390,35 +396,38 @@ class ShowEpubState extends State<ShowEpub> {
                                                   onChanged: (newValue) {
                                                     selectedFont =
                                                         newValue ?? 'IRANSans';
-            
+                                                    // selectedTextStyle =
+                                                    //     'IRANSans';
                                                     selectedTextStyle = fontNames
                                                         .where((element) =>
                                                             element ==
                                                             selectedFont)
                                                         .first;
-            
+
                                                     gs.write(
                                                         libFont, selectedFont);
-            
+
                                                     ///For updating inside
                                                     setState(() {});
                                                     controllerPaging.paginate();
                                                     updateUI();
                                                   },
                                                   items: fontNames.map<
-                                                      DropdownMenuItem<
-                                                          String>>((String font) {
+                                                          DropdownMenuItem<
+                                                              String>>(
+                                                      (String font) {
                                                     return DropdownMenuItem<
                                                         String>(
                                                       value: font,
                                                       child: Text(
                                                         font,
                                                         style: TextStyle(
-                                                            color: selectedFont ==
-                                                                    font
-                                                                ? widget
-                                                                    .accentColor
-                                                                : fontColor,
+                                                            color:
+                                                                selectedFont ==
+                                                                        font
+                                                                    ? widget
+                                                                        .accentColor
+                                                                    : fontColor,
                                                             package:
                                                                 'cosmos_epub',
                                                             fontSize:
@@ -451,17 +460,18 @@ class ShowEpubState extends State<ShowEpub> {
                                             Expanded(
                                               child: Slider(
                                                 activeColor: staticThemeId == 4
-                                                    ? Colors.grey.withOpacity(0.8)
+                                                    ? Colors.grey
+                                                        .withOpacity(0.8)
                                                     : Colors.blue,
                                                 value: _fontSizeProgress,
                                                 min: 15.0,
                                                 max: 30.0,
                                                 onChangeEnd: (double value) {
                                                   _fontSize = value;
-            
+
                                                   gs.write(
                                                       libFontSize, _fontSize);
-            
+
                                                   ///For updating outside
                                                   updateUI();
                                                   controllerPaging.paginate();
@@ -557,7 +567,8 @@ class ShowEpubState extends State<ShowEpub> {
         onWillPop: backPress,
         child: Scaffold(
           backgroundColor: backColor,
-          body: Directionality(textDirection: TextDirection.rtl,
+          body: Directionality(
+            textDirection: TextDirection.rtl,
             child: SafeArea(
               child: Stack(
                 children: [
@@ -586,13 +597,13 @@ class ShowEpubState extends State<ShowEpub> {
                                             .addPostFrameCallback((_) {
                                           openTableOfContents();
                                         });
-            
+
                                         widget.shouldOpenDrawer = false;
                                       }
                                       return PagingWidget(
                                         textContent,
                                         innerHtmlContent,
-            
+
                                         ///Do we need this to the production
                                         lastWidget: null,
                                         starterPageIndex: bookProgress
@@ -621,7 +632,7 @@ class ShowEpubState extends State<ShowEpub> {
                                             widget.onPageFlip!(
                                                 currentPage, totalPages);
                                           }
-            
+
                                           if (currentPage == totalPages - 1) {
                                             bookProgress.setCurrentPageIndex(
                                                 bookId, 0);
@@ -629,16 +640,16 @@ class ShowEpubState extends State<ShowEpub> {
                                             bookProgress.setCurrentPageIndex(
                                                 bookId, currentPage);
                                           }
-            
+
                                           if (isLastPage) {
                                             showHeader = true;
                                           } else {
                                             lastSwipe = 0;
                                           }
-            
+
                                           isLastPage = false;
                                           updateUI();
-            
+
                                           if (currentPage == 0) {
                                             prevSwipe++;
                                             if (prevSwipe > 1) {
@@ -652,19 +663,19 @@ class ShowEpubState extends State<ShowEpub> {
                                           if (widget.onLastPage != null) {
                                             widget.onLastPage!(index);
                                           }
-            
+
                                           if (totalPages > 1) {
                                             lastSwipe++;
                                           } else {
                                             lastSwipe = 2;
                                           }
-            
+
                                           if (lastSwipe > 1) {
                                             nextChapter();
                                           }
-            
+
                                           isLastPage = true;
-            
+
                                           updateUI();
                                         },
                                         chapterTitle: chaptersList[bookProgress
@@ -678,152 +689,152 @@ class ShowEpubState extends State<ShowEpub> {
                                 }
                               }),
                           //)
-            
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Visibility(
-                              visible: showBrightnessWidget,
-                              child: Container(
-                                  height: 150.h,
-                                  width: 30.w,
-                                  alignment: Alignment.bottomCenter,
-                                  margin:
-                                      EdgeInsets.only(bottom: 40.h, right: 15.w),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.brightness_7,
-                                        size: 14.h,
-                                        color: fontColor,
-                                      ),
-                                      SizedBox(
-                                        height: 120.h,
-                                        width: 30.w,
-                                        child: RotatedBox(
-                                            quarterTurns: -1,
-                                            child: SliderTheme(
-                                                data: SliderThemeData(
-                                                  activeTrackColor:
-                                                      staticThemeId == 4
-                                                          ? Colors.white
-                                                          : Colors.blue,
-                                                  disabledThumbColor:
-                                                      Colors.transparent,
-                                                  inactiveTrackColor: Colors.grey
-                                                      .withOpacity(0.5),
-                                                  trackHeight: 5.0,
-            
-                                                  thumbColor: staticThemeId == 4
-                                                      ? Colors.grey
-                                                          .withOpacity(0.8)
-                                                      : Colors.blue,
-                                                  thumbShape:
-                                                      RoundSliderThumbShape(
-                                                          enabledThumbRadius:
-                                                              0.r),
-                                                  // Adjust the size of the thumb
-                                                  overlayShape:
-                                                      RoundSliderOverlayShape(
-                                                          overlayRadius: 10
-                                                              .r), // Adjust the size of the overlay
-                                                ),
-                                                child: Slider(
-                                                  value: brightnessLevel,
-                                                  min: 0.0,
-                                                  max: 1.0,
-                                                  onChangeEnd: (double value) {
-                                                    setBrightness(value);
-                                                  },
-                                                  onChanged: (double value) {
-                                                    setState(() {
-                                                      brightnessLevel = value;
-                                                    });
-                                                  },
-                                                ))),
-                                      ),
-                                    ],
-                                  )),
-                            ),
-                          )
+
+                          // Align(
+                          //   alignment: Alignment.bottomRight,
+                          //   child: Visibility(
+                          //     visible: showBrightnessWidget,
+                          //     child: Container(
+                          //         height: 150.h,
+                          //         width: 30.w,
+                          //         alignment: Alignment.bottomCenter,
+                          //         margin:
+                          //             EdgeInsets.only(bottom: 40.h, right: 15.w),
+                          //         child: Column(
+                          //           children: [
+                          //             // Icon(
+                          //             //   Icons.brightness_7,
+                          //             //   size: 14.h,
+                          //             //   color: fontColor,
+                          //             // ),
+                          //             SizedBox(
+                          //               height: 120.h,
+                          //               width: 30.w,
+                          //               child: RotatedBox(
+                          //                   quarterTurns: -1,
+                          //                   child: SliderTheme(
+                          //                       data: SliderThemeData(
+                          //                         activeTrackColor:
+                          //                             staticThemeId == 4
+                          //                                 ? Colors.white
+                          //                                 : Colors.blue,
+                          //                         disabledThumbColor:
+                          //                             Colors.transparent,
+                          //                         inactiveTrackColor: Colors.grey
+                          //                             .withOpacity(0.5),
+                          //                         trackHeight: 5.0,
+
+                          //                         thumbColor: staticThemeId == 4
+                          //                             ? Colors.grey
+                          //                                 .withOpacity(0.8)
+                          //                             : Colors.blue,
+                          //                         thumbShape:
+                          //                             RoundSliderThumbShape(
+                          //                                 enabledThumbRadius:
+                          //                                     0.r),
+                          //                         // Adjust the size of the thumb
+                          //                         overlayShape:
+                          //                             RoundSliderOverlayShape(
+                          //                                 overlayRadius: 10
+                          //                                     .r), // Adjust the size of the overlay
+                          //                       ),
+                          //                       child: Slider(
+                          //                         value: brightnessLevel,
+                          //                         min: 0.0,
+                          //                         max: 1.0,
+                          //                         onChangeEnd: (double value) {
+                          //                           setBrightness(value);
+                          //                         },
+                          //                         onChanged: (double value) {
+                          //                           setState(() {
+                          //                             brightnessLevel = value;
+                          //                           });
+                          //                         },
+                          //                       ))),
+                          //             ),
+                          //           ],
+                          //         )),
+                          //   ),
+                          // )
                         ],
                       )),
-                      AnimatedContainer(
-                        height: showHeader ? 40.h : 0,
-                        duration: const Duration(milliseconds: 100),
-                        color: backColor,
-                        child: Container(
-                          height: 40.h,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: backColor,
-                            border: Border(
-                              top: BorderSide(
-                                  width: 3.w, color: widget.accentColor),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              SizedBox(
-                                width: 5.w,
-                              ),
-                              Visibility(
-                                visible: showPrevious,
-                                child: IconButton(
-                                    onPressed: () {
-                                      prevChapter();
-                                    },
-                                    icon: Icon(
-                                      Icons.arrow_back_ios,
-                                      size: 15.h,
-                                      color: fontColor,
-                                    )),
-                              ),
-                              SizedBox(
-                                width: 5.w,
-                              ),
-                              Expanded(
-                                flex: 10,
-                                child: Text(
-                                  chaptersList.isNotEmpty
-                                      ? chaptersList[bookProgress
-                                                  .getBookProgress(bookId)
-                                                  .currentChapterIndex ??
-                                              0]
-                                          .chapter
-                                      : 'Loading...',
-                                  maxLines: 1,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 13.sp,
-                                      overflow: TextOverflow.ellipsis,
-                                      fontFamily: selectedTextStyle,
-                                      package: 'cosmos_epub',
-                                      fontWeight: FontWeight.bold,
-                                      color: fontColor),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 5.w,
-                              ),
-                              Visibility(
-                                  visible: showNext,
-                                  child: IconButton(
-                                      onPressed: () {
-                                        nextChapter();
-                                      },
-                                      icon: Icon(
-                                        Icons.arrow_forward_ios_rounded,
-                                        size: 15.h,
-                                        color: fontColor,
-                                      ))),
-                              SizedBox(
-                                width: 5.w,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // AnimatedContainer(
+                      //   height: showHeader ? 40.h : 0,
+                      //   duration: const Duration(milliseconds: 100),
+                      //   color: backColor,
+                      //   child: Container(
+                      //     height: 40.h,
+                      //     alignment: Alignment.center,
+                      //     decoration: BoxDecoration(
+                      //       color: backColor,
+                      //       border: Border(
+                      //         top: BorderSide(
+                      //             width: 3.w, color: widget.accentColor),
+                      //       ),
+                      //     ),
+                      //     child: Row(
+                      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      //       children: [
+                      //         SizedBox(
+                      //           width: 5.w,
+                      //         ),
+                      //         Visibility(
+                      //           visible: showPrevious,
+                      //           child: IconButton(
+                      //               onPressed: () {
+                      //                 prevChapter();
+                      //               },
+                      //               icon: Icon(
+                      //                 Icons.arrow_back_ios,
+                      //                 size: 15.h,
+                      //                 color: fontColor,
+                      //               )),
+                      //         ),
+                      //         SizedBox(
+                      //           width: 5.w,
+                      //         ),
+                      //         Expanded(
+                      //           flex: 10,
+                      //           child: Text(
+                      //             chaptersList.isNotEmpty
+                      //                 ? chaptersList[bookProgress
+                      //                             .getBookProgress(bookId)
+                      //                             .currentChapterIndex ??
+                      //                         0]
+                      //                     .chapter
+                      //                 : 'Loading...',
+                      //             maxLines: 1,
+                      //             textAlign: TextAlign.center,
+                      //             style: TextStyle(
+                      //                 fontSize: 13.sp,
+                      //                 overflow: TextOverflow.ellipsis,
+                      //                 fontFamily: selectedTextStyle,
+                      //                 package: 'cosmos_epub',
+                      //                 fontWeight: FontWeight.bold,
+                      //                 color: fontColor),
+                      //           ),
+                      //         ),
+                      //         SizedBox(
+                      //           width: 5.w,
+                      //         ),
+                      //         Visibility(
+                      //             visible: showNext,
+                      //             child: IconButton(
+                      //                 onPressed: () {
+                      //                   nextChapter();
+                      //                 },
+                      //                 icon: Icon(
+                      //                   Icons.arrow_forward_ios_rounded,
+                      //                   size: 15.h,
+                      //                   color: fontColor,
+                      //                 ))),
+                      //         SizedBox(
+                      //           width: 5.w,
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                   AnimatedContainer(
@@ -870,24 +881,24 @@ class ShowEpubState extends State<ShowEpub> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               )),
-                          SizedBox(
-                            width: 5.w,
-                          ),
-                          InkWell(
-                              onTap: () async {
-                                setState(() {
-                                  showBrightnessWidget = true;
-                                });
-                                await Future.delayed(const Duration(seconds: 7));
-                                setState(() {
-                                  showBrightnessWidget = false;
-                                });
-                              },
-                              child: Icon(
-                                Icons.brightness_high_sharp,
-                                size: 20.h,
-                                color: fontColor,
-                              )),
+                          // SizedBox(
+                          //   width: 5.w,
+                          // ),
+                          // InkWell(
+                          //     onTap: () async {
+                          //       setState(() {
+                          //         showBrightnessWidget = true;
+                          //       });
+                          //       await Future.delayed(const Duration(seconds: 7));
+                          //       setState(() {
+                          //         showBrightnessWidget = false;
+                          //       });
+                          //     },
+                          //     child: Icon(
+                          //       Icons.brightness_high_sharp,
+                          //       size: 20.h,
+                          //       color: fontColor,
+                          //     )),
                           SizedBox(
                             width: 10.w,
                           )

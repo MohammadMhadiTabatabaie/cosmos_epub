@@ -16,7 +16,7 @@ class PageFlipBuilder extends StatefulWidget {
     this.backgroundColor,
     required this.child,
     required this.pageIndex,
-    required this.isRightSwipe,
+     this.isRightSwipe=false,
   }) : super(key: key);
 
   final Animation<double> amount;
@@ -57,8 +57,9 @@ class PageFlipBuilderState extends State<PageFlipBuilder> {
         builder: (context, value, child) {
           if (imageData[widget.pageIndex] != null && value >= 0) {
             return CustomPaint(
+         
               painter: PageFlipEffect(
-                amount: widget.amount,
+                amount: AlwaysStoppedAnimation(1.0),//widget.amount,
                 image: imageData[widget.pageIndex]!,
                 backgroundColor: widget.backgroundColor,
                 isRightSwipe: widget.isRightSwipe,

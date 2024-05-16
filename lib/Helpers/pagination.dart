@@ -254,6 +254,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                               backgroundColor:
                                   widget.style.backgroundColor ?? Colors.white,
                               lastPage: widget.lastWidget,
+                              isRightSwipe: true,
                               children: pages,
                             ),
                           ),
