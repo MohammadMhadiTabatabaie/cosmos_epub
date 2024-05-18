@@ -73,9 +73,10 @@ class ChaptersList extends StatelessWidget {
                                           i
                                       ? accentColor
                                       : fontColor,
-                                  fontFamily: fontNames
-                                      .where((element) => element == selectedFont)
-                                      .first,
+                                  // fontFamily: fontNames
+                                  //     .where((element) => element == selectedFont)
+                                  //     .first,
+                                  
                                   package: 'cosmos_epub',
                                   fontSize: 15.sp,
                                   fontWeight: chapters[i].isSubChapter
