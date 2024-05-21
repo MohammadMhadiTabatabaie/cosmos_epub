@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:cosmos_epub/Model/book_progress_model.dart';
 import 'package:cosmos_epub/cosmos_epub.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,11 +15,11 @@ void main() async {
 
   if (_initialized) {
     // Use BookProgressModel model instance anywhere in your app to access current book progress of specific book
-    BookProgressModel bookProgress = CosmosEpub.getBookProgress('bookId');
-    await CosmosEpub.setCurrentPageIndex('bookId', 1);
-    await CosmosEpub.setCurrentChapterIndex('bookId', 2);
-    await CosmosEpub.deleteBookProgress('bookId');
-    await CosmosEpub.deleteAllBooksProgress();
+    // BookProgressModel bookProgress = CosmosEpub.getBookProgress('bookId');
+    // await CosmosEpub.setCurrentPageIndex('bookId', 1);
+    // await CosmosEpub.setCurrentChapterIndex('bookId', 2);
+    // await CosmosEpub.deleteBookProgress('bookId');
+    // await CosmosEpub.deleteAllBooksProgress();
   }
 
   runApp(MyApp());
@@ -46,12 +50,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Future<void> readerFuture = Future.value(true);
-
+  
   Future<void> _openEpubReader(BuildContext context) async {
+  
     await CosmosEpub.openAssetBook(
-        assetPath: 'assets/jak.epub',
+        assetPath: '',
         context: context,
-        bookId: '10',
+        bookId: '16',
         onPageFlip: (int currentPage, int totalPages) {
           print(currentPage);
         },
