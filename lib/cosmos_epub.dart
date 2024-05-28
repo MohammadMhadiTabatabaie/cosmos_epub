@@ -2,6 +2,7 @@
 
 library cosmos_epub;
 
+import 'dart:io';
 
 import 'package:cosmos_epub/Component/constants.dart';
 import 'package:cosmos_epub/Helpers/isar_service.dart';
@@ -20,33 +21,33 @@ class CosmosEpub {
 
   static bool _initialized = false;
 
-  // static Future<void> openLocalBook(
-  //     {required String localPath,
-  //     required BuildContext context,
-  //     required String bookId,
-  //     Color accentColor = Colors.red,
-  //     Function(int currentPage, int totalPages)? onPageFlip,
-  //     Function(int lastPageIndex)? onLastPage,
-  //     String chapterListTitle = 'Table of Contents',
-  //     bool shouldOpenDrawer = false,
-  //     int starterChapter = -1}) async {
-  //   ///TODO: Optimize with isolates
-  //   var bytes = File(localPath).readAsBytesSync();
+  static Future<void> openLocalBook(
+      {required String localPath,
+      required BuildContext context,
+      required String bookId,
+      Color accentColor = Colors.red,
+      Function(int currentPage, int totalPages)? onPageFlip,
+      Function(int lastPageIndex)? onLastPage,
+      String chapterListTitle = 'Table of Contents',
+      bool shouldOpenDrawer = false,
+      int starterChapter = -1}) async {
+    ///TODO: Optimize with isolates
+    var bytes = File(localPath).readAsBytesSync();
 
-  //   EpubBook epubBook = await EpubReader.readBook(bytes.buffer.asUint8List());
+    EpubBook epubBook = await EpubReader.readBook(bytes.buffer.asUint8List());
 
-  //   if (!context.mounted) return;
-  //   _openBook(
-  //       context: context,
-  //       epubBook: epubBook,
-  //       bookId: bookId,
-  //       shouldOpenDrawer: shouldOpenDrawer,
-  //       starterChapter: starterChapter,
-  //       chapterListTitle: chapterListTitle,
-  //       onPageFlip: onPageFlip,
-  //       onLastPage: onLastPage,
-  //       accentColor: accentColor);
-  // }
+    if (!context.mounted) return;
+    _openBook(
+        context: context,
+        epubBook: epubBook,
+        bookId: bookId,
+        shouldOpenDrawer: shouldOpenDrawer,
+        starterChapter: starterChapter,
+        chapterListTitle: chapterListTitle,
+        onPageFlip: onPageFlip,
+        onLastPage: onLastPage,
+        accentColor: accentColor);
+  }
 
   static Future<void> openAssetBook({
     required String assetPath,
@@ -61,27 +62,25 @@ class CosmosEpub {
   }) async {
     ///TODO: Optimize with isolates
     try {
-      var byteData = await rootBundle.load('assets/jak.epub');
+      var byteData = await rootBundle.load(assetPath);
       print('File loaded from assets');
 
-      final bytes =  byteData.buffer.asUint8List();
-       print('File data converted to Uint8List');
-    print('Bytes length: ${bytes.length}');
+      final bytes = byteData.buffer.asUint8List();
+      print('File data converted to Uint8List');
+      print('Bytes length: ${bytes.length}');
 
-    // چاپ چند بایت اول برای بررسی
-    print('First 20 bytes: ${bytes.take(20).toList()}');
-print('.///////////////////');
+      print('First 20 bytes: ${bytes.take(20).toList()}');
+      print('.///////////////////');
       print(bytes);
       print('File data converted to Uint8List');
-      EpubBook epubBook =
-          await EpubReader.readBook(bytes);
+      EpubBook epubBook = await EpubReader.readBook(bytes);
       print('EPUB book read successfully');
       if (!context.mounted) return;
-    //    if (epubBook.Chapters!.isEmpty) {
-    //   print('The book has no chapters');
-    //   // You can show a message to the user here or handle accordingly
-    //   return;
-    // }
+      //    if (epubBook.Chapters!.isEmpty) {
+      //   print('The book has no chapters');
+      //   // You can show a message to the user here or handle accordingly
+      //   return;
+      // }
       _openBook(
           context: context,
           epubBook: epubBook,
