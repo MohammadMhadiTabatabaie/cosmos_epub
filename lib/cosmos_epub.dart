@@ -31,22 +31,48 @@ class CosmosEpub {
       String chapterListTitle = 'Table of Contents',
       bool shouldOpenDrawer = false,
       int starterChapter = -1}) async {
-    ///TODO: Optimize with isolates
-    var bytes = File(localPath).readAsBytesSync();
+    try {
+      ///TODO: Optimize with isolates
+      var bytes = File(localPath).readAsBytesSync();
+      print('File loaded from assets');
 
-    EpubBook epubBook = await EpubReader.readBook(bytes.buffer.asUint8List());
-
-    if (!context.mounted) return;
-    _openBook(
-        context: context,
-        epubBook: epubBook,
-        bookId: bookId,
-        shouldOpenDrawer: shouldOpenDrawer,
-        starterChapter: starterChapter,
-        chapterListTitle: chapterListTitle,
-        onPageFlip: onPageFlip,
-        onLastPage: onLastPage,
-        accentColor: accentColor);
+      EpubBook epubBook = await EpubReader.readBook(bytes.buffer.asUint8List());
+      print('EPUB book read successfully');
+      if (!context.mounted) return;
+      _openBook(
+          context: context,
+          epubBook: epubBook,
+          bookId: bookId,
+          shouldOpenDrawer: shouldOpenDrawer,
+          starterChapter: starterChapter,
+          chapterListTitle: chapterListTitle,
+          onPageFlip: onPageFlip,
+          onLastPage: onLastPage,
+          accentColor: accentColor);
+    } catch (e) {
+      print('Error occurred: $e');
+      // You can show an alert or error message to the user
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Directionality(
+              textDirection: TextDirection.rtl,
+              child: AlertDialog(
+                title: Text('خطا'),
+                content: Text(
+                    'فایل epub مشکل دارد لطفا با پشتیبانی تماس بگیرید: $e'),
+                actions: [
+                  TextButton(
+                    child: Text('تایید'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            );
+          });
+    }
   }
 
   static Future<void> openAssetBook({
