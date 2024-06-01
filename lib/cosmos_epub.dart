@@ -93,9 +93,9 @@ class CosmosEpub {
 
       final bytes = byteData.buffer.asUint8List();
       print('File data converted to Uint8List');
-      print('Bytes length: ${bytes.length}');
+   
 
-      print('First 20 bytes: ${bytes.take(20).toList()}');
+      
       print('.///////////////////');
       print(bytes);
       print('File data converted to Uint8List');

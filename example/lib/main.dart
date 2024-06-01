@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _openEpubReader(BuildContext context) async {
   
     await CosmosEpub.openAssetBook(
-        assetPath: '',
+        assetPath: 'assets/maxTest10.epub',
         context: context,
         bookId: '16',
         onPageFlip: (int currentPage, int totalPages) {
