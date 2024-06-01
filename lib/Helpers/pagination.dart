@@ -107,7 +107,7 @@ class _PagingWidgetState extends State<PagingWidget> {
 
     final textPainter = TextPainter(
       text: textSpan,
-      textDirection: TextDirection.ltr,
+      textDirection: TextDirection.rtl,
     );
     textPainter.layout(
       minWidth: 0,
@@ -180,7 +180,11 @@ class _PagingWidgetState extends State<PagingWidget> {
                 child: widget.innerHtmlContent != null
                     ? HtmlWidget(
                         text,
-                      
+                        customStylesBuilder: (element) {
+                          return {
+                            'text-align': 'justify',
+                          };
+                        },
                         onTapUrl: (String? s) async {
                           if (s != null && s == "a") {
                             if (s.contains("chapter")) {
@@ -195,7 +199,6 @@ class _PagingWidgetState extends State<PagingWidget> {
                           }
                           return true;
                         },
-                        
                         textStyle: widget.style,
                       )
                     : Text(
