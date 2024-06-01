@@ -82,7 +82,7 @@ class ShowEpubState extends State<ShowEpub> {
   double _fontSizeProgress = 17.0;
   double _fontSize = 17.0;
 
- late EpubBook epubBook;
+  late EpubBook epubBook;
   late String bookId;
   String bookTitle = '';
   String chapterTitle = '';
@@ -260,7 +260,7 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   Future<bool> backPress() async {
-    // Navigator.of(context).pop();
+    Navigator.of(context).pop();
     return true;
   }
 
@@ -563,8 +563,13 @@ class ShowEpubState extends State<ShowEpub> {
     ScreenUtil.init(context,
         designSize: const Size(DESIGN_WIDTH, DESIGN_HEIGHT));
 
-    return WillPopScope(
-        onWillPop: backPress,
+    return PopScope(
+        onPopInvoked: (bool didPop) {
+          if (didPop) {
+            Navigator.of(context).pop();
+            print('exit for epub');
+          }
+        },
         child: Scaffold(
           backgroundColor: backColor,
           body: Directionality(
@@ -632,7 +637,7 @@ class ShowEpubState extends State<ShowEpub> {
                                             widget.onPageFlip!(
                                                 currentPage, totalPages);
                                           }
-
+                                      
                                           if (currentPage == totalPages - 1) {
                                             bookProgress.setCurrentPageIndex(
                                                 bookId, 0);
@@ -678,13 +683,13 @@ class ShowEpubState extends State<ShowEpub> {
 
                                           updateUI();
                                         },
-                                         chapterTitle:'',
+                                        chapterTitle: '',
                                         // chapterTitle: chaptersList[bookProgress
                                         //             .getBookProgress(bookId)
                                         //             .currentChapterIndex ??
                                         //         0]
                                         //     .chapter,
-                                        totalChapters: 1,//chaptersList.length,
+                                        totalChapters: 1, //chaptersList.length,
                                       );
                                     }
                                 }

@@ -180,6 +180,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                 child: widget.innerHtmlContent != null
                     ? HtmlWidget(
                         text,
+                      
                         onTapUrl: (String? s) async {
                           if (s != null && s == "a") {
                             if (s.contains("chapter")) {
@@ -194,10 +195,12 @@ class _PagingWidgetState extends State<PagingWidget> {
                           }
                           return true;
                         },
+                        
                         textStyle: widget.style,
                       )
                     : Text(
                         text,
+                        textAlign: TextAlign.justify,
                         // Assuming _isPaging and _currentIndex are handled elsewhere
                         style: widget.style,
                         overflow: TextOverflow.visible,
