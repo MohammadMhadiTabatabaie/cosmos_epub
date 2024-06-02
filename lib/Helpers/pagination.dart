@@ -176,7 +176,7 @@ class _PagingWidgetState extends State<PagingWidget> {
               physics: const BouncingScrollPhysics(),
               child: Padding(
                 padding: EdgeInsets.only(
-                    bottom: 40.h, top: 60.h, left: 10.w, right: 10.w),
+                    bottom: 40.h, top: 60.h, left: 16.w, right: 16.w),
                 child: widget.innerHtmlContent != null
                     ? HtmlWidget(
                         text,

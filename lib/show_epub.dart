@@ -565,6 +565,7 @@ class ShowEpubState extends State<ShowEpub> {
 
     return PopScope(
         onPopInvoked: (bool didPop) {
+          Navigator.of(context).pop();
           if (didPop) {
             Navigator.of(context).pop();
             print('exit for epub');
