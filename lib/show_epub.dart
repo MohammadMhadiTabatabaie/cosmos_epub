@@ -261,6 +261,7 @@ class ShowEpubState extends State<ShowEpub> {
 
   Future<bool> backPress() async {
     Navigator.of(context).pop();
+    Navigator.of(context).pop();
     return true;
   }
 
@@ -563,14 +564,15 @@ class ShowEpubState extends State<ShowEpub> {
     ScreenUtil.init(context,
         designSize: const Size(DESIGN_WIDTH, DESIGN_HEIGHT));
 
-    return PopScope(
-        onPopInvoked: (bool didPop) {
-          Navigator.of(context).pop();
-          if (didPop) {
-            Navigator.of(context).pop();
-            print('exit for epub');
-          }
-        },
+    return  WillPopScope(
+        onWillPop: backPress,
+        // onPopInvoked: (bool didPop) {
+        //   Navigator.of(context).pop();
+        //   if (didPop) {
+        //     Navigator.of(context).pop();
+        //     print('exit for epub');
+        //   }
+        // },
         child: Scaffold(
           backgroundColor: backColor,
           body: Directionality(
