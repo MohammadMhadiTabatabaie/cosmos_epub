@@ -54,7 +54,7 @@ class ShowEpub extends StatefulWidget {
   final Function(int currentPage, int totalPages)? onPageFlip;
   final Function(int lastPageIndex)? onLastPage;
   final Color accentColor;
-
+  bool isloading = false;
   ShowEpub({
     super.key,
     required this.epubBook,
@@ -99,6 +99,7 @@ class ShowEpubState extends State<ShowEpub> {
   int prevSwipe = 0;
   bool showPrevious = false;
   bool showNext = false;
+
   var dropDownFontItems;
 
   GetStorage gs = GetStorage();
@@ -260,8 +261,7 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   Future<bool> backPress() async {
-    
-  //  Navigator.of(context).pop();
+    //  Navigator.of(context).pop();
     return true;
   }
 
@@ -458,6 +458,35 @@ class ShowEpubState extends State<ShowEpub> {
                                                   color: fontColor,
                                                   fontWeight: FontWeight.bold),
                                             ),
+                                            // code for devloper orginal
+                                            // Expanded(
+                                            //   child: Slider(
+                                            //     activeColor: staticThemeId == 4
+                                            //         ? Colors.grey
+                                            //             .withOpacity(0.8)
+                                            //         : Colors.blue,
+                                            //     value: _fontSizeProgress,
+                                            //     min: 15.0,
+                                            //     max: 30.0,
+                                            //     onChangeEnd: (double value) {
+                                            //       _fontSize = value;
+
+                                            //       gs.write(
+                                            //           libFontSize, _fontSize);
+
+                                            //       ///For updating outside
+                                            //       updateUI();
+                                            //       controllerPaging.paginate();
+                                            //     },
+                                            //     onChanged: (double value) {
+                                            //       ///For updating widget's inside
+                                            //       setState(() {
+                                            //         _fontSizeProgress = value;
+                                            //       });
+                                            //     },
+                                            //   ),
+                                            // ),
+                                            // Optimized code
                                             Expanded(
                                               child: Slider(
                                                 activeColor: staticThemeId == 4
@@ -467,20 +496,25 @@ class ShowEpubState extends State<ShowEpub> {
                                                 value: _fontSizeProgress,
                                                 min: 15.0,
                                                 max: 30.0,
-                                                onChangeEnd: (double value) {
+                                                onChangeEnd:
+                                                    (double value) async {
+                                                  setState(() {
+                                                    widget.isloading = true;
+                                                  });
                                                   _fontSize = value;
 
-                                                  gs.write(
-                                                      libFontSize, _fontSize);
+                                                  // ذخیره‌سازی مقدار فونت به صورت غیر همزمان
 
-                                                  ///For updating outside
+                                                  // به‌روزرسانی رابط کاربری و صفحه‌بندی
                                                   updateUI();
                                                   controllerPaging.paginate();
+                                                  await gs.write(
+                                                      libFontSize, _fontSize);
                                                 },
                                                 onChanged: (double value) {
-                                                  ///For updating widget's inside
                                                   setState(() {
                                                     _fontSizeProgress = value;
+                                                    widget.isloading = false;
                                                   });
                                                 },
                                               ),
@@ -564,7 +598,7 @@ class ShowEpubState extends State<ShowEpub> {
     ScreenUtil.init(context,
         designSize: const Size(DESIGN_WIDTH, DESIGN_HEIGHT));
 
-    return  WillPopScope(
+    return WillPopScope(
         onWillPop: backPress,
         // onPopInvoked: (bool didPop) {
         //   Navigator.of(context).pop();
@@ -585,6 +619,16 @@ class ShowEpubState extends State<ShowEpub> {
                       Expanded(
                           child: Stack(
                         children: [
+                          if (widget.isloading) ...{
+                            Positioned.fill(
+                              child: Container(
+                                color: Colors.red,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            ),
+                          },
                           FutureBuilder<void>(
                               future: loadChapterFuture,
                               builder: (context, snapshot) {
@@ -640,7 +684,7 @@ class ShowEpubState extends State<ShowEpub> {
                                             widget.onPageFlip!(
                                                 currentPage, totalPages);
                                           }
-                                      
+
                                           if (currentPage == totalPages - 1) {
                                             bookProgress.setCurrentPageIndex(
                                                 bookId, 0);

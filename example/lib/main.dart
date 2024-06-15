@@ -1,10 +1,7 @@
-import 'dart:io';
 
-import 'package:cosmos_epub/Model/book_progress_model.dart';
 import 'package:cosmos_epub/cosmos_epub.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 
 void main() async {
@@ -54,9 +51,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _openEpubReader(BuildContext context) async {
   
     await CosmosEpub.openAssetBook(
-        assetPath: 'assets/maxTest10.epub',
+        assetPath: 'assets/maxTest10 (3).epub',
         context: context,
-        bookId: '16',
+        bookId: '17',
         onPageFlip: (int currentPage, int totalPages) {
           print(currentPage);
         },
