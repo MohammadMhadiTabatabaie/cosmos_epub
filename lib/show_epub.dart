@@ -498,23 +498,23 @@ class ShowEpubState extends State<ShowEpub> {
                                                 max: 30.0,
                                                 onChangeEnd:
                                                     (double value) async {
-                                                  setState(() {
-                                                    widget.isloading = true;
-                                                  });
                                                   _fontSize = value;
 
                                                   // ذخیره‌سازی مقدار فونت به صورت غیر همزمان
-
+                                                  await gs.write(
+                                                      libFontSize, _fontSize);
                                                   // به‌روزرسانی رابط کاربری و صفحه‌بندی
                                                   updateUI();
                                                   controllerPaging.paginate();
-                                                  await gs.write(
-                                                      libFontSize, _fontSize);
+
+                                                  setState(() {
+                                                    widget.isloading = false;
+                                                  });
                                                 },
                                                 onChanged: (double value) {
                                                   setState(() {
                                                     _fontSizeProgress = value;
-                                                    widget.isloading = false;
+                                                    widget.isloading = true;
                                                   });
                                                 },
                                               ),
@@ -538,7 +538,10 @@ class ShowEpubState extends State<ShowEpub> {
         });
   }
 
-  updateTheme(int id, {bool isInit = false}) {
+  updateTheme(int id, {bool isInit = false}) async{
+     setState(() {
+      widget.isloading = true;
+    });
     staticThemeId = id;
     if (id == 1) {
       backColor = cVioletishColor;
@@ -557,8 +560,10 @@ class ShowEpubState extends State<ShowEpub> {
       fontColor = Colors.black;
     }
 
-    gs.write(libTheme, id);
-
+    await gs.write(libTheme, id);
+   setState(() {
+      widget.isloading = false;
+    });
     if (!isInit) {
       Navigator.of(context).pop();
       controllerPaging.paginate();
