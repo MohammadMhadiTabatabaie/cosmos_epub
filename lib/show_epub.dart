@@ -539,11 +539,6 @@ class ShowEpubState extends State<ShowEpub> {
         });
   }
 
-  void examplePaginate() {
-    // عملیات شبیه‌سازی شده برای صفحه‌بندی
-    print("Paging operation executed.");
-  }
-
   updateTheme(int id, {bool isInit = false}) async {
     setState(() {
       widget.isloading = true;
@@ -571,8 +566,9 @@ class ShowEpubState extends State<ShowEpub> {
     if (!isInit) {
       print('lisInit ');
       Navigator.of(context).pop();
-      controllerPaging.paginate();
+
       updateUI();
+      controllerPaging.paginate();
     }
     setState(() {
       print('loading off ');
