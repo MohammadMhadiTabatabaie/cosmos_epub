@@ -302,11 +302,12 @@ class ShowEpubState extends State<ShowEpub> {
                                   children: [
                                     GestureDetector(
                                       onTap: () {
+                                        print('loading on ');
                                         updateTheme(1);
                                       },
                                       child: CircleButton(
                                         backColor: cVioletishColor,
-                                        fontColor: Colors.black,
+                                        fontColor: Colors.red,
                                         id: 1,
                                         accentColor: widget.accentColor,
                                       ),
@@ -538,8 +539,13 @@ class ShowEpubState extends State<ShowEpub> {
         });
   }
 
-  updateTheme(int id, {bool isInit = false}) async{
-     setState(() {
+  void examplePaginate() {
+    // عملیات شبیه‌سازی شده برای صفحه‌بندی
+    print("Paging operation executed.");
+  }
+
+  updateTheme(int id, {bool isInit = false}) async {
+    setState(() {
       widget.isloading = true;
     });
     staticThemeId = id;
@@ -561,14 +567,18 @@ class ShowEpubState extends State<ShowEpub> {
     }
 
     await gs.write(libTheme, id);
-   setState(() {
-      widget.isloading = false;
-    });
+
     if (!isInit) {
+      print('lisInit ');
       Navigator.of(context).pop();
       controllerPaging.paginate();
       updateUI();
     }
+    setState(() {
+      print('loading off ');
+
+      widget.isloading = false;
+    });
   }
 
   ///Update widget tree
