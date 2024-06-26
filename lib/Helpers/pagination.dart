@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/cupertino.dart';
@@ -70,6 +68,7 @@ class _PagingWidgetState extends State<PagingWidget> {
 
   rePaginate() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('rePaginate');
       if (!mounted) return;
       setState(() {
         _initializedRenderBox = context.findRenderObject() as RenderBox;
@@ -96,6 +95,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   Future<void> _paginate() async {
+    print('_paginate');
     final pageSize = _initializedRenderBox.size;
 
     _pageTexts.clear();
@@ -168,7 +168,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       return InkWell(
         onTap: widget.onTextTap,
         child: Container(
-          color: widget.style.backgroundColor,
+          // color: widget.style.backgroundColor,
           child: FadingEdgeScrollView.fromSingleChildScrollView(
             gradientFractionOnEnd: 0.2,
             child: SingleChildScrollView(

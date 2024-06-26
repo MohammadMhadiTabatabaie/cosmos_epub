@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await CosmosEpub.openAssetBook(
         assetPath: 'assets/maxTest10 (3).epub',
         context: context,
-        bookId: '17',
+        bookId: '18',
         onPageFlip: (int currentPage, int totalPages) {
           print(currentPage);
         },

@@ -100,7 +100,7 @@ class ShowEpubState extends State<ShowEpub> {
   bool showPrevious = false;
   bool showNext = false;
 
-  var dropDownFontItems;
+  // var dropDownFontItems;
 
   GetStorage gs = GetStorage();
 
@@ -122,7 +122,6 @@ class ShowEpubState extends State<ShowEpub> {
       orElse: () => 'IRANSans',
     );
 
-    print(fontNames);
     getTitleFromXhtml();
     reLoadChapter(init: true);
 
@@ -506,7 +505,7 @@ class ShowEpubState extends State<ShowEpub> {
                                                       libFontSize, _fontSize);
                                                   // به‌روزرسانی رابط کاربری و صفحه‌بندی
                                                   updateUI();
-                                                  controllerPaging.paginate();
+                                                  // controllerPaging.paginate();
 
                                                   setState(() {
                                                     widget.isloading = false;
@@ -540,9 +539,7 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   updateTheme(int id, {bool isInit = false}) async {
-    setState(() {
-      widget.isloading = true;
-    });
+   
     staticThemeId = id;
     if (id == 1) {
       backColor = cVioletishColor;
@@ -564,17 +561,14 @@ class ShowEpubState extends State<ShowEpub> {
     await gs.write(libTheme, id);
 
     if (!isInit) {
-      print('lisInit ');
+      print('updateTheme ');
       Navigator.of(context).pop();
+     controllerPaging.paginate();
 
       updateUI();
-      controllerPaging.paginate();
     }
-    setState(() {
-      print('loading off ');
 
-      widget.isloading = false;
-    });
+   
   }
 
   ///Update widget tree
@@ -630,16 +624,7 @@ class ShowEpubState extends State<ShowEpub> {
                       Expanded(
                           child: Stack(
                         children: [
-                          if (widget.isloading) ...{
-                            Positioned.fill(
-                              child: Container(
-                                color: Colors.red,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                            ),
-                          },
+                         
                           FutureBuilder<void>(
                               future: loadChapterFuture,
                               builder: (context, snapshot) {
