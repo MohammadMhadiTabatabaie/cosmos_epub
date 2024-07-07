@@ -57,22 +57,45 @@ class _PagingWidgetState extends State<PagingWidget> {
 
   final _pageKey = GlobalKey();
   final _pageController = GlobalKey<PageFlipWidgetState>();
-
+  int _pagesLoaded = 0;
+  //static const int _pagesBatchSize = 10;
+  final int _pagesBatchSize = 10;
+  // int _pagesLoaded = 0;
   @override
   void initState() {
-    rePaginate();
-    var handler = PagingTextHandler(paginate: rePaginate);
-    widget.handlerCallback(handler); // callback call.
+    // rePaginate(initialLoad: true);
+    // // var handler = PagingTextHandler(paginate: rePaginate);
+    // var handler =
+    //     PagingTextHandler(paginate: () => rePaginate(initialLoad: false));
+    // widget.handlerCallback(handler); // callback call.
+    // super.initState();
     super.initState();
+    _loadMorePages(initialLoad: true);
   }
 
-  rePaginate() {
+  void _loadMorePages({required bool initialLoad}) async {
+    final newPages = await _paginate(_pagesLoaded + _pagesBatchSize);
+    setState(() {
+      _pagesLoaded += _pagesBatchSize;
+      _pageTexts.addAll(newPages);
+      pages = _buildPageWidgets(_pageTexts);
+    });
+  }
+
+  rePaginate({required bool initialLoad}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print('rePaginate');
       if (!mounted) return;
       setState(() {
+        // _initializedRenderBox = context.findRenderObject() as RenderBox;
+        // paginateFuture = _paginate();
         _initializedRenderBox = context.findRenderObject() as RenderBox;
-        paginateFuture = _paginate();
+        if (initialLoad) {
+          _pagesLoaded = _pagesBatchSize; // لود اولیه 10 صفحه
+        } else {
+          _pagesLoaded += _pagesBatchSize; // اضافه کردن صفحات جدید
+        }
+        paginateFuture = _paginate(_pagesLoaded);
       });
     });
   }
@@ -94,7 +117,8 @@ class _PagingWidgetState extends State<PagingWidget> {
     }
   }
 
-  Future<void> _paginate() async {
+/*
+  Future<void> _paginate(int pagesToLoad) async {
     print('_paginate');
     final pageSize = _initializedRenderBox.size;
 
@@ -124,7 +148,9 @@ class _PagingWidgetState extends State<PagingWidget> {
       final left = line.left;
       final top = line.baseline - line.ascent;
       final bottom = line.baseline + line.descent;
-
+      if (_pageTexts.length >= pagesToLoad) {
+        return; // متوقف کردن لود بیشتر اگر به تعداد صفحات مورد نظر رسیدیم
+      }
       // Current line overflow page
       if (currentPageBottom < bottom) {
         currentPageEndIndex =
@@ -217,6 +243,38 @@ class _PagingWidgetState extends State<PagingWidget> {
 
     pages = await Future.wait(futures);
   }
+*/
+  Future<List<String>> _paginate(int pagesToLoad) async {
+    // محاسبه صفحات بر اساس تعداد کاراکترها یا اندازه متن و صفحه
+    // در اینجا فرض می‌کنیم متن را به قسمت‌های ۱۰ صفحه‌ای تقسیم می‌کنیم
+    final textLength = widget.textContent.length;
+    final pageSize = (textLength / _pagesBatchSize).ceil();
+    List<String> newPages = [];
+    for (int i = 0; i < pagesToLoad && i < _pagesBatchSize; i++) {
+      final start = i * pageSize;
+      final end = (i + 1) * pageSize;
+      final pageContent = widget.textContent
+          .substring(start.toInt(), end.toInt().clamp(0, textLength));
+      newPages.add(pageContent);
+    }
+    return newPages;
+  }
+
+  List<Widget> _buildPageWidgets(List<String> pageTexts) {
+    return pageTexts.map((text) {
+      return GestureDetector(
+        onTap: widget.onTextTap,
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            text,
+            style: widget.style,
+            textAlign: TextAlign.justify,
+          ),
+        ),
+      );
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -241,8 +299,9 @@ class _PagingWidgetState extends State<PagingWidget> {
                       children: [
                         Expanded(
                           child: SizedBox.expand(
-                            key: _pageKey,
-                            child: PageFlipWidget(
+                              key: _pageKey,
+                              child:
+                                  /*  PageFlipWidget(
                               key: _pageController,
                               initialIndex: widget.starterPageIndex != 0
                                   ? (pages.isNotEmpty &&
@@ -250,11 +309,22 @@ class _PagingWidgetState extends State<PagingWidget> {
                                       ? widget.starterPageIndex
                                       : 0)
                                   : widget.starterPageIndex,
+                              // onPageFlip: (pageIndex) {
+                              //   _currentPageIndex = pageIndex;
+                              //   widget.onPageFlip(pageIndex, pages.length);
+                              //   if (_currentPageIndex == pages.length - 1) {
+                              //     widget.onLastPage(pageIndex, pages.length);
+                              //   }
+                              // },
                               onPageFlip: (pageIndex) {
                                 _currentPageIndex = pageIndex;
                                 widget.onPageFlip(pageIndex, pages.length);
                                 if (_currentPageIndex == pages.length - 1) {
                                   widget.onLastPage(pageIndex, pages.length);
+                                }
+                                if (_currentPageIndex == 5) {
+                                  rePaginate(
+                                      initialLoad: false); // لود 10 صفحه‌ی بعدی
                                 }
                               },
                               backgroundColor:
@@ -262,8 +332,25 @@ class _PagingWidgetState extends State<PagingWidget> {
                               lastPage: widget.lastWidget,
                               isRightSwipe: true,
                               children: pages,
-                            ),
-                          ),
+                            ),*/
+                                  PageFlipWidget(
+                                isRightSwipe: true,
+                                initialIndex: 0,
+                                children: pages,
+                              //  backgroundColor: widget.style.backgroundColor!,
+                                onPageFlip: (index) {
+                                  setState(() {
+                                    _currentPageIndex = index;
+                                  });
+                                  widget.onPageFlip(index, pages.length);
+                                  if (_currentPageIndex == pages.length - 1) {
+                                    widget.onLastPage(index, pages.length);
+                                  }
+                                  if (_currentPageIndex == 5) {
+                                    _loadMorePages(initialLoad: false);
+                                  }
+                                },
+                              )),
                         ),
                         Visibility(
                           visible: false,

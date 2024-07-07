@@ -137,7 +137,7 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   getTitleFromXhtml() {
-    // /Listener for slider
+    // Listener for slider
     // controller.addListener(() {
     //   if (controller.position.userScrollDirection == ScrollDirection.forward &&
     //       showHeader == false) {
@@ -504,8 +504,9 @@ class ShowEpubState extends State<ShowEpub> {
                                                   await gs.write(
                                                       libFontSize, _fontSize);
                                                   // به‌روزرسانی رابط کاربری و صفحه‌بندی
+                                                  controllerPaging.paginate();
+
                                                   updateUI();
-                                                  // controllerPaging.paginate();
 
                                                   setState(() {
                                                     widget.isloading = false;
@@ -539,7 +540,6 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   updateTheme(int id, {bool isInit = false}) async {
-   
     staticThemeId = id;
     if (id == 1) {
       backColor = cVioletishColor;
@@ -563,12 +563,10 @@ class ShowEpubState extends State<ShowEpub> {
     if (!isInit) {
       print('updateTheme ');
       Navigator.of(context).pop();
-     controllerPaging.paginate();
+      controllerPaging.paginate();
 
       updateUI();
     }
-
-   
   }
 
   ///Update widget tree
@@ -624,7 +622,14 @@ class ShowEpubState extends State<ShowEpub> {
                       Expanded(
                           child: Stack(
                         children: [
-                         
+                          Positioned(
+                              right: 0,
+                              bottom: 15,
+                              child: Container(
+                                height: 45,
+                                width: 45,
+                                color: Colors.red,
+                              )),
                           FutureBuilder<void>(
                               future: loadChapterFuture,
                               builder: (context, snapshot) {
@@ -640,6 +645,14 @@ class ShowEpubState extends State<ShowEpub> {
                                     }
                                   default:
                                     {
+                                      Positioned(
+                                          right: 0,
+                                          bottom: 15,
+                                          child: Container(
+                                            height: 45,
+                                            width: 45,
+                                            color: Colors.green,
+                                          ));
                                       if (widget.shouldOpenDrawer) {
                                         WidgetsBinding.instance
                                             .addPostFrameCallback((_) {

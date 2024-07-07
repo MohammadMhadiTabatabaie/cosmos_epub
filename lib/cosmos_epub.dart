@@ -58,12 +58,12 @@ class CosmosEpub {
             return Directionality(
               textDirection: TextDirection.rtl,
               child: AlertDialog(
-                title: Text('خطا'),
+                title:const Text('خطا'),
                 content: Text(
                     'فایل epub مشکل دارد لطفا با پشتیبانی تماس بگیرید: $e'),
                 actions: [
                   TextButton(
-                    child: Text('تایید'),
+                    child:const Text('تایید'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
