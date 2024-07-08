@@ -563,9 +563,9 @@ class ShowEpubState extends State<ShowEpub> {
     if (!isInit) {
       print('updateTheme ');
       Navigator.of(context).pop();
-      controllerPaging.paginate();
-
+     controllerPaging.paginate();
       updateUI();
+ 
     }
   }
 
@@ -645,14 +645,7 @@ class ShowEpubState extends State<ShowEpub> {
                                     }
                                   default:
                                     {
-                                      Positioned(
-                                          right: 0,
-                                          bottom: 15,
-                                          child: Container(
-                                            height: 45,
-                                            width: 45,
-                                            color: Colors.green,
-                                          ));
+                                      
                                       if (widget.shouldOpenDrawer) {
                                         WidgetsBinding.instance
                                             .addPostFrameCallback((_) {
@@ -671,11 +664,13 @@ class ShowEpubState extends State<ShowEpub> {
                                                 .getBookProgress(bookId)
                                                 .currentPageIndex ??
                                             0,
+                                            /// font color
                                         style: TextStyle(
                                             backgroundColor: backColor,
                                             fontSize: _fontSize.sp,
                                             fontFamily: selectedTextStyle,
                                             package: 'cosmos_epub',
+
                                             color: fontColor),
                                         handlerCallback: (ctrl) {
                                           controllerPaging = ctrl;

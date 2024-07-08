@@ -59,7 +59,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   final _pageController = GlobalKey<PageFlipWidgetState>();
   int _pagesLoaded = 0;
   //static const int _pagesBatchSize = 10;
-  final int _pagesBatchSize = 100;
+  final int _pagesBatchSize = 10;
   late double _pageHeight;
   // int _pagesLoaded = 0;
   @override
@@ -83,10 +83,28 @@ class _PagingWidgetState extends State<PagingWidget> {
         34.0; // تنظیم ارتفاع صفحه با توجه به اندازه دستگاه
   }
 
+  @override
+  void didUpdateWidget(covariant PagingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.style != widget.style ||
+        oldWidget.textContent != widget.textContent) {
+      _reloadPages();
+    }
+  }
+
   void _loadMorePages({required bool initialLoad}) async {
     final newPages = await _paginate(_pagesLoaded + _pagesBatchSize);
     setState(() {
       _pagesLoaded += _pagesBatchSize;
+      _pageTexts.addAll(newPages);
+      pages = _buildPageWidgets(_pageTexts);
+    });
+  }
+
+  Future<void> _reloadPages() async {
+    final newPages = await _paginate(_pageTexts.length);
+    setState(() {
+      _pageTexts.clear();
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
     });
@@ -351,38 +369,49 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
+    print('widget.style.backgroundColor');
+
+    print(widget.style.backgroundColor);
+    print(widget.style.fontSize);
+    print(widget.style.color);
     return pageTexts.map((text) {
       return SingleChildScrollView(
         child: GestureDetector(
           onTap: widget.onTextTap,
           child: Container(
+            color: widget.style.backgroundColor,
             height: _pageHeight,
             padding: const EdgeInsets.all(16.0),
-            child: widget.innerHtmlContent != null
-                ? HtmlWidget(
-                    text,
-                    customStylesBuilder: (element) {
-                      return {
-                        'text-align': 'justify',
-                      };
-                    },
-                    onTapUrl: (String? s) async {
-                      if (s != null && s == "a") {
-                        if (s.contains("chapter")) {
-                          setState(() {
-                            // Write logic for goto chapter
-                          });
-                        }
-                      }
-                      return true;
-                    },
-                    textStyle: widget.style,
-                  )
-                : Text(
-                    text,
-                    style: widget.style,
-                    textAlign: TextAlign.justify,
-                  ),
+            child:
+                // widget.innerHtmlContent != null
+                //     ? HtmlWidget(
+                //         text,
+                //         customStylesBuilder: (element) {
+                //           return {
+                //             'text-align': 'justify',
+                //           };
+                //         },
+                //         onTapUrl: (String? s) async {
+                //           if (s != null && s == "a") {
+                //             if (s.contains("chapter")) {
+                //               setState(() {
+                //                 // Write logic for goto chapter
+                //               });
+                //             }
+                //           }
+                //           return true;
+                //         },
+                //         textStyle: widget.style,
+                //       )
+                //     :
+                Text(
+              text,
+              style: TextStyle(
+                  fontSize: widget.style.fontSize ?? 0,
+                  fontFamily: widget.style.fontFamily,
+                  color: widget.style.color),
+              textAlign: TextAlign.justify,
+            ),
           ),
         ),
       );
@@ -391,6 +420,7 @@ class _PagingWidgetState extends State<PagingWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.style.backgroundColor);
     return FutureBuilder<void>(
         future: paginateFuture,
         builder: (context, snapshot) {
@@ -413,40 +443,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                         Expanded(
                           child: SizedBox.expand(
                               key: _pageKey,
-                              child:
-                                  /*  PageFlipWidget(
-                              key: _pageController,
-                              initialIndex: widget.starterPageIndex != 0
-                                  ? (pages.isNotEmpty &&
-                                          widget.starterPageIndex < pages.length
-                                      ? widget.starterPageIndex
-                                      : 0)
-                                  : widget.starterPageIndex,
-                              // onPageFlip: (pageIndex) {
-                              //   _currentPageIndex = pageIndex;
-                              //   widget.onPageFlip(pageIndex, pages.length);
-                              //   if (_currentPageIndex == pages.length - 1) {
-                              //     widget.onLastPage(pageIndex, pages.length);
-                              //   }
-                              // },
-                              onPageFlip: (pageIndex) {
-                                _currentPageIndex = pageIndex;
-                                widget.onPageFlip(pageIndex, pages.length);
-                                if (_currentPageIndex == pages.length - 1) {
-                                  widget.onLastPage(pageIndex, pages.length);
-                                }
-                                if (_currentPageIndex == 5) {
-                                  rePaginate(
-                                      initialLoad: false); // لود 10 صفحه‌ی بعدی
-                                }
-                              },
-                              backgroundColor:
-                                  widget.style.backgroundColor ?? Colors.white,
-                              lastPage: widget.lastWidget,
-                              isRightSwipe: true,
-                              children: pages,
-                            ),*/
-                                  PageFlipWidget(
+                              child: PageFlipWidget(
                                 isRightSwipe: true,
                                 initialIndex: 0,
                                 children: pages,
@@ -531,3 +528,35 @@ class _PagingWidgetState extends State<PagingWidget> {
         });
   }
 }
+    /*  PageFlipWidget(
+                              key: _pageController,
+                              initialIndex: widget.starterPageIndex != 0
+                                  ? (pages.isNotEmpty &&
+                                          widget.starterPageIndex < pages.length
+                                      ? widget.starterPageIndex
+                                      : 0)
+                                  : widget.starterPageIndex,
+                              // onPageFlip: (pageIndex) {
+                              //   _currentPageIndex = pageIndex;
+                              //   widget.onPageFlip(pageIndex, pages.length);
+                              //   if (_currentPageIndex == pages.length - 1) {
+                              //     widget.onLastPage(pageIndex, pages.length);
+                              //   }
+                              // },
+                              onPageFlip: (pageIndex) {
+                                _currentPageIndex = pageIndex;
+                                widget.onPageFlip(pageIndex, pages.length);
+                                if (_currentPageIndex == pages.length - 1) {
+                                  widget.onLastPage(pageIndex, pages.length);
+                                }
+                                if (_currentPageIndex == 5) {
+                                  rePaginate(
+                                      initialLoad: false); // لود 10 صفحه‌ی بعدی
+                                }
+                              },
+                              backgroundColor:
+                                  widget.style.backgroundColor ?? Colors.white,
+                              lastPage: widget.lastWidget,
+                              isRightSwipe: true,
+                              children: pages,
+                            ),*/
