@@ -648,11 +648,15 @@ class _PagingWidgetState extends State<PagingWidget> {
   int _currentPageIndex = 0;
   Future<void> paginateFuture = Future.value(true);
   late double _pageHeight;
-
+  late TextPainter textPainter;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pageHeight = MediaQuery.of(context).size.height - 32.0;
+      textPainter = TextPainter(
+        textDirection: TextDirection.rtl,
+      );
       _loadMorePages(initialLoad: true);
     });
   }
@@ -675,42 +679,41 @@ class _PagingWidgetState extends State<PagingWidget> {
   void didUpdateWidget(covariant PagingWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.style != widget.style ||
-        oldWidget.textContent != widget.textContent) {
+        oldWidget.style.background != widget.style.background) {
       _loadPages(initialLoad: true);
     }
   }
 
   void _loadPages({required bool initialLoad}) async {
-    final newPages = await _paginate(_pageTexts.length);
-
+    final newPages = await _paginate(_pageTexts.length + 1);
+    print('_loadPages');
     setState(() {
-      if (initialLoad) {
-        _pageTexts.addAll(newPages);
-      } else {
-        _pageTexts.addAll(newPages);
-      }
+      _pageTexts.addAll(newPages);
+
       pages = _buildPageWidgets(_pageTexts);
     });
   }
 
   Future<List<String>> _paginate(int pagesToLoad) async {
+    _pageTexts.clear();
     List<String> newPages = [];
-
+    print('_paginate start');
     final textSpan = TextSpan(
       text: widget.textContent,
       style: widget.style,
     );
 
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.rtl,
-    );
+    // final textPainter = TextPainter(
+    //   text: textSpan,
+    //   textDirection: TextDirection.rtl,
+    // );
+    textPainter.text = textSpan;
 
     textPainter.layout(
       minWidth: 0,
       maxWidth: MediaQuery.of(context).size.width - 32.0,
     );
-
+    print('mid');
     final lines = textPainter.computeLineMetrics();
     int currentLine = 0;
     while (currentLine < lines.length && newPages.length < pagesToLoad) {
@@ -731,14 +734,13 @@ class _PagingWidgetState extends State<PagingWidget> {
       newPages.add(pageContent);
       currentLine = endLine;
     }
-
+    print('_paginate end');
     return newPages;
   }
 
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
     print('_buildPageWidgets called');
-    print(widget.style.background);
-    print(widget.backColor);
+
     return pageTexts.map((text) {
       return SingleChildScrollView(
         child: GestureDetector(
@@ -760,7 +762,6 @@ class _PagingWidgetState extends State<PagingWidget> {
   @override
   Widget build(BuildContext context) {
     print('build called');
-    print(widget.style.background);
     // if (_pageTexts.isNotEmpty) {
     //   setState(() {
     //     pages = _buildPageWidgets(_pageTexts);
@@ -812,13 +813,20 @@ class _PagingWidgetState extends State<PagingWidget> {
                     right: 0,
                     bottom: 15,
                     child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            bottomLeft: Radius.circular(10)),
+                        color: Color(0xffB0276D),
+                      ),
                       height: 45,
-                      width: 45,
-                      color: Colors.grey.shade300,
                       child: Center(
-                          child: Text(
-                        '${_currentPageIndex + 1} از ${_pageTexts.length}',
-                        style: TextStyle(color: Colors.black, fontSize: 14),
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          '${_currentPageIndex + 1} از ${_pageTexts.length}',
+                          style: TextStyle(color: Colors.white, fontSize: 14),
+                        ),
                       )),
                     )),
               ],
