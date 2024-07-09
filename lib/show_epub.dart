@@ -621,14 +621,7 @@ class ShowEpubState extends State<ShowEpub> {
                       Expanded(
                           child: Stack(
                         children: [
-                          Positioned(
-                              right: 0,
-                              bottom: 15,
-                              child: Container(
-                                height: 45,
-                                width: 45,
-                                color: Colors.red,
-                              )),
+                          
                           FutureBuilder<void>(
                               future: loadChapterFuture,
                               builder: (context, snapshot) {

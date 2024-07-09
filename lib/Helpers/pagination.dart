@@ -671,6 +671,28 @@ class _PagingWidgetState extends State<PagingWidget> {
     });
   }
 
+  @override
+  void didUpdateWidget(covariant PagingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.style != widget.style ||
+        oldWidget.textContent != widget.textContent) {
+      _loadPages(initialLoad: true);
+    }
+  }
+
+  void _loadPages({required bool initialLoad}) async {
+    final newPages = await _paginate(_pageTexts.length);
+
+    setState(() {
+      if (initialLoad) {
+        _pageTexts.addAll(newPages);
+      } else {
+        _pageTexts.addAll(newPages);
+      }
+      pages = _buildPageWidgets(_pageTexts);
+    });
+  }
+
   Future<List<String>> _paginate(int pagesToLoad) async {
     List<String> newPages = [];
 
@@ -739,12 +761,12 @@ class _PagingWidgetState extends State<PagingWidget> {
   Widget build(BuildContext context) {
     print('build called');
     print(widget.style.background);
-    if (_pageTexts.isNotEmpty) {
-      setState(() {
-        pages = _buildPageWidgets(_pageTexts);
-      });
-    }
-   
+    // if (_pageTexts.isNotEmpty) {
+    //   setState(() {
+    //     pages = _buildPageWidgets(_pageTexts);
+    //   });
+    // }
+
     return FutureBuilder<void>(
       future: paginateFuture,
       builder: (context, snapshot) {
@@ -769,12 +791,16 @@ class _PagingWidgetState extends State<PagingWidget> {
                             setState(() {
                               _currentPageIndex = index;
                             });
+                            print('onPageFlip called');
+
+                            //   didUpdateWidget(widget);
                             widget.onPageFlip(index, pages.length);
+
                             if (_currentPageIndex == pages.length - 1) {
                               widget.onLastPage(index, pages.length);
                             }
                             if (_currentPageIndex == pages.length - 5) {
-                             _loadMorePages(initialLoad: false);
+                              _loadMorePages(initialLoad: false);
                             }
                           },
                         ),
@@ -782,6 +808,19 @@ class _PagingWidgetState extends State<PagingWidget> {
                     ),
                   ],
                 ),
+                Positioned(
+                    right: 0,
+                    bottom: 15,
+                    child: Container(
+                      height: 45,
+                      width: 45,
+                      color: Colors.grey.shade300,
+                      child: Center(
+                          child: Text(
+                        '${_currentPageIndex + 1} از ${_pageTexts.length}',
+                        style: TextStyle(color: Colors.black, fontSize: 14),
+                      )),
+                    )),
               ],
             );
         }
