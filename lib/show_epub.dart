@@ -563,9 +563,8 @@ class ShowEpubState extends State<ShowEpub> {
     if (!isInit) {
       print('updateTheme ');
       Navigator.of(context).pop();
-     controllerPaging.paginate();
+      controllerPaging.paginate();
       updateUI();
- 
     }
   }
 
@@ -645,7 +644,6 @@ class ShowEpubState extends State<ShowEpub> {
                                     }
                                   default:
                                     {
-                                      
                                       if (widget.shouldOpenDrawer) {
                                         WidgetsBinding.instance
                                             .addPostFrameCallback((_) {
@@ -664,13 +662,13 @@ class ShowEpubState extends State<ShowEpub> {
                                                 .getBookProgress(bookId)
                                                 .currentPageIndex ??
                                             0,
-                                            /// font color
+
+                                        /// font color
                                         style: TextStyle(
                                             backgroundColor: backColor,
                                             fontSize: _fontSize.sp,
                                             fontFamily: selectedTextStyle,
                                             package: 'cosmos_epub',
-
                                             color: fontColor),
                                         handlerCallback: (ctrl) {
                                           controllerPaging = ctrl;
@@ -741,6 +739,7 @@ class ShowEpubState extends State<ShowEpub> {
                                         //         0]
                                         //     .chapter,
                                         totalChapters: 1, //chaptersList.length,
+                                        backColor: backColor,
                                       );
                                     }
                                 }
