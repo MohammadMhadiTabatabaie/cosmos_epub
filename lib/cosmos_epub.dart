@@ -47,7 +47,7 @@ class CosmosEpub {
           starterChapter: starterChapter,
           chapterListTitle: chapterListTitle,
           onPageFlip: onPageFlip,
-          onLastPage: onLastPage,
+    //      onLastPage: onLastPage,
           accentColor: accentColor);
     } catch (e) {
       print('Error occurred: $e');
@@ -115,7 +115,7 @@ class CosmosEpub {
           starterChapter: starterChapter,
           chapterListTitle: chapterListTitle,
           onPageFlip: onPageFlip,
-          onLastPage: onLastPage,
+        //  onLastPage: onLastPage,
           accentColor: accentColor);
     } catch (e) {
       print('Error occurred: $e');
@@ -152,7 +152,8 @@ class CosmosEpub {
       required int starterChapter,
       required String chapterListTitle,
       Function(int currentPage, int totalPages)? onPageFlip,
-      Function(int lastPageIndex)? onLastPage}) async {
+    //  Function(int lastPageIndex)? onLastPage
+      }) async {
     _checkInitialization();
 
     ///Set starter chapter as current
@@ -173,7 +174,7 @@ class CosmosEpub {
           accentColor: accentColor,
           chapterListTitle: chapterListTitle,
           onPageFlip: onPageFlip,
-          onLastPage: onLastPage,
+         // onLastPage: onLastPage,
         );
       },
     );

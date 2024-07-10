@@ -648,12 +648,14 @@ class _PagingWidgetState extends State<PagingWidget> {
   int _currentPageIndex = 0;
   Future<void> paginateFuture = Future.value(true);
   late double _pageHeight;
+  late double _pagewidth;
   late TextPainter textPainter;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pageHeight = MediaQuery.of(context).size.height - 32.0;
+      _pagewidth = MediaQuery.of(context).size.width - 32.0;
       textPainter = TextPainter(
         textDirection: TextDirection.rtl,
       );
@@ -664,7 +666,6 @@ class _PagingWidgetState extends State<PagingWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _pageHeight = MediaQuery.of(context).size.height - 34.0;
   }
 
   void _loadMorePages({required bool initialLoad}) async {
@@ -685,7 +686,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   void _loadPages({required bool initialLoad}) async {
-    final newPages = await _paginate(_pageTexts.length + 1);
+    final newPages = await _paginate(_pageTexts.length - 1);
     print('_loadPages');
     setState(() {
       _pageTexts.addAll(newPages);
@@ -695,7 +696,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   Future<List<String>> _paginate(int pagesToLoad) async {
-    _pageTexts.clear();
+  //   _pageTexts.clear();
     List<String> newPages = [];
     print('_paginate start');
     final textSpan = TextSpan(
@@ -708,32 +709,58 @@ class _PagingWidgetState extends State<PagingWidget> {
     //   textDirection: TextDirection.rtl,
     // );
     textPainter.text = textSpan;
+    print('textPainter');
 
     textPainter.layout(
-      minWidth: 0,
-      maxWidth: MediaQuery.of(context).size.width - 32.0,
-    );
+        minWidth: 0,
+        maxWidth: _pagewidth //MediaQuery.of(context).size.width - 32.0,
+        );
     print('mid');
-    final lines = textPainter.computeLineMetrics();
-    int currentLine = 0;
-    while (currentLine < lines.length && newPages.length < pagesToLoad) {
-      int start = textPainter
-          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-          .offset;
-      int endLine = currentLine;
 
-      while (endLine < lines.length &&
-          lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
-        endLine++;
+    /// get all page
+    // final lines = textPainter.computeLineMetrics();
+    // int currentLine = 0;
+
+    // while (currentLine < lines.length) {
+    //   int start = textPainter
+    //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+    //       .offset;
+    //   int endLine = currentLine;
+
+    //   while (endLine < lines.length &&
+    //       lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
+    //     endLine++;
+    //   }
+
+    //   int end = textPainter
+    //       .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
+    //       .offset;
+    //   final pageContent = widget.textContent.substring(start, end);
+    //   newPages.add(pageContent);
+    //   currentLine = endLine;
+    // }
+
+    //   //  10 page load
+      final lines = textPainter.computeLineMetrics();
+      int currentLine = 0;
+      while (currentLine < lines.length && newPages.length < pagesToLoad) {
+        int start = textPainter
+            .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+            .offset;
+        int endLine = currentLine;
+
+        while (endLine < lines.length &&
+            lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
+          endLine++;
+        }
+
+        int end = textPainter
+            .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
+            .offset;
+        final pageContent = widget.textContent.substring(start, end);
+        newPages.add(pageContent);
+        currentLine = endLine;
       }
-
-      int end = textPainter
-          .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
-          .offset;
-      final pageContent = widget.textContent.substring(start, end);
-      newPages.add(pageContent);
-      currentLine = endLine;
-    }
     print('_paginate end');
     return newPages;
   }
@@ -762,12 +789,6 @@ class _PagingWidgetState extends State<PagingWidget> {
   @override
   Widget build(BuildContext context) {
     print('build called');
-    // if (_pageTexts.isNotEmpty) {
-    //   setState(() {
-    //     pages = _buildPageWidgets(_pageTexts);
-    //   });
-    // }
-
     return FutureBuilder<void>(
       future: paginateFuture,
       builder: (context, snapshot) {
@@ -813,7 +834,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                     right: 0,
                     bottom: 15,
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration:const BoxDecoration(
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10),
                             bottomLeft: Radius.circular(10)),
