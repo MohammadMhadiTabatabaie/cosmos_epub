@@ -390,9 +390,7 @@
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
 
-import 'package:flutter/material.dart';
 
 class PagingTextHandler {
   final Function paginate;
@@ -615,7 +613,7 @@ class PagingWidget extends StatefulWidget {
   final Function handlerCallback;
   final VoidCallback onTextTap;
   final Function(int, int) onPageFlip;
-  final Function(int, int) onLastPage;
+ // final Function(int, int) onLastPage;
   final Widget? lastWidget;
   final Color backColor;
 
@@ -630,7 +628,7 @@ class PagingWidget extends StatefulWidget {
     required this.handlerCallback(PagingTextHandler handler),
     required this.onTextTap,
     required this.onPageFlip,
-    required this.onLastPage,
+   // required this.onLastPage,
     this.starterPageIndex = 0,
     required this.chapterTitle,
     required this.totalChapters,
@@ -686,7 +684,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   void _loadPages({required bool initialLoad}) async {
-    final newPages = await _paginate(_pageTexts.length - 1);
+    final newPages = await _paginate(_pageTexts.length + 1);
     print('_loadPages');
     setState(() {
       _pageTexts.addAll(newPages);
@@ -696,7 +694,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   Future<List<String>> _paginate(int pagesToLoad) async {
-  //   _pageTexts.clear();
+      _pageTexts.clear();
     List<String> newPages = [];
     print('_paginate start');
     final textSpan = TextSpan(
@@ -741,26 +739,26 @@ class _PagingWidgetState extends State<PagingWidget> {
     // }
 
     //   //  10 page load
-      final lines = textPainter.computeLineMetrics();
-      int currentLine = 0;
-      while (currentLine < lines.length && newPages.length < pagesToLoad) {
-        int start = textPainter
-            .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-            .offset;
-        int endLine = currentLine;
+    final lines = textPainter.computeLineMetrics();
+    int currentLine = 0;
+    while (currentLine < lines.length && newPages.length < pagesToLoad) {
+      int start = textPainter
+          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+          .offset;
+      int endLine = currentLine;
 
-        while (endLine < lines.length &&
-            lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
-          endLine++;
-        }
-
-        int end = textPainter
-            .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
-            .offset;
-        final pageContent = widget.textContent.substring(start, end);
-        newPages.add(pageContent);
-        currentLine = endLine;
+      while (endLine < lines.length &&
+          lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
+        endLine++;
       }
+
+      int end = textPainter
+          .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
+          .offset;
+      final pageContent = widget.textContent.substring(start, end);
+      newPages.add(pageContent);
+      currentLine = endLine;
+    }
     print('_paginate end');
     return newPages;
   }
@@ -818,9 +816,9 @@ class _PagingWidgetState extends State<PagingWidget> {
                             //   didUpdateWidget(widget);
                             widget.onPageFlip(index, pages.length);
 
-                            if (_currentPageIndex == pages.length - 1) {
-                              widget.onLastPage(index, pages.length);
-                            }
+                            // if (_currentPageIndex == pages.length - 1) {
+                            // //  widget.onLastPage(index, pages.length);
+                            // }
                             if (_currentPageIndex == pages.length - 5) {
                               _loadMorePages(initialLoad: false);
                             }
@@ -834,7 +832,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                     right: 0,
                     bottom: 15,
                     child: Container(
-                      decoration:const BoxDecoration(
+                      decoration: const BoxDecoration(
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10),
                             bottomLeft: Radius.circular(10)),

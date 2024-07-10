@@ -706,25 +706,25 @@ class ShowEpubState extends State<ShowEpub> {
                                             prevSwipe = 0;
                                           }
                                         },
-                                        onLastPage: (index, totalPages) async {
-                                          if (widget.onLastPage != null) {
-                                            widget.onLastPage!(index);
-                                          }
+                                        // onLastPage: (index, totalPages) async {
+                                        //   if (widget.onLastPage != null) {
+                                        //     widget.onLastPage!(index);
+                                        //   }
 
-                                          if (totalPages > 1) {
-                                            lastSwipe++;
-                                          } else {
-                                            lastSwipe = 2;
-                                          }
+                                        //   if (totalPages > 1) {
+                                        //     lastSwipe++;
+                                        //   } else {
+                                        //     lastSwipe = 2;
+                                        //   }
 
-                                          if (lastSwipe > 1) {
-                                            nextChapter();
-                                          }
+                                        //   if (lastSwipe > 1) {
+                                        //     nextChapter();
+                                        //   }
 
-                                          isLastPage = true;
+                                        //   isLastPage = true;
 
-                                          updateUI();
-                                        },
+                                        //   updateUI();
+                                        // },
                                         chapterTitle: '',
                                         // chapterTitle: chaptersList[bookProgress
                                         //             .getBookProgress(bookId)
