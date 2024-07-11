@@ -390,8 +390,6 @@
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:flutter/material.dart';
 
-
-
 class PagingTextHandler {
   final Function paginate;
 
@@ -613,7 +611,7 @@ class PagingWidget extends StatefulWidget {
   final Function handlerCallback;
   final VoidCallback onTextTap;
   final Function(int, int) onPageFlip;
- // final Function(int, int) onLastPage;
+  // final Function(int, int) onLastPage;
   final Widget? lastWidget;
   final Color backColor;
 
@@ -628,7 +626,7 @@ class PagingWidget extends StatefulWidget {
     required this.handlerCallback(PagingTextHandler handler),
     required this.onTextTap,
     required this.onPageFlip,
-   // required this.onLastPage,
+    // required this.onLastPage,
     this.starterPageIndex = 0,
     required this.chapterTitle,
     required this.totalChapters,
@@ -652,7 +650,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pageHeight = MediaQuery.of(context).size.height - 32.0;
+      _pageHeight = MediaQuery.of(context).size.height - 55;
       _pagewidth = MediaQuery.of(context).size.width - 32.0;
       textPainter = TextPainter(
         textDirection: TextDirection.rtl,
@@ -694,7 +692,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   Future<List<String>> _paginate(int pagesToLoad) async {
-      _pageTexts.clear();
+    _pageTexts.clear();
     List<String> newPages = [];
     print('_paginate start');
     final textSpan = TextSpan(
@@ -771,6 +769,7 @@ class _PagingWidgetState extends State<PagingWidget> {
         child: GestureDetector(
           onTap: widget.onTextTap,
           child: Container(
+           // color: Colors.red,
             height: _pageHeight,
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -801,7 +800,8 @@ class _PagingWidgetState extends State<PagingWidget> {
                 Column(
                   children: [
                     Expanded(
-                      child: SizedBox.expand(
+                      child: SizedBox(
+                        height: _pageHeight,
                         child: PageFlipWidget(
                           isRightSwipe: true,
                           initialIndex: widget.starterPageIndex,
@@ -830,24 +830,55 @@ class _PagingWidgetState extends State<PagingWidget> {
                 ),
                 Positioned(
                     right: 0,
-                    bottom: 15,
+                    bottom: 0,
                     child: Container(
-                      decoration: const BoxDecoration(
+                      decoration:  BoxDecoration(
                         borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10)),
-                        color: Color(0xffB0276D),
+                            // topLeft: Radius.circular(10),
+                            // bottomLeft: Radius.circular(10)
+                            ),
+                        color: widget.backColor
                       ),
-                      height: 45,
+                      height: 40,
+                      width: MediaQuery.of(context).size.width,
                       child: Center(
                           child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           '${_currentPageIndex + 1} از ${_pageTexts.length}',
-                          style: TextStyle(color: Colors.white, fontSize: 14),
+                          style: widget.style.copyWith(
+                            fontSize: 14
+                          )
                         ),
                       )),
                     )),
+                Visibility(
+                  visible: false,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.first_page),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.navigate_before),
+                        onPressed: () {},
+                      ),
+                      Text(
+                        '${_currentPageIndex + 1}/${_pageTexts.length}',
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.navigate_next),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.last_page),
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ),
               ],
             );
         }

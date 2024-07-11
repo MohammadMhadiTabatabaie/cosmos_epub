@@ -621,7 +621,6 @@ class ShowEpubState extends State<ShowEpub> {
                       Expanded(
                           child: Stack(
                         children: [
-                          
                           FutureBuilder<void>(
                               future: loadChapterFuture,
                               builder: (context, snapshot) {
@@ -747,8 +746,8 @@ class ShowEpubState extends State<ShowEpub> {
                           //         height: 150.h,
                           //         width: 30.w,
                           //         alignment: Alignment.bottomCenter,
-                          //         margin:
-                          //             EdgeInsets.only(bottom: 40.h, right: 15.w),
+                          //         margin: EdgeInsets.only(
+                          //             bottom: 40.h, right: 15.w),
                           //         child: Column(
                           //           children: [
                           //             // Icon(
@@ -769,7 +768,8 @@ class ShowEpubState extends State<ShowEpub> {
                           //                                 : Colors.blue,
                           //                         disabledThumbColor:
                           //                             Colors.transparent,
-                          //                         inactiveTrackColor: Colors.grey
+                          //                         inactiveTrackColor: Colors
+                          //                             .grey
                           //                             .withOpacity(0.5),
                           //                         trackHeight: 5.0,
 
@@ -827,31 +827,25 @@ class ShowEpubState extends State<ShowEpub> {
                       //         SizedBox(
                       //           width: 5.w,
                       //         ),
-                      //         Visibility(
-                      //           visible: showPrevious,
-                      //           child: IconButton(
-                      //               onPressed: () {
-                      //                 prevChapter();
-                      //               },
-                      //               icon: Icon(
-                      //                 Icons.arrow_back_ios,
-                      //                 size: 15.h,
-                      //                 color: fontColor,
-                      //               )),
-                      //         ),
+                      //         // Visibility(
+                      //         //   visible: showPrevious,
+                      //         //   child: IconButton(
+                      //         //       onPressed: () {
+                      //         //         prevChapter();
+                      //         //       },
+                      //         //       icon: Icon(
+                      //         //         Icons.arrow_back_ios,
+                      //         //         size: 15.h,
+                      //         //         color: fontColor,
+                      //         //       )),
+                      //         // ),
                       //         SizedBox(
                       //           width: 5.w,
                       //         ),
                       //         Expanded(
                       //           flex: 10,
                       //           child: Text(
-                      //             chaptersList.isNotEmpty
-                      //                 ? chaptersList[bookProgress
-                      //                             .getBookProgress(bookId)
-                      //                             .currentChapterIndex ??
-                      //                         0]
-                      //                     .chapter
-                      //                 : 'Loading...',
+                      //             'sfsaf',
                       //             maxLines: 1,
                       //             textAlign: TextAlign.center,
                       //             style: TextStyle(
@@ -866,17 +860,17 @@ class ShowEpubState extends State<ShowEpub> {
                       //         SizedBox(
                       //           width: 5.w,
                       //         ),
-                      //         Visibility(
-                      //             visible: showNext,
-                      //             child: IconButton(
-                      //                 onPressed: () {
-                      //                   nextChapter();
-                      //                 },
-                      //                 icon: Icon(
-                      //                   Icons.arrow_forward_ios_rounded,
-                      //                   size: 15.h,
-                      //                   color: fontColor,
-                      //                 ))),
+                      //         // Visibility(
+                      //         //     visible: showNext,
+                      //         //     child: IconButton(
+                      //         //         onPressed: () {
+                      //         //           nextChapter();
+                      //         //         },
+                      //         //         icon: Icon(
+                      //         //           Icons.arrow_forward_ios_rounded,
+                      //         //           size: 15.h,
+                      //         //           color: fontColor,
+                      //         //         ))),
                       //         SizedBox(
                       //           width: 5.w,
                       //         ),
