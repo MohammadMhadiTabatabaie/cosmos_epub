@@ -52,7 +52,7 @@ class ShowEpub extends StatefulWidget {
   final String bookId;
   final String chapterListTitle;
   final Function(int currentPage, int totalPages)? onPageFlip;
-  final Function(int lastPageIndex)? onLastPage;
+ // final Function(int lastPageIndex)? onLastPage;
   final Color accentColor;
   bool isloading = false;
   ShowEpub({
@@ -64,7 +64,7 @@ class ShowEpub extends StatefulWidget {
     required this.bookId,
     required this.chapterListTitle,
     this.onPageFlip,
-    this.onLastPage,
+   // this.onLastPage,
   });
 
   @override
@@ -573,27 +573,27 @@ class ShowEpubState extends State<ShowEpub> {
     setState(() {});
   }
 
-  nextChapter() async {
-    ///Set page to initial
-    await bookProgress.setCurrentPageIndex(bookId, 0);
+  // nextChapter() async {
+  //   ///Set page to initial
+  //   await bookProgress.setCurrentPageIndex(bookId, 0);
 
-    var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
+  //   var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
 
-    if (index != chaptersList.length - 1) {
-      reLoadChapter(index: index + 1);
-    }
-  }
+  //   if (index != chaptersList.length - 1) {
+  //     reLoadChapter(index: index + 1);
+  //   }
+  // }
 
-  prevChapter() async {
-    ///Set page to initial
-    await bookProgress.setCurrentPageIndex(bookId, 0);
+  // prevChapter() async {
+  //   ///Set page to initial
+  //   await bookProgress.setCurrentPageIndex(bookId, 0);
 
-    var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
+  //   var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
 
-    if (index != 0) {
-      reLoadChapter(index: index - 1);
-    }
-  }
+  //   if (index != 0) {
+  //     reLoadChapter(index: index - 1);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -680,11 +680,11 @@ class ShowEpubState extends State<ShowEpub> {
                                           }
 
                                           if (currentPage == totalPages - 1) {
-                                            bookProgress.setCurrentPageIndex(
-                                                bookId, 0);
+                                            // bookProgress.setCurrentPageIndex(
+                                            //     bookId, 0);
                                           } else {
-                                            bookProgress.setCurrentPageIndex(
-                                                bookId, currentPage);
+                                            // bookProgress.setCurrentPageIndex(
+                                            //     bookId, currentPage);
                                           }
 
                                           if (isLastPage) {
@@ -696,14 +696,14 @@ class ShowEpubState extends State<ShowEpub> {
                                           isLastPage = false;
                                           updateUI();
 
-                                          if (currentPage == 0) {
-                                            prevSwipe++;
-                                            if (prevSwipe > 1) {
-                                              prevChapter();
-                                            }
-                                          } else {
-                                            prevSwipe = 0;
-                                          }
+                                          // if (currentPage == 0) {
+                                          //   prevSwipe++;
+                                          //   if (prevSwipe > 1) {
+                                          //     prevChapter();
+                                          //   }
+                                          // } else {
+                                          //   prevSwipe = 0;
+                                          // }
                                         },
                                         // onLastPage: (index, totalPages) async {
                                         //   if (widget.onLastPage != null) {
@@ -970,7 +970,7 @@ class ShowEpubState extends State<ShowEpub> {
       var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
 
       ///Set page to initial and update chapter index with content
-      await bookProgress.setCurrentPageIndex(bookId, 0);
+    //  await bookProgress.setCurrentPageIndex(bookId, 0);
       reLoadChapter(index: index);
     }
   }
