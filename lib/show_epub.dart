@@ -52,7 +52,7 @@ class ShowEpub extends StatefulWidget {
   final String bookId;
   final String chapterListTitle;
   final Function(int currentPage, int totalPages)? onPageFlip;
- // final Function(int lastPageIndex)? onLastPage;
+  // final Function(int lastPageIndex)? onLastPage;
   final Color accentColor;
   bool isloading = false;
   ShowEpub({
@@ -64,7 +64,7 @@ class ShowEpub extends StatefulWidget {
     required this.bookId,
     required this.chapterListTitle,
     this.onPageFlip,
-   // this.onLastPage,
+    // this.onLastPage,
   });
 
   @override
@@ -260,6 +260,7 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   Future<bool> backPress() async {
+    print('pop');
     //  Navigator.of(context).pop();
     return true;
   }
@@ -600,8 +601,13 @@ class ShowEpubState extends State<ShowEpub> {
     ScreenUtil.init(context,
         designSize: const Size(DESIGN_WIDTH, DESIGN_HEIGHT));
 
-    return WillPopScope(
-        onWillPop: backPress,
+    return Scaffold(
+      backgroundColor: backColor,
+      body: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) {
+          showExitPopup();
+        },
         // onPopInvoked: (bool didPop) {
         //   Navigator.of(context).pop();
         //   if (didPop) {
@@ -609,351 +615,350 @@ class ShowEpubState extends State<ShowEpub> {
         //     print('exit for epub');
         //   }
         // },
-        child: Scaffold(
-          backgroundColor: backColor,
-          body: Directionality(
-            textDirection: TextDirection.rtl,
-            child: SafeArea(
-              child: Stack(
-                children: [
-                  Column(
-                    children: [
-                      Expanded(
-                          child: Stack(
-                        children: [
-                          FutureBuilder<void>(
-                              future: loadChapterFuture,
-                              builder: (context, snapshot) {
-                                switch (snapshot.connectionState) {
-                                  case ConnectionState.waiting:
-                                    {
-                                      // Otherwise, display a loading indicator.
-                                      return Center(
-                                          child: CupertinoActivityIndicator(
-                                        color: Theme.of(context).primaryColor,
-                                        radius: 30.r,
-                                      ));
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    Expanded(
+                        child: Stack(
+                      children: [
+                        FutureBuilder<void>(
+                            future: loadChapterFuture,
+                            builder: (context, snapshot) {
+                              switch (snapshot.connectionState) {
+                                case ConnectionState.waiting:
+                                  {
+                                    // Otherwise, display a loading indicator.
+                                    return Center(
+                                        child: CupertinoActivityIndicator(
+                                      color: Theme.of(context).primaryColor,
+                                      radius: 30.r,
+                                    ));
+                                  }
+                                default:
+                                  {
+                                    if (widget.shouldOpenDrawer) {
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                        openTableOfContents();
+                                      });
+
+                                      widget.shouldOpenDrawer = false;
                                     }
-                                  default:
-                                    {
-                                      if (widget.shouldOpenDrawer) {
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          openTableOfContents();
-                                        });
+                                    return PagingWidget(
+                                      textContent,
+                                      innerHtmlContent,
 
-                                        widget.shouldOpenDrawer = false;
-                                      }
-                                      return PagingWidget(
-                                        textContent,
-                                        innerHtmlContent,
+                                      ///Do we need this to the production
+                                      lastWidget: null,
+                                      starterPageIndex: bookProgress
+                                              .getBookProgress(bookId)
+                                              .currentPageIndex ??
+                                          0,
 
-                                        ///Do we need this to the production
-                                        lastWidget: null,
-                                        starterPageIndex: bookProgress
-                                                .getBookProgress(bookId)
-                                                .currentPageIndex ??
-                                            0,
+                                      /// font color
+                                      style: TextStyle(
+                                          backgroundColor: backColor,
+                                          fontSize: _fontSize.sp,
+                                          fontFamily: selectedTextStyle,
+                                          package: 'cosmos_epub',
+                                          color: fontColor),
+                                      handlerCallback: (ctrl) {
+                                        controllerPaging = ctrl;
+                                      },
+                                      onTextTap: () {
+                                        if (showHeader) {
+                                          showHeader = false;
+                                        } else {
+                                          showHeader = true;
+                                        }
+                                        updateUI();
+                                      },
+                                      onPageFlip: (currentPage, totalPages) {
+                                        if (widget.onPageFlip != null) {
+                                          widget.onPageFlip!(
+                                              currentPage, totalPages);
+                                        }
 
-                                        /// font color
-                                        style: TextStyle(
-                                            backgroundColor: backColor,
-                                            fontSize: _fontSize.sp,
-                                            fontFamily: selectedTextStyle,
-                                            package: 'cosmos_epub',
-                                            color: fontColor),
-                                        handlerCallback: (ctrl) {
-                                          controllerPaging = ctrl;
-                                        },
-                                        onTextTap: () {
-                                          if (showHeader) {
-                                            showHeader = false;
-                                          } else {
-                                            showHeader = true;
-                                          }
-                                          updateUI();
-                                        },
-                                        onPageFlip: (currentPage, totalPages) {
-                                          if (widget.onPageFlip != null) {
-                                            widget.onPageFlip!(
-                                                currentPage, totalPages);
-                                          }
+                                        if (currentPage == totalPages - 1) {
+                                          // bookProgress.setCurrentPageIndex(
+                                          //     bookId, 0);
+                                        } else {
+                                          // bookProgress.setCurrentPageIndex(
+                                          //     bookId, currentPage);
+                                        }
 
-                                          if (currentPage == totalPages - 1) {
-                                            // bookProgress.setCurrentPageIndex(
-                                            //     bookId, 0);
-                                          } else {
-                                            // bookProgress.setCurrentPageIndex(
-                                            //     bookId, currentPage);
-                                          }
+                                        if (isLastPage) {
+                                          showHeader = true;
+                                        } else {
+                                          lastSwipe = 0;
+                                        }
 
-                                          if (isLastPage) {
-                                            showHeader = true;
-                                          } else {
-                                            lastSwipe = 0;
-                                          }
+                                        isLastPage = false;
+                                        updateUI();
 
-                                          isLastPage = false;
-                                          updateUI();
-
-                                          // if (currentPage == 0) {
-                                          //   prevSwipe++;
-                                          //   if (prevSwipe > 1) {
-                                          //     prevChapter();
-                                          //   }
-                                          // } else {
-                                          //   prevSwipe = 0;
-                                          // }
-                                        },
-                                        // onLastPage: (index, totalPages) async {
-                                        //   if (widget.onLastPage != null) {
-                                        //     widget.onLastPage!(index);
+                                        // if (currentPage == 0) {
+                                        //   prevSwipe++;
+                                        //   if (prevSwipe > 1) {
+                                        //     prevChapter();
                                         //   }
+                                        // } else {
+                                        //   prevSwipe = 0;
+                                        // }
+                                      },
+                                      // onLastPage: (index, totalPages) async {
+                                      //   if (widget.onLastPage != null) {
+                                      //     widget.onLastPage!(index);
+                                      //   }
 
-                                        //   if (totalPages > 1) {
-                                        //     lastSwipe++;
-                                        //   } else {
-                                        //     lastSwipe = 2;
-                                        //   }
+                                      //   if (totalPages > 1) {
+                                      //     lastSwipe++;
+                                      //   } else {
+                                      //     lastSwipe = 2;
+                                      //   }
 
-                                        //   if (lastSwipe > 1) {
-                                        //     nextChapter();
-                                        //   }
+                                      //   if (lastSwipe > 1) {
+                                      //     nextChapter();
+                                      //   }
 
-                                        //   isLastPage = true;
+                                      //   isLastPage = true;
 
-                                        //   updateUI();
-                                        // },
-                                        chapterTitle: '',
-                                        // chapterTitle: chaptersList[bookProgress
-                                        //             .getBookProgress(bookId)
-                                        //             .currentChapterIndex ??
-                                        //         0]
-                                        //     .chapter,
-                                        totalChapters: 1, //chaptersList.length,
-                                        backColor: backColor,
-                                      );
-                                    }
-                                }
-                              }),
-                          //)
+                                      //   updateUI();
+                                      // },
+                                      chapterTitle: '',
+                                      // chapterTitle: chaptersList[bookProgress
+                                      //             .getBookProgress(bookId)
+                                      //             .currentChapterIndex ??
+                                      //         0]
+                                      //     .chapter,
+                                      totalChapters: 1, //chaptersList.length,
+                                      backColor: backColor,
+                                    );
+                                  }
+                              }
+                            }),
+                        //)
 
-                          // Align(
-                          //   alignment: Alignment.bottomRight,
-                          //   child: Visibility(
-                          //     visible: showBrightnessWidget,
-                          //     child: Container(
-                          //         height: 150.h,
-                          //         width: 30.w,
-                          //         alignment: Alignment.bottomCenter,
-                          //         margin: EdgeInsets.only(
-                          //             bottom: 40.h, right: 15.w),
-                          //         child: Column(
-                          //           children: [
-                          //             // Icon(
-                          //             //   Icons.brightness_7,
-                          //             //   size: 14.h,
-                          //             //   color: fontColor,
-                          //             // ),
-                          //             SizedBox(
-                          //               height: 120.h,
-                          //               width: 30.w,
-                          //               child: RotatedBox(
-                          //                   quarterTurns: -1,
-                          //                   child: SliderTheme(
-                          //                       data: SliderThemeData(
-                          //                         activeTrackColor:
-                          //                             staticThemeId == 4
-                          //                                 ? Colors.white
-                          //                                 : Colors.blue,
-                          //                         disabledThumbColor:
-                          //                             Colors.transparent,
-                          //                         inactiveTrackColor: Colors
-                          //                             .grey
-                          //                             .withOpacity(0.5),
-                          //                         trackHeight: 5.0,
+                        // Align(
+                        //   alignment: Alignment.bottomRight,
+                        //   child: Visibility(
+                        //     visible: showBrightnessWidget,
+                        //     child: Container(
+                        //         height: 150.h,
+                        //         width: 30.w,
+                        //         alignment: Alignment.bottomCenter,
+                        //         margin: EdgeInsets.only(
+                        //             bottom: 40.h, right: 15.w),
+                        //         child: Column(
+                        //           children: [
+                        //             // Icon(
+                        //             //   Icons.brightness_7,
+                        //             //   size: 14.h,
+                        //             //   color: fontColor,
+                        //             // ),
+                        //             SizedBox(
+                        //               height: 120.h,
+                        //               width: 30.w,
+                        //               child: RotatedBox(
+                        //                   quarterTurns: -1,
+                        //                   child: SliderTheme(
+                        //                       data: SliderThemeData(
+                        //                         activeTrackColor:
+                        //                             staticThemeId == 4
+                        //                                 ? Colors.white
+                        //                                 : Colors.blue,
+                        //                         disabledThumbColor:
+                        //                             Colors.transparent,
+                        //                         inactiveTrackColor: Colors
+                        //                             .grey
+                        //                             .withOpacity(0.5),
+                        //                         trackHeight: 5.0,
 
-                          //                         thumbColor: staticThemeId == 4
-                          //                             ? Colors.grey
-                          //                                 .withOpacity(0.8)
-                          //                             : Colors.blue,
-                          //                         thumbShape:
-                          //                             RoundSliderThumbShape(
-                          //                                 enabledThumbRadius:
-                          //                                     0.r),
-                          //                         // Adjust the size of the thumb
-                          //                         overlayShape:
-                          //                             RoundSliderOverlayShape(
-                          //                                 overlayRadius: 10
-                          //                                     .r), // Adjust the size of the overlay
-                          //                       ),
-                          //                       child: Slider(
-                          //                         value: brightnessLevel,
-                          //                         min: 0.0,
-                          //                         max: 1.0,
-                          //                         onChangeEnd: (double value) {
-                          //                           setBrightness(value);
-                          //                         },
-                          //                         onChanged: (double value) {
-                          //                           setState(() {
-                          //                             brightnessLevel = value;
-                          //                           });
-                          //                         },
-                          //                       ))),
-                          //             ),
-                          //           ],
-                          //         )),
-                          //   ),
-                          // )
-                        ],
-                      )),
-                      // AnimatedContainer(
-                      //   height: showHeader ? 40.h : 0,
-                      //   duration: const Duration(milliseconds: 100),
-                      //   color: backColor,
-                      //   child: Container(
-                      //     height: 40.h,
-                      //     alignment: Alignment.center,
-                      //     decoration: BoxDecoration(
-                      //       color: backColor,
-                      //       border: Border(
-                      //         top: BorderSide(
-                      //             width: 3.w, color: widget.accentColor),
-                      //       ),
-                      //     ),
-                      //     child: Row(
-                      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      //       children: [
-                      //         SizedBox(
-                      //           width: 5.w,
-                      //         ),
-                      //         // Visibility(
-                      //         //   visible: showPrevious,
-                      //         //   child: IconButton(
-                      //         //       onPressed: () {
-                      //         //         prevChapter();
-                      //         //       },
-                      //         //       icon: Icon(
-                      //         //         Icons.arrow_back_ios,
-                      //         //         size: 15.h,
-                      //         //         color: fontColor,
-                      //         //       )),
-                      //         // ),
-                      //         SizedBox(
-                      //           width: 5.w,
-                      //         ),
-                      //         Expanded(
-                      //           flex: 10,
-                      //           child: Text(
-                      //             'sfsaf',
-                      //             maxLines: 1,
-                      //             textAlign: TextAlign.center,
-                      //             style: TextStyle(
-                      //                 fontSize: 13.sp,
-                      //                 overflow: TextOverflow.ellipsis,
-                      //                 fontFamily: selectedTextStyle,
-                      //                 package: 'cosmos_epub',
-                      //                 fontWeight: FontWeight.bold,
-                      //                 color: fontColor),
-                      //           ),
-                      //         ),
-                      //         SizedBox(
-                      //           width: 5.w,
-                      //         ),
-                      //         // Visibility(
-                      //         //     visible: showNext,
-                      //         //     child: IconButton(
-                      //         //         onPressed: () {
-                      //         //           nextChapter();
-                      //         //         },
-                      //         //         icon: Icon(
-                      //         //           Icons.arrow_forward_ios_rounded,
-                      //         //           size: 15.h,
-                      //         //           color: fontColor,
-                      //         //         ))),
-                      //         SizedBox(
-                      //           width: 5.w,
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                  AnimatedContainer(
-                    height: showHeader ? 50.h : 0,
-                    duration: const Duration(milliseconds: 100),
-                    color: backColor,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 3.h),
-                      child: AppBar(
-                        centerTitle: true,
-                        title: Text(
-                          bookTitle,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
-                              color: fontColor),
-                        ),
-                        backgroundColor: backColor,
-                        shape: Border(
-                            bottom: BorderSide(
-                                color: widget.accentColor, width: 3.h)),
-                        elevation: 0,
-                        leading: IconButton(
-                          onPressed: openTableOfContents,
-                          icon: Icon(
-                            Icons.menu,
-                            color: fontColor,
-                            size: 20.h,
-                          ),
-                        ),
-                        actions: [
-                          InkWell(
-                              onTap: () {
-                                updateFontSettings();
-                              },
-                              child: Container(
-                                width: 40.w,
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "Aa",
-                                  style: TextStyle(
-                                      fontSize: 18.sp,
-                                      color: fontColor,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              )),
-                          // SizedBox(
-                          //   width: 5.w,
-                          // ),
-                          // InkWell(
-                          //     onTap: () async {
-                          //       setState(() {
-                          //         showBrightnessWidget = true;
-                          //       });
-                          //       await Future.delayed(const Duration(seconds: 7));
-                          //       setState(() {
-                          //         showBrightnessWidget = false;
-                          //       });
-                          //     },
-                          //     child: Icon(
-                          //       Icons.brightness_high_sharp,
-                          //       size: 20.h,
-                          //       color: fontColor,
-                          //     )),
-                          SizedBox(
-                            width: 10.w,
-                          )
-                        ],
+                        //                         thumbColor: staticThemeId == 4
+                        //                             ? Colors.grey
+                        //                                 .withOpacity(0.8)
+                        //                             : Colors.blue,
+                        //                         thumbShape:
+                        //                             RoundSliderThumbShape(
+                        //                                 enabledThumbRadius:
+                        //                                     0.r),
+                        //                         // Adjust the size of the thumb
+                        //                         overlayShape:
+                        //                             RoundSliderOverlayShape(
+                        //                                 overlayRadius: 10
+                        //                                     .r), // Adjust the size of the overlay
+                        //                       ),
+                        //                       child: Slider(
+                        //                         value: brightnessLevel,
+                        //                         min: 0.0,
+                        //                         max: 1.0,
+                        //                         onChangeEnd: (double value) {
+                        //                           setBrightness(value);
+                        //                         },
+                        //                         onChanged: (double value) {
+                        //                           setState(() {
+                        //                             brightnessLevel = value;
+                        //                           });
+                        //                         },
+                        //                       ))),
+                        //             ),
+                        //           ],
+                        //         )),
+                        //   ),
+                        // )
+                      ],
+                    )),
+                    // AnimatedContainer(
+                    //   height: showHeader ? 40.h : 0,
+                    //   duration: const Duration(milliseconds: 100),
+                    //   color: backColor,
+                    //   child: Container(
+                    //     height: 40.h,
+                    //     alignment: Alignment.center,
+                    //     decoration: BoxDecoration(
+                    //       color: backColor,
+                    //       border: Border(
+                    //         top: BorderSide(
+                    //             width: 3.w, color: widget.accentColor),
+                    //       ),
+                    //     ),
+                    //     child: Row(
+                    //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    //       children: [
+                    //         SizedBox(
+                    //           width: 5.w,
+                    //         ),
+                    //         // Visibility(
+                    //         //   visible: showPrevious,
+                    //         //   child: IconButton(
+                    //         //       onPressed: () {
+                    //         //         prevChapter();
+                    //         //       },
+                    //         //       icon: Icon(
+                    //         //         Icons.arrow_back_ios,
+                    //         //         size: 15.h,
+                    //         //         color: fontColor,
+                    //         //       )),
+                    //         // ),
+                    //         SizedBox(
+                    //           width: 5.w,
+                    //         ),
+                    //         Expanded(
+                    //           flex: 10,
+                    //           child: Text(
+                    //             'sfsaf',
+                    //             maxLines: 1,
+                    //             textAlign: TextAlign.center,
+                    //             style: TextStyle(
+                    //                 fontSize: 13.sp,
+                    //                 overflow: TextOverflow.ellipsis,
+                    //                 fontFamily: selectedTextStyle,
+                    //                 package: 'cosmos_epub',
+                    //                 fontWeight: FontWeight.bold,
+                    //                 color: fontColor),
+                    //           ),
+                    //         ),
+                    //         SizedBox(
+                    //           width: 5.w,
+                    //         ),
+                    //         // Visibility(
+                    //         //     visible: showNext,
+                    //         //     child: IconButton(
+                    //         //         onPressed: () {
+                    //         //           nextChapter();
+                    //         //         },
+                    //         //         icon: Icon(
+                    //         //           Icons.arrow_forward_ios_rounded,
+                    //         //           size: 15.h,
+                    //         //           color: fontColor,
+                    //         //         ))),
+                    //         SizedBox(
+                    //           width: 5.w,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                  ],
+                ),
+                AnimatedContainer(
+                  height: showHeader ? 50.h : 0,
+                  duration: const Duration(milliseconds: 100),
+                  color: backColor,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 3.h),
+                    child: AppBar(
+                      centerTitle: true,
+                      title: Text(
+                        bookTitle,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                            color: fontColor),
                       ),
+                      backgroundColor: backColor,
+                      shape: Border(
+                          bottom: BorderSide(
+                              color: widget.accentColor, width: 3.h)),
+                      elevation: 0,
+                      leading: IconButton(
+                        onPressed: openTableOfContents,
+                        icon: Icon(
+                          Icons.menu,
+                          color: fontColor,
+                          size: 20.h,
+                        ),
+                      ),
+                      actions: [
+                        InkWell(
+                            onTap: () {
+                              updateFontSettings();
+                            },
+                            child: Container(
+                              width: 40.w,
+                              alignment: Alignment.center,
+                              child: Text(
+                                "Aa",
+                                style: TextStyle(
+                                    fontSize: 18.sp,
+                                    color: fontColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            )),
+                        // SizedBox(
+                        //   width: 5.w,
+                        // ),
+                        // InkWell(
+                        //     onTap: () async {
+                        //       setState(() {
+                        //         showBrightnessWidget = true;
+                        //       });
+                        //       await Future.delayed(const Duration(seconds: 7));
+                        //       setState(() {
+                        //         showBrightnessWidget = false;
+                        //       });
+                        //     },
+                        //     child: Icon(
+                        //       Icons.brightness_high_sharp,
+                        //       size: 20.h,
+                        //       color: fontColor,
+                        //     )),
+                        SizedBox(
+                          width: 10.w,
+                        )
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   openTableOfContents() async {
@@ -970,9 +975,132 @@ class ShowEpubState extends State<ShowEpub> {
       var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
 
       ///Set page to initial and update chapter index with content
-    //  await bookProgress.setCurrentPageIndex(bookId, 0);
+      //  await bookProgress.setCurrentPageIndex(bookId, 0);
       reLoadChapter(index: index);
     }
+  }
+
+  Future<void> showExitPopup(
+   // BuildContext context,
+  ) async {
+    return await showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        Size size = MediaQuery.sizeOf(context);
+        // return AlertDialog(
+
+        //   backgroundColor: Colors.white,
+        //   content:
+        return Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            Container(
+              padding:
+                  const EdgeInsets.only(bottom: 8, right: 16, left: 16, top: 8),
+              height: 160,
+              width: size.width,
+              decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24)),
+                  color: Colors.white),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    //    Text('000'),
+                    Text(
+                      'کتابخوان',
+                      // style: textTheme.labelSmall!.copyWith(
+                      //   fontFamily: 'Bold',
+                      // ),
+                      style: TextStyle(
+                          fontFamily: 'IRANSans',
+                          fontSize: 14,
+                          color: Colors.black),
+                    ),
+                    // SizedBox(height: 24),
+                    Text(
+                      'آیا میخواهید از کتابخوان  خارج شوید؟',
+                      // style: textTheme.displaySmall!.copyWith(
+                      //   fontFamily: 'Light',
+                      //   fontSize: 16,
+                      // ),
+                      style: TextStyle(
+                          //  fontFamily: selectedTextStyle,
+                          fontSize: 14,
+                          color: Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                    // SizedBox(height: 24),
+                    Row(
+                      //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                              height: 42,
+                              width: size.width / 3.5,
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    backPress();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xffB0276D),
+                                    foregroundColor: Colors.white,
+                                    //   elevation: 10,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'خارج شدن',
+                                    style: const TextStyle(
+                                        fontFamily: 'IRANSans',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                  ))),
+                        ),
+                        //   Spacer(),
+                        SizedBox(width: 16),
+
+                        Expanded(
+                          child: SizedBox(
+                              height: 42,
+                              width: size.width / 3.5,
+                              child: OutlinedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Color(0xff4430C2),
+                                    side: BorderSide(
+                                        color: Color(0xff4430C2), width: 2),
+                                    //   elevation: 10,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'بازگشت',
+                                    style: const TextStyle(
+                                        fontFamily: 'IRANSans',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                  ))),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              //  ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

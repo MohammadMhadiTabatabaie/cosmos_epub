@@ -389,6 +389,7 @@
 
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html_reborn/flutter_html_reborn.dart';
 
 class PagingTextHandler {
   final Function paginate;
@@ -646,15 +647,20 @@ class _PagingWidgetState extends State<PagingWidget> {
   late double _pageHeight;
   late double _pagewidth;
   late TextPainter textPainter;
+  int totalPages = 0;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pageHeight = MediaQuery.of(context).size.height - 55;
-      _pagewidth = MediaQuery.of(context).size.width - 32.0;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _pageHeight = MediaQuery.of(context).size.height;
+      _pagewidth = MediaQuery.of(context).size.width - 20.0;
       textPainter = TextPainter(
         textDirection: TextDirection.rtl,
       );
+       totalPages = await _calculateTotalPages();
+
+      setstate() {}
       _loadMorePages(initialLoad: true);
     });
   }
@@ -676,11 +682,14 @@ class _PagingWidgetState extends State<PagingWidget> {
   void didUpdateWidget(covariant PagingWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.style != widget.style ||
-        oldWidget.style.background != widget.style.background) {
+        oldWidget.textContent != widget.textContent) {
       _loadPages(initialLoad: true);
     }
   }
 
+// if (oldWidget.style.fontSize != widget.style.fontSize) {
+  //   totalPages = await _calculateTotalPages();
+  // }
   void _loadPages({required bool initialLoad}) async {
     final newPages = await _paginate(_pageTexts.length + 1);
     print('_loadPages');
@@ -691,55 +700,25 @@ class _PagingWidgetState extends State<PagingWidget> {
     });
   }
 
-  Future<List<String>> _paginate(int pagesToLoad) async {
+  Future<int> _calculateTotalPages() async {
     _pageTexts.clear();
     List<String> newPages = [];
-    print('_paginate start');
+    print('_calculateTotalPages start');
     final textSpan = TextSpan(
       text: widget.textContent,
       style: widget.style,
     );
 
-    // final textPainter = TextPainter(
-    //   text: textSpan,
-    //   textDirection: TextDirection.rtl,
-    // );
     textPainter.text = textSpan;
-    print('textPainter');
-
+    print('_calculateTotalPages textPainter');
     textPainter.layout(
-        minWidth: 0,
-        maxWidth: _pagewidth //MediaQuery.of(context).size.width - 32.0,
-        );
-    print('mid');
-
-    /// get all page
-    // final lines = textPainter.computeLineMetrics();
-    // int currentLine = 0;
-
-    // while (currentLine < lines.length) {
-    //   int start = textPainter
-    //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-    //       .offset;
-    //   int endLine = currentLine;
-
-    //   while (endLine < lines.length &&
-    //       lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
-    //     endLine++;
-    //   }
-
-    //   int end = textPainter
-    //       .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
-    //       .offset;
-    //   final pageContent = widget.textContent.substring(start, end);
-    //   newPages.add(pageContent);
-    //   currentLine = endLine;
-    // }
-
-    //   //  10 page load
+      minWidth: 0,
+      maxWidth: MediaQuery.of(context).size.width - 20.0,
+    );
+    print('_calculateTotalPages mid');
     final lines = textPainter.computeLineMetrics();
     int currentLine = 0;
-    while (currentLine < lines.length && newPages.length < pagesToLoad) {
+    while (currentLine < lines.length) {
       int start = textPainter
           .getPositionForOffset(Offset(0, lines[currentLine].baseline))
           .offset;
@@ -757,27 +736,106 @@ class _PagingWidgetState extends State<PagingWidget> {
       newPages.add(pageContent);
       currentLine = endLine;
     }
+    print('_calculateTotalPages end');
+    return newPages.length;
+  }
+
+  Future<List<String>> _paginate(int pagesToLoad) async {
+    _pageTexts.clear();
+    List<String> newPages = [];
+    print('_paginate start');
+    final textSpan = TextSpan(
+      text: widget.textContent,
+      style: widget.style,
+    );
+    textPainter.text = textSpan;
+    // final textPainter = TextPainter(
+    //   text: textSpan,
+    //   textDirection: TextDirection.rtl,
+    // );
+
+    print('textPainter');
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: MediaQuery.of(context).size.width - 40.0,
+    );
+    print('mid');
+
+    final lines = textPainter.computeLineMetrics();
+
+    int currentLine = 0;
+    while (currentLine < lines.length && newPages.length < pagesToLoad) {
+      int start = textPainter
+          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+          .offset;
+      int endLine = currentLine;
+
+      // while (currentLine < lines.length) {
+      //   int start = textPainter
+      //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+      //       .offset;
+      // int endLine = currentLine;
+       double currentHeight = 0.0;
+      // while (endLine < lines.length &&
+      //     lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
+      //   endLine++;
+      // }
+     // محاسبه ارتفاع خطوط تا زمانی که به ارتفاع صفحه برسد
+      while (endLine < lines.length &&
+          currentHeight + lines[endLine].height <= _pageHeight-100) {
+        currentHeight += lines[endLine].height;
+        endLine++;
+      }
+      int end = textPainter
+          .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
+          .offset;
+      final pageContent = widget.textContent.substring(start, end);
+      newPages.add(pageContent);
+      currentLine = endLine;
+      //   int end = textPainter.getPositionForOffset(Offset(0, lines[endLine - 1].baseline + lines[endLine - 1].height)).offset;
+      // final pageContent = widget.textContent.substring(start, end);
+      // newPages.add(pageContent);
+      // currentLine = endLine;
+    }
     print('_paginate end');
     return newPages;
   }
 
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
     print('_buildPageWidgets called');
-
+    print('object $_pageHeight');
     return pageTexts.map((text) {
-      return SingleChildScrollView(
-        child: GestureDetector(
-          onTap: widget.onTextTap,
-          child: Container(
-           // color: Colors.red,
-            height: _pageHeight,
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              text,
-              style: widget.style.copyWith(backgroundColor: widget.backColor),
-              textAlign: TextAlign.justify,
-            ),
-          ),
+      return GestureDetector(
+        onTap: widget.onTextTap,
+        child: Container(
+          //color: Colors.red[30],
+          //  height: _pageHeight-100,
+          padding: const EdgeInsets.all(16.0),
+          margin: const EdgeInsets.only(top: 35, bottom: 40),
+          child: widget.innerHtmlContent != null
+              ? Html(
+                  data: text,
+                  style: {
+                    "*": Style(
+                        textAlign: TextAlign.justify,
+                        fontSize: FontSize(widget.style.fontSize ?? 0),
+                        fontFamily: widget.style.fontFamily,
+                        color: widget.style.color),
+                  },
+                )
+              : Container(
+               //    height: _pageHeight /2,
+                   color: widget.backColor,
+                  child: Padding(
+                    padding: const EdgeInsets.all(0.0),
+                    child: Text(
+                      text,
+                      style: widget.style
+                          .copyWith(backgroundColor: widget.backColor),
+                      textAlign: TextAlign.justify,
+                    ),
+                  ),
+                ),
         ),
       );
     }).toList();
@@ -801,7 +859,8 @@ class _PagingWidgetState extends State<PagingWidget> {
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: _pageHeight,
+                        //    color: Colors.green,
+                        // height: _pageHeight,
                         child: PageFlipWidget(
                           isRightSwipe: true,
                           initialIndex: widget.starterPageIndex,
@@ -832,24 +891,21 @@ class _PagingWidgetState extends State<PagingWidget> {
                     right: 0,
                     bottom: 0,
                     child: Container(
-                      decoration:  BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                            // topLeft: Radius.circular(10),
-                            // bottomLeft: Radius.circular(10)
-                            ),
-                        color: widget.backColor
-                      ),
-                      height: 40,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              // topLeft: Radius.circular(10),
+                              // bottomLeft: Radius.circular(10)
+                              ),
+                          color: widget.backColor),
+                      //   height: 40,
                       width: MediaQuery.of(context).size.width,
                       child: Center(
                           child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          '${_currentPageIndex + 1} از ${_pageTexts.length}',
-                          style: widget.style.copyWith(
-                            fontSize: 14
-                          )
-                        ),
+                            '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
+                            //    '${_currentPageIndex + 1}  از ${totalPages}',
+                            style: widget.style.copyWith(fontSize: 14)),
                       )),
                     )),
                 Visibility(

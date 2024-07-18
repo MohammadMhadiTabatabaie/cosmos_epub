@@ -490,7 +490,7 @@ class PageFlipWidget extends StatefulWidget {
     this.lastPage,
     required this.isRightSwipe,
     required this.onPageFlip,
-  })  : assert(initialIndex < children.length,
+  })  : assert( initialIndex < children.length,
             'initialIndex cannot be greater than children length'),
         super(key: key);
 
@@ -514,11 +514,11 @@ class PageFlipWidgetState extends State<PageFlipWidget>
   List<Widget> pages = [];
   final List<AnimationController> _controllers = [];
   bool? _isForward;
-
+  bool _isDraggingHorizontally = false;  // New variable to track horizontal dragging
   @override
   void didUpdateWidget(PageFlipWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-   
+
     if (oldWidget.backgroundColor != widget.backgroundColor ||
         oldWidget.children.length != widget.children.length ||
         oldWidget.lastPage != widget.lastPage ||
@@ -576,6 +576,7 @@ class PageFlipWidgetState extends State<PageFlipWidget>
   bool get _isFirstPage => pageNumber == 0;
 
   void _turnPage(DragUpdateDetails details, BoxConstraints dimens) {
+      if (!_isDraggingHorizontally) return; 
     currentPage.value = pageNumber;
     currentWidget.value = Container();
     final ratio = details.delta.dx / dimens.maxWidth;
@@ -689,9 +690,15 @@ class PageFlipWidgetState extends State<PageFlipWidget>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, dimens) => GestureDetector(
-        behavior: HitTestBehavior.opaque,
+        behavior: HitTestBehavior.deferToChild,
+        onHorizontalDragStart: (details) {
+          _isDraggingHorizontally = true;
+        },
         onHorizontalDragUpdate: (details) => _turnPage(details, dimens),
         onHorizontalDragEnd: (details) => _onDragFinish(),
+          onVerticalDragStart: (details) {
+          _isDraggingHorizontally = false;
+        },
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[
