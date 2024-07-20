@@ -604,7 +604,7 @@ class ShowEpubState extends State<ShowEpub> {
     return Scaffold(
       backgroundColor: backColor,
       body: PopScope(
-        canPop: false,
+     //   canPop: false,
         onPopInvoked: (didPop) {
           showExitPopup();
         },
@@ -741,7 +741,7 @@ class ShowEpubState extends State<ShowEpub> {
                               }
                             }),
                         //)
-
+ 
                         // Align(
                         //   alignment: Alignment.bottomRight,
                         //   child: Visibility(
@@ -885,7 +885,8 @@ class ShowEpubState extends State<ShowEpub> {
                   ],
                 ),
                 AnimatedContainer(
-                  height: showHeader ? 50.h : 0,
+                  //   height: showHeader ? 50.h : 0,
+                  height: 50,
                   duration: const Duration(milliseconds: 100),
                   color: backColor,
                   child: Padding(
@@ -981,8 +982,8 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   Future<void> showExitPopup(
-   // BuildContext context,
-  ) async {
+      // BuildContext context,
+      ) async {
     return await showDialog(
       barrierDismissible: true,
       context: context,
