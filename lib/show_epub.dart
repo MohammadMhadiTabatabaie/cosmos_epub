@@ -606,7 +606,7 @@ class ShowEpubState extends State<ShowEpub> {
       body: PopScope(
      //   canPop: false,
         onPopInvoked: (didPop) {
-          showExitPopup();
+         backPress();
         },
         // onPopInvoked: (bool didPop) {
         //   Navigator.of(context).pop();
@@ -885,8 +885,8 @@ class ShowEpubState extends State<ShowEpub> {
                   ],
                 ),
                 AnimatedContainer(
-                  //   height: showHeader ? 50.h : 0,
-                  height: 50,
+                     height: showHeader ? 50.h : 0,
+                 // height: 50,
                   duration: const Duration(milliseconds: 100),
                   color: backColor,
                   child: Padding(

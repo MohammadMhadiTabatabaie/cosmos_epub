@@ -658,7 +658,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       textPainter = TextPainter(
         textDirection: TextDirection.rtl,
       );
-       totalPages = await _calculateTotalPages();
+      totalPages = await _calculateTotalPages();
 
       setstate() {}
       _loadMorePages(initialLoad: true);
@@ -679,17 +679,20 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   @override
-  void didUpdateWidget(covariant PagingWidget oldWidget) {
+  void didUpdateWidget(covariant PagingWidget oldWidget)  {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.style != widget.style ||
-        oldWidget.textContent != widget.textContent) {
+
+    if (oldWidget.style != widget.style 
+   // ||
+    //    oldWidget.textContent != widget.textContent
+        ) {
       _loadPages(initialLoad: true);
     }
+    // if (oldWidget.style.fontSize != widget.style.fontSize) {
+    //   totalPages =  _calculateTotalPages();
+    // }
   }
 
-// if (oldWidget.style.fontSize != widget.style.fontSize) {
-  //   totalPages = await _calculateTotalPages();
-  // }
   void _loadPages({required bool initialLoad}) async {
     final newPages = await _paginate(_pageTexts.length + 1);
     print('_loadPages');
@@ -775,14 +778,14 @@ class _PagingWidgetState extends State<PagingWidget> {
       //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
       //       .offset;
       // int endLine = currentLine;
-       double currentHeight = 0.0;
+      double currentHeight = 0.0;
       // while (endLine < lines.length &&
       //     lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
       //   endLine++;
       // }
-     // محاسبه ارتفاع خطوط تا زمانی که به ارتفاع صفحه برسد
+      // محاسبه ارتفاع خطوط تا زمانی که به ارتفاع صفحه برسد
       while (endLine < lines.length &&
-          currentHeight + lines[endLine].height <= _pageHeight-100) {
+          currentHeight + lines[endLine].height <= _pageHeight  ) {
         currentHeight += lines[endLine].height;
         endLine++;
       }
@@ -795,7 +798,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       //   int end = textPainter.getPositionForOffset(Offset(0, lines[endLine - 1].baseline + lines[endLine - 1].height)).offset;
       // final pageContent = widget.textContent.substring(start, end);
       // newPages.add(pageContent);
-      // currentLine = endLine;
+      // currentLine = endLine; 
     }
     print('_paginate end');
     return newPages;
@@ -805,13 +808,14 @@ class _PagingWidgetState extends State<PagingWidget> {
     print('_buildPageWidgets called');
     print('object $_pageHeight');
     return pageTexts.map((text) {
+    
       return GestureDetector(
         onTap: widget.onTextTap,
         child: Container(
           //color: Colors.red[30],
           //  height: _pageHeight-100,
           padding: const EdgeInsets.all(16.0),
-          margin: const EdgeInsets.only(top: 35, bottom: 40),
+          margin: const EdgeInsets.only(top: 0, bottom: 0),
           child: widget.innerHtmlContent != null
               ? Html(
                   data: text,
@@ -823,19 +827,21 @@ class _PagingWidgetState extends State<PagingWidget> {
                         color: widget.style.color),
                   },
                 )
-              : Container(
-               //    height: _pageHeight /2,
-                   color: widget.backColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(0.0),
-                    child: Text(
-                      text,
-                      style: widget.style
-                          .copyWith(backgroundColor: widget.backColor),
-                      textAlign: TextAlign.justify,
+              : SingleChildScrollView(
+                child: Container(
+                    //    height: _pageHeight /2,
+                    color: widget.backColor,
+                    child: Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: Text(
+                        text,
+                        style: widget.style
+                            .copyWith(backgroundColor: widget.backColor),
+                        textAlign: TextAlign.justify,
+                      ),
                     ),
                   ),
-                ),
+              ),
         ),
       );
     }).toList();
@@ -896,45 +902,46 @@ class _PagingWidgetState extends State<PagingWidget> {
                               // topLeft: Radius.circular(10),
                               // bottomLeft: Radius.circular(10)
                               ),
-                          color: widget.backColor),
+                     //     color: widget.backColor
+                       color: Colors.black   ),
                       //   height: 40,
                       width: MediaQuery.of(context).size.width,
                       child: Center(
                           child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                            '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
-                            //    '${_currentPageIndex + 1}  از ${totalPages}',
+                          //  '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
+                                '${_currentPageIndex + 1}  از ${totalPages}',
                             style: widget.style.copyWith(fontSize: 14)),
                       )),
                     )),
-                Visibility(
-                  visible: false,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.first_page),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.navigate_before),
-                        onPressed: () {},
-                      ),
-                      Text(
-                        '${_currentPageIndex + 1}/${_pageTexts.length}',
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.navigate_next),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.last_page),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                ),
+                // Visibility(
+                //   visible: false,
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.center,
+                //     children: [
+                //       IconButton(
+                //         icon: Icon(Icons.first_page),
+                //         onPressed: () {},
+                //       ),
+                //       IconButton(
+                //         icon: Icon(Icons.navigate_before),
+                //         onPressed: () {},
+                //       ),
+                //       Text(
+                //         '${_currentPageIndex + 1}/${_pageTexts.length}',
+                //       ),
+                //       IconButton(
+                //         icon: Icon(Icons.navigate_next),
+                //         onPressed: () {},
+                //       ),
+                //       IconButton(
+                //         icon: Icon(Icons.last_page),
+                //         onPressed: () {},
+                //       ),
+                //     ],
+                //   ),
+                // ),
               ],
             );
         }
