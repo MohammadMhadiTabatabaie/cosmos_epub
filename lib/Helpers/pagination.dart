@@ -603,6 +603,8 @@ class PagingTextHandler {
 // }
 
 class PagingWidget extends StatefulWidget {
+  final List<String> textContents;
+  
   final String textContent;
   final String? innerHtmlContent;
   final String chapterTitle;
@@ -633,6 +635,7 @@ class PagingWidget extends StatefulWidget {
     required this.totalChapters,
     this.lastWidget,
     required this.backColor,
+    required this.textContents,
   });
 
   @override
@@ -653,7 +656,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _pageHeight = MediaQuery.of(context).size.height-50;
+      _pageHeight = MediaQuery.of(context).size.height - 50;
       _pagewidth = MediaQuery.of(context).size.width - 20.0;
       textPainter = TextPainter(
         textDirection: TextDirection.rtl,
@@ -705,6 +708,7 @@ class _PagingWidgetState extends State<PagingWidget> {
 
   Future<int> _calculateTotalPages() async {
     _pageTexts.clear();
+
     List<String> newPages = [];
     print('_calculateTotalPages start');
     final textSpan = TextSpan(
@@ -742,6 +746,50 @@ class _PagingWidgetState extends State<PagingWidget> {
     print('_calculateTotalPages end');
     return newPages.length;
   }
+//   Future<int> _calculateTotalPages() async {
+//   int totalPages = 0;
+//   _pageTexts.clear();
+
+//   for (String chapterContent in widget.textContents) {
+//     List<String> newPages = [];
+//     print('_calculateTotalPages start');
+//     final textSpan = TextSpan(
+//       text: chapterContent,
+//       style: widget.style,
+//     );
+
+//     textPainter.text = textSpan;
+//     print('_calculateTotalPages textPainter');
+//     textPainter.layout(
+//       minWidth: 0,
+//       maxWidth: MediaQuery.of(context).size.width - 20.0,
+//     );
+//     print('_calculateTotalPages mid');
+//     final lines = textPainter.computeLineMetrics();
+//     int currentLine = 0;
+//     while (currentLine < lines.length) {
+//       int start = textPainter
+//           .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+//           .offset;
+//       int endLine = currentLine;
+
+//       while (endLine < lines.length &&
+//           lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
+//         endLine++;
+//       }
+
+//       int end = textPainter
+//           .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
+//           .offset;
+//       final pageContent = chapterContent.substring(start, end);
+//       newPages.add(pageContent);
+//       currentLine = endLine;
+//     }
+//     print('_calculateTotalPages end');
+//     totalPages += newPages.length;
+//   }
+//   return totalPages;
+// }
 
   Future<List<String>> _paginate(int pagesToLoad) async {
     _pageTexts.clear();
@@ -823,7 +871,7 @@ class _PagingWidgetState extends State<PagingWidget> {
         onTap: widget.onTextTap,
         child: Container(
           //color: Colors.red[30],
-          height: _pageHeight -20,
+          height: _pageHeight - 20,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           margin: const EdgeInsets.only(top: 40, bottom: 0),
           child: SingleChildScrollView(
@@ -860,6 +908,8 @@ class _PagingWidgetState extends State<PagingWidget> {
   @override
   Widget build(BuildContext context) {
     print('build called');
+    print(' total  ');
+    print(widget.totalChapters);
     return FutureBuilder<void>(
       future: paginateFuture,
       builder: (context, snapshot) {
@@ -877,7 +927,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                       child: SingleChildScrollView(
                         child: SizedBox(
                           //   color: Colors.green,
-                          height: _pageHeight+15 ,
+                          height: _pageHeight + 15,
                           child: PageFlipWidget(
                             isRightSwipe: true,
                             initialIndex: widget.starterPageIndex,
@@ -914,16 +964,15 @@ class _PagingWidgetState extends State<PagingWidget> {
                               // topLeft: Radius.circular(10),
                               // bottomLeft: Radius.circular(10)
                               ),
-                          color:widget.backColor
-                        ),
+                          color: widget.backColor),
                       //   height: 40,
                       width: MediaQuery.of(context).size.width,
                       child: Center(
                           child: Padding(
                         padding: const EdgeInsets.all(0.0),
                         child: Text(
-                          //  '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
-                                '${_currentPageIndex + 1}  از ${totalPages}',
+                            //  '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
+                            '${_currentPageIndex + 1}  از ${totalPages}',
                             style: widget.style.copyWith(fontSize: 12)),
                       )),
                     )),

@@ -51,6 +51,7 @@ class ShowEpub extends StatefulWidget {
   int starterChapter;
   final String bookId;
   final String chapterListTitle;
+
   final Function(int currentPage, int totalPages)? onPageFlip;
   // final Function(int lastPageIndex)? onLastPage;
   final Color accentColor;
@@ -64,6 +65,7 @@ class ShowEpub extends StatefulWidget {
     required this.bookId,
     required this.chapterListTitle,
     this.onPageFlip,
+
     // this.onLastPage,
   });
 
@@ -75,6 +77,7 @@ class ShowEpubState extends State<ShowEpub> {
   String htmlContent = '';
   String? innerHtmlContent;
   String textContent = '';
+
   bool showBrightnessWidget = false;
   final controller = ScrollController();
   Future<void> loadChapterFuture = Future.value(true);
@@ -189,6 +192,9 @@ class ShowEpubState extends State<ShowEpub> {
     }));
 
     ///Choose initial chapter
+    ///
+    // setupNavButtons();
+    // await updateContentAccordingChapter(0);
     if (widget.starterChapter >= 0 &&
         widget.starterChapter < chaptersList.length) {
       setupNavButtons();
@@ -203,34 +209,57 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   updateContentAccordingChapter(int chapterIndex) async {
-    ///Set current chapter index
+    // ///Set current chapter index
+    // await bookProgress.setCurrentChapterIndex(bookId, chapterIndex);
+
+    // String content = '';
+
+    // await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
+    //   content = epubBook.Chapters![chapterIndex].HtmlContent!;
+
+    //   List<EpubChapter>? subChapters = chapter.SubChapters;
+    //   if (subChapters != null && subChapters.isNotEmpty) {
+    //     for (int i = 0; i < subChapters.length; i++) {
+    //       content = content + subChapters[i].HtmlContent!;
+    //     }
+    //   } else {
+    //     subChapters?.forEach((element) {
+    //       if (element.Title == epubBook.Chapters![chapterIndex].Title) {
+    //         content = element.HtmlContent!;
+    //       }
+    //     });
+    //   }
+    // }));
+    // تنظیم شاخص فصل فعلی
     await bookProgress.setCurrentChapterIndex(bookId, chapterIndex);
 
-    String content = '';
+    // دریافت محتوای کامل از همه فصل‌ها و زیرفصل‌ها
+    String fullContent = '';
 
     await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
-      content = epubBook.Chapters![chapterIndex].HtmlContent!;
+      String chapterContent = chapter.HtmlContent ?? '';
 
+      // اضافه کردن محتوای زیرفصل‌ها
       List<EpubChapter>? subChapters = chapter.SubChapters;
       if (subChapters != null && subChapters.isNotEmpty) {
-        for (int i = 0; i < subChapters.length; i++) {
-          content = content + subChapters[i].HtmlContent!;
+        for (var subChapter in subChapters) {
+          chapterContent += subChapter.HtmlContent ?? '';
         }
-      } else {
-        subChapters?.forEach((element) {
-          if (element.Title == epubBook.Chapters![chapterIndex].Title) {
-            content = element.HtmlContent!;
-          }
-        });
       }
+
+      // ترکیب محتوای فصل و زیرفصل‌ها
+      fullContent += chapterContent;
     }));
 
-    htmlContent = content;
-    textContent = parse(htmlContent).documentElement!.text;
+    setState(() {
+      textContent = parse(fullContent).documentElement!.text;
 
-    if (isHTML(textContent)) {
-      innerHtmlContent = textContent;
-    }
+      if (isHTML(textContent)) {
+        innerHtmlContent = textContent;
+      }
+    });
+
+    // به روزرسانی تعداد صفحات
     controllerPaging.paginate();
 
     setupNavButtons();
@@ -604,9 +633,9 @@ class ShowEpubState extends State<ShowEpub> {
     return Scaffold(
       backgroundColor: backColor,
       body: PopScope(
-     //   canPop: false,
+        //   canPop: false,
         onPopInvoked: (didPop) {
-         backPress();
+          backPress();
         },
         // onPopInvoked: (bool didPop) {
         //   Navigator.of(context).pop();
@@ -649,6 +678,7 @@ class ShowEpubState extends State<ShowEpub> {
                                       widget.shouldOpenDrawer = false;
                                     }
                                     return PagingWidget(
+                                      textContents: [textContent],
                                       textContent,
                                       innerHtmlContent,
 
@@ -728,20 +758,20 @@ class ShowEpubState extends State<ShowEpub> {
 
                                       //   updateUI();
                                       // },
-                                      chapterTitle: '',
-                                      // chapterTitle: chaptersList[bookProgress
-                                      //             .getBookProgress(bookId)
-                                      //             .currentChapterIndex ??
-                                      //         0]
-                                      //     .chapter,
-                                      totalChapters: 1, //chaptersList.length,
+
+                                      chapterTitle: chaptersList[bookProgress
+                                                  .getBookProgress(bookId)
+                                                  .currentChapterIndex ??
+                                              0]
+                                          .chapter,
+                                      totalChapters: chaptersList.length,
                                       backColor: backColor,
                                     );
                                   }
                               }
                             }),
                         //)
- 
+
                         // Align(
                         //   alignment: Alignment.bottomRight,
                         //   child: Visibility(
@@ -886,7 +916,7 @@ class ShowEpubState extends State<ShowEpub> {
                 ),
                 AnimatedContainer(
                   //   height: showHeader ? 50.h : 0,
-                 height: 50,
+                  height: 50,
                   duration: const Duration(milliseconds: 100),
                   color: backColor,
                   child: Padding(
