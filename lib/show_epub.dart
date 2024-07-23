@@ -20,8 +20,9 @@ late BookProgressSingleton bookProgress;
 const double DESIGN_WIDTH = 375;
 const double DESIGN_HEIGHT = 812;
 
-String selectedFont = 'IRANSans';
+String selectedFont = 'BNazanin';
 List<String> fontNames = [
+  "BNazanin", 
   "IRANSans",
   "Segoe",
   "Alegreya",
@@ -122,7 +123,7 @@ class ShowEpubState extends State<ShowEpub> {
     // fontNames.where((element) => element == selectedFont).first;
     selectedTextStyle = fontNames.firstWhere(
       (element) => element == selectedFont,
-      orElse: () => 'IRANSans',
+      orElse: () => 'BNazanin',
     );
 
     getTitleFromXhtml();
@@ -593,8 +594,9 @@ class ShowEpubState extends State<ShowEpub> {
     if (!isInit) {
       print('updateTheme ');
       Navigator.of(context).pop();
-      controllerPaging.paginate();
+ controllerPaging.paginate();
       updateUI();
+    
     }
   }
 
@@ -1048,7 +1050,7 @@ class ShowEpubState extends State<ShowEpub> {
                       //   fontFamily: 'Bold',
                       // ),
                       style: TextStyle(
-                          fontFamily: 'IRANSans',
+                          fontFamily: 'BNazanin',
                           fontSize: 14,
                           color: Colors.black),
                     ),
@@ -1088,7 +1090,7 @@ class ShowEpubState extends State<ShowEpub> {
                                   child: Text(
                                     'خارج شدن',
                                     style: const TextStyle(
-                                        fontFamily: 'IRANSans',
+                                        fontFamily: 'BNazanin',
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600),
                                   ))),
@@ -1116,7 +1118,7 @@ class ShowEpubState extends State<ShowEpub> {
                                   child: Text(
                                     'بازگشت',
                                     style: const TextStyle(
-                                        fontFamily: 'IRANSans',
+                                        fontFamily: 'BNazanin',
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600),
                                   ))),

@@ -387,9 +387,12 @@
 //                               children: pages,
 //                             ),*/گ
 
+// ignore_for_file: avoid_print
+
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html_reborn/flutter_html_reborn.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PagingTextHandler {
   final Function paginate;
@@ -397,214 +400,9 @@ class PagingTextHandler {
   PagingTextHandler({required this.paginate});
 }
 
-// class PagingWidget extends StatefulWidget {
-//   final String textContent;
-//   final String? innerHtmlContent;
-//   final String chapterTitle;
-//   final int totalChapters;
-//   final int starterPageIndex;
-//   final TextStyle style;
-//   final Function handlerCallback;
-//   final VoidCallback onTextTap;
-//   final Function(int, int) onPageFlip;
-//   final Function(int, int) onLastPage;
-//   final Widget? lastWidget;
-//   final Color backColor;
-
-//   const PagingWidget(
-//     this.textContent,
-//     this.innerHtmlContent, {
-//     super.key,
-//     this.style = const TextStyle(
-//       color: Colors.black,
-//       fontSize: 30,
-//     ),
-//     required this.handlerCallback(PagingTextHandler handler),
-//     required this.onTextTap,
-//     required this.onPageFlip,
-//     required this.onLastPage,
-//     this.starterPageIndex = 0,
-//     required this.chapterTitle,
-//     required this.totalChapters,
-//     this.lastWidget,
-//     required this.backColor,
-//   });
-
-//   @override
-//   _PagingWidgetState createState() => _PagingWidgetState();
-// }
-
-// class _PagingWidgetState extends State<PagingWidget> {
-//   final List<String> _pageTexts = [];
-//   List<Widget> pages = [];
-//   int _currentPageIndex = 0;
-//   Future<void> paginateFuture = Future.value(true);
-//   late RenderBox _initializedRenderBox;
-//   Widget? lastWidget;
-
-//   final _pageKey = GlobalKey();
-//   final _pageController = GlobalKey<PageFlipWidgetState>();
-//   int _pagesLoaded = 0;
-//   final int _pagesBatchSize = 10;
-//   late double _pageHeight;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       _loadMorePages(initialLoad: true);
-//     });
-//   }
-
-//   @override
-//   void didChangeDependencies() {
-//     super.didChangeDependencies();
-//     _pageHeight = MediaQuery.of(context).size.height - 34.0;
-//   }
-
-//   void _loadMorePages({required bool initialLoad}) async {
-//     final newPages = await _paginate(_pagesLoaded + _pagesBatchSize);
-//     setState(() {
-//       _pagesLoaded += _pagesBatchSize;
-//       _pageTexts.addAll(newPages);
-//       pages = _buildPageWidgets(_pageTexts);
-//     });
-//   }
-
-//   Future<List<String>> _paginate(int pagesToLoad) async {
-//     List<String> newPages = [];
-
-//     final textSpan = TextSpan(
-//       text: widget.textContent,
-//       style: widget.style,
-//     );
-
-//     final textPainter = TextPainter(
-//       text: textSpan,
-//       textDirection: TextDirection.rtl,
-//     );
-
-//     textPainter.layout(
-//       minWidth: 0,
-//       maxWidth: MediaQuery.of(context).size.width - 32.0,
-//     );
-
-//     final lines = textPainter.computeLineMetrics();
-//     int currentLine = 0;
-//     while (currentLine < lines.length && newPages.length < pagesToLoad) {
-//       int start = textPainter
-//           .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-//           .offset;
-//       int endLine = currentLine;
-
-//       while (endLine < lines.length &&
-//           lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
-//         endLine++;
-//       }
-
-//       int end = textPainter
-//           .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
-//           .offset;
-//       final pageContent = widget.textContent.substring(start, end);
-//       newPages.add(pageContent);
-//       currentLine = endLine;
-//     }
-
-//     return newPages;
-//   }
-
-//   List<Widget> _buildPageWidgets(List<String> pageTexts) {
-//     print('_buildPageWidgets');
-//     print(widget.style.background);
-//     print(widget.style.color);
-//     print(widget.style.fontSize);
-//     print(widget.backColor);
-//     return pageTexts.map((text) {
-//       return SingleChildScrollView(
-//         child: GestureDetector(
-//           onTap: widget.onTextTap,
-//           child: Container(
-//             height: _pageHeight,
-//             padding: const EdgeInsets.all(14.0),
-//             child: Text(
-//               text,
-//               // style: TextStyle(
-//               //   fontSize: widget.style.fontSize ?? 16,
-//               //   fontFamily: widget.style.fontFamily,
-//               //   color: widget.style.color,
-//               // ),
-//               style: TextStyle(
-//                   backgroundColor: widget.backColor,
-//                   color: widget.style.color,
-//                   fontSize: widget.style.fontSize),
-
-//               textAlign: TextAlign.justify,
-//             ),
-//           ),
-//         ),
-//       );
-//     }).toList();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     print('build');
-//     print(widget.style.background);
-//     print(widget.style.color);
-//     // ساخت صفحات در هر بار فراخوانی build
-//     if (_pageTexts.isNotEmpty) {
-//       pages = _buildPageWidgets(_pageTexts);
-//     }
-
-//     return FutureBuilder<void>(
-//       future: paginateFuture,
-//       builder: (context, snapshot) {
-//         switch (snapshot.connectionState) {
-//           case ConnectionState.waiting:
-//             return Center(
-//               child: CircularProgressIndicator(),
-//             );
-//           default:
-//             return Stack(
-//               children: [
-//                 Column(
-//                   children: [
-//                     Expanded(
-//                       child: SizedBox.expand(
-//                         key: _pageKey,
-//                         child: PageFlipWidget(
-//                           isRightSwipe: true,
-//                           initialIndex: 0,
-//                           children: pages,
-//                           // backgroundColor: widget.backColor,
-//                           onPageFlip: (index) {
-//                             setState(() {
-//                               _currentPageIndex = index;
-//                             });
-//                             widget.onPageFlip(index, pages.length);
-//                             if (_currentPageIndex == pages.length - 1) {
-//                               widget.onLastPage(index, pages.length);
-//                             }
-//                             if (_currentPageIndex == pages.length - 5) {
-//                               _loadMorePages(initialLoad: false);
-//                             }
-//                           },
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ],
-//             );
-//         }
-//       },
-//     );
-//   }
-// }
-
 class PagingWidget extends StatefulWidget {
   final List<String> textContents;
-  
+
   final String textContent;
   final String? innerHtmlContent;
   final String chapterTitle;
@@ -618,7 +416,7 @@ class PagingWidget extends StatefulWidget {
   final Widget? lastWidget;
   final Color backColor;
 
-  const PagingWidget(
+  PagingWidget(
     this.textContent,
     this.innerHtmlContent, {
     super.key,
@@ -643,14 +441,15 @@ class PagingWidget extends StatefulWidget {
 }
 
 class _PagingWidgetState extends State<PagingWidget> {
+  Future paginateFuture = Future.value(true);
   final List<String> _pageTexts = [];
   List<Widget> pages = [];
   int _currentPageIndex = 0;
-  Future<void> paginateFuture = Future.value(true);
   late double _pageHeight;
   late double _pagewidth;
   late TextPainter textPainter;
   int totalPages = 0;
+  bool _isLoadingMorePages = false;
 
   @override
   void initState() {
@@ -661,9 +460,8 @@ class _PagingWidgetState extends State<PagingWidget> {
       textPainter = TextPainter(
         textDirection: TextDirection.rtl,
       );
+      print('initState');
       totalPages = await _calculateTotalPages();
-
-      setstate() {}
       _loadMorePages(initialLoad: true);
     });
   }
@@ -674,36 +472,58 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   void _loadMorePages({required bool initialLoad}) async {
+    // setState(() {
+    //   paginateFuture = _paginate(_pageTexts.length + 10);
+    // });
+    // final newPages = await paginateFuture;
     final newPages = await _paginate(_pageTexts.length + 10);
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
     });
+
+    // setState(() {
+    //   _pageTexts.addAll(newPages);
+    //   pages = _buildPageWidgets(_pageTexts);
+    //
+    // });
   }
 
   @override
   void didUpdateWidget(covariant PagingWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.style != widget.style
-        // ||
-        //    oldWidget.textContent != widget.textContent
-        ) {
-      _loadPages(initialLoad: true);
+    if (oldWidget.style != widget.style ||
+        oldWidget.textContent != widget.textContent) {
+      _loadPages(initialLoad: false, oldWidget: oldWidget);
+      print('didUpdateWidget');
     }
-    // if (oldWidget.style.fontSize != widget.style.fontSize) {
-    //   totalPages =  _calculateTotalPages();
-    // }
   }
 
-  void _loadPages({required bool initialLoad}) async {
-    final newPages = await _paginate(_pageTexts.length + 1);
+  void _loadPages(
+      {required bool initialLoad,
+      required covariant PagingWidget oldWidget}) async {
     print('_loadPages');
+
+    setState(() {
+      paginateFuture = _paginate(_pageTexts.length + 1);
+    });
+    final newPages = await paginateFuture;
+
     setState(() {
       _pageTexts.addAll(newPages);
-
       pages = _buildPageWidgets(_pageTexts);
     });
+    // final newPages = await _paginate(_pageTexts.length + 1);
+    // // if (widget.style.fontSize != oldWidget.style.fontSize) {
+    // //   totalPages = await _calculateTotalPages();
+    // // }
+
+    // setState(() {
+    //   paginateFuture = _paginate(_pageTexts.length + 1);
+    //   _pageTexts.addAll(newPages);
+    //   pages = _buildPageWidgets(_pageTexts);
+    // });
   }
 
   Future<int> _calculateTotalPages() async {
@@ -712,7 +532,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     List<String> newPages = [];
     print('_calculateTotalPages start');
     final textSpan = TextSpan(
-      text: widget.textContent,
+      text: widget.textContent ?? '',
       style: widget.style,
     );
 
@@ -746,50 +566,6 @@ class _PagingWidgetState extends State<PagingWidget> {
     print('_calculateTotalPages end');
     return newPages.length;
   }
-//   Future<int> _calculateTotalPages() async {
-//   int totalPages = 0;
-//   _pageTexts.clear();
-
-//   for (String chapterContent in widget.textContents) {
-//     List<String> newPages = [];
-//     print('_calculateTotalPages start');
-//     final textSpan = TextSpan(
-//       text: chapterContent,
-//       style: widget.style,
-//     );
-
-//     textPainter.text = textSpan;
-//     print('_calculateTotalPages textPainter');
-//     textPainter.layout(
-//       minWidth: 0,
-//       maxWidth: MediaQuery.of(context).size.width - 20.0,
-//     );
-//     print('_calculateTotalPages mid');
-//     final lines = textPainter.computeLineMetrics();
-//     int currentLine = 0;
-//     while (currentLine < lines.length) {
-//       int start = textPainter
-//           .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-//           .offset;
-//       int endLine = currentLine;
-
-//       while (endLine < lines.length &&
-//           lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
-//         endLine++;
-//       }
-
-//       int end = textPainter
-//           .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
-//           .offset;
-//       final pageContent = chapterContent.substring(start, end);
-//       newPages.add(pageContent);
-//       currentLine = endLine;
-//     }
-//     print('_calculateTotalPages end');
-//     totalPages += newPages.length;
-//   }
-//   return totalPages;
-// }
 
   Future<List<String>> _paginate(int pagesToLoad) async {
     _pageTexts.clear();
@@ -800,27 +576,19 @@ class _PagingWidgetState extends State<PagingWidget> {
       style: widget.style,
     );
     textPainter.text = textSpan;
-    // final textPainter = TextPainter(
-    //   text: textSpan,
-    //   textDirection: TextDirection.rtl,
-    // );
-
     print('textPainter');
     textPainter.layout(
       minWidth: 0,
-      maxWidth: MediaQuery.of(context).size.width - 40.0,
+      maxWidth: _pagewidth,
     );
     print('mid');
-
     final lines = textPainter.computeLineMetrics();
-
     int currentLine = 0;
     while (currentLine < lines.length && newPages.length < pagesToLoad) {
       int start = textPainter
           .getPositionForOffset(Offset(0, lines[currentLine].baseline))
           .offset;
       int endLine = currentLine;
-
       // while (currentLine < lines.length) {
       //   int start = textPainter
       //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
@@ -837,6 +605,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       //   currentHeight += lines[endLine].height;
       //   endLine++;
       // }
+
       // تغییر: محاسبه ارتفاع خطوط تا زمانی که به ارتفاع صفحه برسد
       while (endLine < lines.length &&
           currentHeight + lines[endLine].height <= _pageHeight) {
@@ -847,6 +616,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       //     .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
       //     .offset;
       // تغییر: پایان هر صفحه را با ارتفاع مناسب محاسبه کنید
+      print('_paginate تغییر');
       int end = textPainter
           .getPositionForOffset(Offset(
               0, lines[endLine - 1].baseline + lines[endLine - 1].height))
@@ -865,40 +635,48 @@ class _PagingWidgetState extends State<PagingWidget> {
 
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
     print('_buildPageWidgets called');
-    print('object $_pageHeight');
+
     return pageTexts.map((text) {
+      final _scrollController = ScrollController();
+
       return GestureDetector(
-        onTap: widget.onTextTap,
+        //  onTap: widget.onTextTap,
         child: Container(
-          //color: Colors.red[30],
-          height: _pageHeight - 20,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          margin: const EdgeInsets.only(top: 40, bottom: 0),
+          //  color: Colors.red[30],
+       //   height: _pageHeight - 20,
+          // padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          // margin: const EdgeInsets.only(top: 40, bottom: 0),
           child: SingleChildScrollView(
-            child: widget.innerHtmlContent != null
-                ? Html(
-                    data: text,
-                    style: {
-                      "*": Style(
+            controller: _scrollController,
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.only(
+                  bottom: 40.h, top: 60.h, left: 20.w, right: 20.w),
+              child: widget.innerHtmlContent != null
+                  ? Html(
+                      data: text,
+                      style: {
+                        "*": Style(
+                            textAlign: TextAlign.justify,
+                            fontSize: FontSize(widget.style.fontSize ?? 0),
+                            fontFamily: widget.style.fontFamily,
+                            color: widget.style.color),
+                      },
+                    )
+                  : Container(
+                      //    height: _pageHeight /2,
+                      //   color: widget.backColor,
+                      child: Padding(
+                        padding: const EdgeInsets.all(0.0),
+                        child: Text(
+                          text,
+                          style: widget.style
+                              .copyWith(backgroundColor: widget.backColor),
                           textAlign: TextAlign.justify,
-                          fontSize: FontSize(widget.style.fontSize ?? 0),
-                          fontFamily: widget.style.fontFamily,
-                          color: widget.style.color),
-                    },
-                  )
-                : Container(
-                    //    height: _pageHeight /2,
-                    color: widget.backColor,
-                    child: Padding(
-                      padding: const EdgeInsets.all(0.0),
-                      child: Text(
-                        text,
-                        style: widget.style
-                            .copyWith(backgroundColor: widget.backColor),
-                        textAlign: TextAlign.justify,
+                        ),
                       ),
                     ),
-                  ),
+            ),
           ),
         ),
       );
@@ -906,16 +684,20 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    print('build called');
-    print(' total  ');
-    print(widget.totalChapters);
-    return FutureBuilder<void>(
+    print('FutureBuilder called');
+
+    return FutureBuilder(
       future: paginateFuture,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           default:
@@ -926,13 +708,13 @@ class _PagingWidgetState extends State<PagingWidget> {
                     Expanded(
                       child: SingleChildScrollView(
                         child: SizedBox(
-                          //   color: Colors.green,
-                          height: _pageHeight + 15,
+                          //  color: widget.backColor,
+                          height: _pageHeight,
                           child: PageFlipWidget(
                             isRightSwipe: true,
                             initialIndex: widget.starterPageIndex,
                             children: pages,
-                            // backgroundColor: widget.backColor,
+                            backgroundColor: widget.backColor,
                             onPageFlip: (index) {
                               setState(() {
                                 _currentPageIndex = index;
@@ -959,20 +741,15 @@ class _PagingWidgetState extends State<PagingWidget> {
                     right: 0,
                     bottom: 0,
                     child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              // topLeft: Radius.circular(10),
-                              // bottomLeft: Radius.circular(10)
-                              ),
-                          color: widget.backColor),
+                      color: widget.backColor,
                       //   height: 40,
                       width: MediaQuery.of(context).size.width,
                       child: Center(
                           child: Padding(
                         padding: const EdgeInsets.all(0.0),
                         child: Text(
-                            //  '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
-                            '${_currentPageIndex + 1}  از ${totalPages}',
+                            '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
+                            //    '${_currentPageIndex + 1}  از ${totalPages}',
                             style: widget.style.copyWith(fontSize: 12)),
                       )),
                     )),
@@ -1002,7 +779,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                 //       ),
                 //     ],
                 //   ),
-                // ),
+                // ),-
               ],
             );
         }

@@ -88,6 +88,9 @@ flutter:
     - family: IRANSans
       fonts:
         - asset: assets/fonts/IRANSansXFaNum-Regular.ttf
+    - family: BNazanin
+      fonts:
+        - asset: assets/fonts/BNazanin.ttf
 
   # To add assets to your package, add an assets section, like this:
   # assets:
