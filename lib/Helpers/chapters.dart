@@ -22,7 +22,8 @@ class ChaptersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(textDirection: TextDirection.rtl,
+    return Directionality(
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 40.h,
@@ -40,7 +41,9 @@ class ChaptersList extends StatelessWidget {
           title: Text(
             'فهرست',
             style: TextStyle(
-                fontWeight: FontWeight.bold, color: accentColor, fontSize: 15.sp),
+                fontWeight: FontWeight.bold,
+                color: accentColor,
+                fontSize: 15.sp),
           ),
         ),
         body: SafeArea(
@@ -57,6 +60,8 @@ class ChaptersList extends StatelessWidget {
                     children: [
                       ListTile(
                         onTap: () async {
+                          print('bookId $bookId  i $i');
+                           
                           await bookProgress.setCurrentChapterIndex(bookId, i);
                           Navigator.of(context).pop(true);
                         },
@@ -76,7 +81,7 @@ class ChaptersList extends StatelessWidget {
                                   // fontFamily: fontNames
                                   //     .where((element) => element == selectedFont)
                                   //     .first,
-                                  
+
                                   package: 'cosmos_epub',
                                   fontSize: 15.sp,
                                   fontWeight: chapters[i].isSubChapter

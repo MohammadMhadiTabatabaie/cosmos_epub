@@ -22,7 +22,7 @@ const double DESIGN_HEIGHT = 812;
 
 String selectedFont = 'BNazanin';
 List<String> fontNames = [
-  "BNazanin", 
+  "BNazanin",
   "IRANSans",
   "Segoe",
   "Alegreya",
@@ -78,6 +78,7 @@ class ShowEpubState extends State<ShowEpub> {
   String htmlContent = '';
   String? innerHtmlContent;
   String textContent = '';
+  String textContentnumber = '';
 
   bool showBrightnessWidget = false;
   final controller = ScrollController();
@@ -103,7 +104,7 @@ class ShowEpubState extends State<ShowEpub> {
   int prevSwipe = 0;
   bool showPrevious = false;
   bool showNext = false;
-
+  List<String> pagesContent = [];
   // var dropDownFontItems;
 
   GetStorage gs = GetStorage();
@@ -176,6 +177,7 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   loadChapter({int index = -1}) async {
+    print('loadChapter $index');
     chaptersList = [];
 
     await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
@@ -211,59 +213,74 @@ class ShowEpubState extends State<ShowEpub> {
 
   updateContentAccordingChapter(int chapterIndex) async {
     // ///Set current chapter index
-    // await bookProgress.setCurrentChapterIndex(bookId, chapterIndex);
-
-    // String content = '';
-
-    // await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
-    //   content = epubBook.Chapters![chapterIndex].HtmlContent!;
-
-    //   List<EpubChapter>? subChapters = chapter.SubChapters;
-    //   if (subChapters != null && subChapters.isNotEmpty) {
-    //     for (int i = 0; i < subChapters.length; i++) {
-    //       content = content + subChapters[i].HtmlContent!;
-    //     }
-    //   } else {
-    //     subChapters?.forEach((element) {
-    //       if (element.Title == epubBook.Chapters![chapterIndex].Title) {
-    //         content = element.HtmlContent!;
-    //       }
-    //     });
-    //   }
-    // }));
-    // تنظیم شاخص فصل فعلی
+    ///Set current chapter index
     await bookProgress.setCurrentChapterIndex(bookId, chapterIndex);
 
-    // دریافت محتوای کامل از همه فصل‌ها و زیرفصل‌ها
-    String fullContent = '';
+    String content = '';
 
     await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
-      String chapterContent = chapter.HtmlContent ?? '';
+      content = epubBook.Chapters![chapterIndex].HtmlContent!;
 
-      // اضافه کردن محتوای زیرفصل‌ها
       List<EpubChapter>? subChapters = chapter.SubChapters;
       if (subChapters != null && subChapters.isNotEmpty) {
-        for (var subChapter in subChapters) {
-          chapterContent += subChapter.HtmlContent ?? '';
+        for (int i = 0; i < subChapters.length; i++) {
+          content = content + subChapters[i].HtmlContent!;
         }
+      } else {
+        subChapters?.forEach((element) {
+          if (element.Title == epubBook.Chapters![chapterIndex].Title) {
+            content = element.HtmlContent!;
+          }
+        });
       }
-
-      // ترکیب محتوای فصل و زیرفصل‌ها
-      fullContent += chapterContent;
     }));
 
-    setState(() {
-      textContent = parse(fullContent).documentElement!.text;
+    htmlContent = content;
+    textContent = parse(htmlContent).documentElement!.text;
 
-      if (isHTML(textContent)) {
-        innerHtmlContent = textContent;
-      }
-    });
-
-    // به روزرسانی تعداد صفحات
+    if (isHTML(textContent)) {
+      innerHtmlContent = textContent;
+    } else {
+      textContent = textContent.replaceAll('Unknown', '').trim();
+    }
     controllerPaging.paginate();
 
     setupNavButtons();
+    if (chapterIndex == 0) {
+      // // تنظیم شاخص فصل فعلی
+      await bookProgress.setCurrentChapterIndex(bookId, chapterIndex);
+
+      // دریافت محتوای کامل از همه فصل‌ها و زیرفصل‌ها
+      String fullContent = '';
+
+      await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
+        String chapterContent = chapter.HtmlContent ?? '';
+
+        // اضافه کردن محتوای زیرفصل‌ها
+        List<EpubChapter>? subChapters = chapter.SubChapters;
+        if (subChapters != null && subChapters.isNotEmpty) {
+          for (var subChapter in subChapters) {
+            chapterContent += subChapter.HtmlContent ?? '';
+          }
+        }
+
+        // ترکیب محتوای فصل و زیرفصل‌ها
+        fullContent += chapterContent;
+      }));
+
+      setState(() {
+        textContentnumber = parse(fullContent).documentElement!.text;
+
+        if (isHTML(textContentnumber)) {
+          innerHtmlContent = textContentnumber;
+        }
+      });
+
+      // به روزرسانی تعداد صفحات
+      controllerPaging.paginate();
+
+      setupNavButtons();
+    }
   }
 
   bool isHTML(String str) {
@@ -594,9 +611,8 @@ class ShowEpubState extends State<ShowEpub> {
     if (!isInit) {
       print('updateTheme ');
       Navigator.of(context).pop();
- controllerPaging.paginate();
+      controllerPaging.paginate();
       updateUI();
-    
     }
   }
 
@@ -605,32 +621,34 @@ class ShowEpubState extends State<ShowEpub> {
     setState(() {});
   }
 
-  // nextChapter() async {
-  //   ///Set page to initial
-  //   await bookProgress.setCurrentPageIndex(bookId, 0);
+  nextChapter() async {
+    ///Set page to initial
+    await bookProgress.setCurrentPageIndex(bookId, 0);
 
-  //   var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
+    var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
 
-  //   if (index != chaptersList.length - 1) {
-  //     reLoadChapter(index: index + 1);
-  //   }
-  // }
+    if (index != chaptersList.length - 1) {
+      reLoadChapter(index: index + 1);
+    }
+  }
 
-  // prevChapter() async {
-  //   ///Set page to initial
-  //   await bookProgress.setCurrentPageIndex(bookId, 0);
+  prevChapter() async {
+    ///Set page to initial
+    await bookProgress.setCurrentPageIndex(bookId, 0);
 
-  //   var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
+    var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
 
-  //   if (index != 0) {
-  //     reLoadChapter(index: index - 1);
-  //   }
-  // }
+    if (index != 0) {
+      reLoadChapter(index: index - 1);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.sizeOf(context);
     ScreenUtil.init(context,
         designSize: const Size(DESIGN_WIDTH, DESIGN_HEIGHT));
+    //designSize:  Size(size.width, size.height));
 
     return Scaffold(
       backgroundColor: backColor,
@@ -680,8 +698,9 @@ class ShowEpubState extends State<ShowEpub> {
                                       widget.shouldOpenDrawer = false;
                                     }
                                     return PagingWidget(
-                                      textContents: [textContent],
+                                      textContents: [textContentnumber],
                                       textContent,
+                                      textContentnumber,
                                       innerHtmlContent,
 
                                       ///Do we need this to the production
@@ -741,26 +760,28 @@ class ShowEpubState extends State<ShowEpub> {
                                         //   prevSwipe = 0;
                                         // }
                                       },
-                                      // onLastPage: (index, totalPages) async {
-                                      //   if (widget.onLastPage != null) {
-                                      //     widget.onLastPage!(index);
-                                      //   }
+                                      onLastPage: (index, totalPages) async {
+                                        // if (widget.onLastPage != null) {
+                                        //   widget.onLastPage!(index);
+                                        // }
 
-                                      //   if (totalPages > 1) {
-                                      //     lastSwipe++;
-                                      //   } else {
-                                      //     lastSwipe = 2;
-                                      //   }
+                                        if (totalPages > 1) {
+                                          lastSwipe++;
+                                        } else {
+                                          lastSwipe = 2;
+                                        }
 
-                                      //   if (lastSwipe > 1) {
-                                      //     nextChapter();
-                                      //   }
+                                        if (lastSwipe > 1) {
+                                          //  nextChapter();
+                                        }
 
-                                      //   isLastPage = true;
+                                        isLastPage = true;
 
-                                      //   updateUI();
-                                      // },
+                                        updateUI();
+                                        // },
 
+                                        //  backColor: backColor,
+                                      },
                                       chapterTitle: chaptersList[bookProgress
                                                   .getBookProgress(bookId)
                                                   .currentChapterIndex ??
@@ -1008,133 +1029,137 @@ class ShowEpubState extends State<ShowEpub> {
       var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
 
       ///Set page to initial and update chapter index with content
-      //  await bookProgress.setCurrentPageIndex(bookId, 0);
+      await bookProgress.setCurrentPageIndex(bookId, 0);
       reLoadChapter(index: index);
     }
-  }
-
-  Future<void> showExitPopup(
-      // BuildContext context,
-      ) async {
-    return await showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (BuildContext context) {
-        Size size = MediaQuery.sizeOf(context);
-        // return AlertDialog(
-
-        //   backgroundColor: Colors.white,
-        //   content:
-        return Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            Container(
-              padding:
-                  const EdgeInsets.only(bottom: 8, right: 16, left: 16, top: 8),
-              height: 160,
-              width: size.width,
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24)),
-                  color: Colors.white),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    //    Text('000'),
-                    Text(
-                      'کتابخوان',
-                      // style: textTheme.labelSmall!.copyWith(
-                      //   fontFamily: 'Bold',
-                      // ),
-                      style: TextStyle(
-                          fontFamily: 'BNazanin',
-                          fontSize: 14,
-                          color: Colors.black),
-                    ),
-                    // SizedBox(height: 24),
-                    Text(
-                      'آیا میخواهید از کتابخوان  خارج شوید؟',
-                      // style: textTheme.displaySmall!.copyWith(
-                      //   fontFamily: 'Light',
-                      //   fontSize: 16,
-                      // ),
-                      style: TextStyle(
-                          //  fontFamily: selectedTextStyle,
-                          fontSize: 14,
-                          color: Colors.black),
-                      textAlign: TextAlign.center,
-                    ),
-                    // SizedBox(height: 24),
-                    Row(
-                      //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                              height: 42,
-                              width: size.width / 3.5,
-                              child: ElevatedButton(
-                                  onPressed: () {
-                                    backPress();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xffB0276D),
-                                    foregroundColor: Colors.white,
-                                    //   elevation: 10,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'خارج شدن',
-                                    style: const TextStyle(
-                                        fontFamily: 'BNazanin',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600),
-                                  ))),
-                        ),
-                        //   Spacer(),
-                        SizedBox(width: 16),
-
-                        Expanded(
-                          child: SizedBox(
-                              height: 42,
-                              width: size.width / 3.5,
-                              child: OutlinedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(false);
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: Color(0xff4430C2),
-                                    side: BorderSide(
-                                        color: Color(0xff4430C2), width: 2),
-                                    //   elevation: 10,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'بازگشت',
-                                    style: const TextStyle(
-                                        fontFamily: 'BNazanin',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600),
-                                  ))),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              //  ),
-            ),
-          ],
-        );
-      },
-    );
   }
 }
 
 // ignore: must_be_immutable
+
+
+
+
+
+//  Future<void> showExitPopup(
+//       // BuildContext context,
+//       ) async {
+//     return await showDialog(
+//       barrierDismissible: true,
+//       context: context,
+//       builder: (BuildContext context) {
+//         Size size = MediaQuery.sizeOf(context);
+//         // return AlertDialog(
+
+//         //   backgroundColor: Colors.white,
+//         //   content:
+//         return Stack(
+//           alignment: Alignment.bottomCenter,
+//           children: [
+//             Container(
+//               padding:
+//                   const EdgeInsets.only(bottom: 8, right: 16, left: 16, top: 8),
+//               height: 160,
+//               width: size.width,
+//               decoration: const BoxDecoration(
+//                   borderRadius: BorderRadius.only(
+//                       topLeft: Radius.circular(24),
+//                       topRight: Radius.circular(24)),
+//                   color: Colors.white),
+//               child: Padding(
+//                 padding: const EdgeInsets.symmetric(horizontal: 0),
+//                 child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                   children: [
+//                     //    Text('000'),
+//                     Text(
+//                       'کتابخوان',
+//                       // style: textTheme.labelSmall!.copyWith(
+//                       //   fontFamily: 'Bold',
+//                       // ),
+//                       style: TextStyle(
+//                           fontFamily: 'BNazanin',
+//                           fontSize: 14,
+//                           color: Colors.black),
+//                     ),
+//                     // SizedBox(height: 24),
+//                     Text(
+//                       'آیا میخواهید از کتابخوان  خارج شوید؟',
+//                       // style: textTheme.displaySmall!.copyWith(
+//                       //   fontFamily: 'Light',
+//                       //   fontSize: 16,
+//                       // ),
+//                       style: TextStyle(
+//                           //  fontFamily: selectedTextStyle,
+//                           fontSize: 14,
+//                           color: Colors.black),
+//                       textAlign: TextAlign.center,
+//                     ),
+//                     // SizedBox(height: 24),
+//                     Row(
+//                       //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: [
+//                         Expanded(
+//                           child: SizedBox(
+//                               height: 42,
+//                               width: size.width / 3.5,
+//                               child: ElevatedButton(
+//                                   onPressed: () {
+//                                     backPress();
+//                                   },
+//                                   style: ElevatedButton.styleFrom(
+//                                     backgroundColor: Color(0xffB0276D),
+//                                     foregroundColor: Colors.white,
+//                                     //   elevation: 10,
+//                                     shape: RoundedRectangleBorder(
+//                                       borderRadius: BorderRadius.circular(8),
+//                                     ),
+//                                   ),
+//                                   child: Text(
+//                                     'خارج شدن',
+//                                     style: const TextStyle(
+//                                         fontFamily: 'BNazanin',
+//                                         fontSize: 16,
+//                                         fontWeight: FontWeight.w600),
+//                                   ))),
+//                         ),
+//                         //   Spacer(),
+//                         SizedBox(width: 16),
+
+//                         Expanded(
+//                           child: SizedBox(
+//                               height: 42,
+//                               width: size.width / 3.5,
+//                               child: OutlinedButton(
+//                                   onPressed: () {
+//                                     Navigator.of(context).pop(false);
+//                                   },
+//                                   style: OutlinedButton.styleFrom(
+//                                     foregroundColor: Color(0xff4430C2),
+//                                     side: BorderSide(
+//                                         color: Color(0xff4430C2), width: 2),
+//                                     //   elevation: 10,
+//                                     shape: RoundedRectangleBorder(
+//                                       borderRadius: BorderRadius.circular(8),
+//                                     ),
+//                                   ),
+//                                   child: Text(
+//                                     'بازگشت',
+//                                     style: const TextStyle(
+//                                         fontFamily: 'BNazanin',
+//                                         fontSize: 16,
+//                                         fontWeight: FontWeight.w600),
+//                                   ))),
+//                         ),
+//                       ],
+//                     )
+//                   ],
+//                 ),
+//               ),
+//               //  ),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }

@@ -220,9 +220,9 @@ class CosmosEpub {
     }
   }
 
-  // static Future<bool> setCurrentPageIndex(String bookId, int index) async {
-  //   return await bookProgress.setCurrentPageIndex(bookId, index);
-  // }
+  static Future<bool> setCurrentPageIndex(String bookId, int index) async {
+    return await bookProgress.setCurrentPageIndex(bookId, index);
+  }
 
   static Future<bool> setCurrentChapterIndex(String bookId, int index) async {
     return await bookProgress.setCurrentChapterIndex(bookId, index);

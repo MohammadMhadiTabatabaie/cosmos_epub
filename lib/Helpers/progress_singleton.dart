@@ -34,33 +34,33 @@ class BookProgressSingleton {
     }
   }
 
-  // Future<bool> setCurrentPageIndex(String bookId, int pageIndex) async {
-  //   try {
-  //     BookProgressModel? oldBookProgressModel = await isar.bookProgressModels
-  //         .where()
-  //         .filter()
-  //         .bookIdEqualTo(bookId)
-  //         .findFirst();
+  Future<bool> setCurrentPageIndex(String bookId, int pageIndex) async {
+    try {
+      BookProgressModel? oldBookProgressModel = await isar.bookProgressModels
+          .where()
+          .filter()
+          .bookIdEqualTo(bookId)
+          .findFirst();
 
-  //     if (oldBookProgressModel != null) {
-  //       oldBookProgressModel.currentPageIndex = pageIndex;
-  //       await isar.writeTxn(() async {
-  //         isar.bookProgressModels.put(oldBookProgressModel);
-  //       });
-  //     } else {
-  //       var newBookProgressModel = BookProgressModel(
-  //           currentPageIndex: pageIndex,
-  //           currentChapterIndex: 0,
-  //           bookId: bookId);
-  //       await isar.writeTxn(() async {
-  //         isar.bookProgressModels.put(newBookProgressModel);
-  //       });
-  //     }
-  //     return true;
-  //   } catch (e) {
-  //     return false;
-  //   }
-  // }
+      if (oldBookProgressModel != null) {
+        oldBookProgressModel.currentPageIndex = pageIndex;
+        await isar.writeTxn(() async {
+          isar.bookProgressModels.put(oldBookProgressModel);
+        });
+      } else {
+        var newBookProgressModel = BookProgressModel(
+            currentPageIndex: pageIndex,
+            currentChapterIndex: 0,
+            bookId: bookId);
+        await isar.writeTxn(() async {
+          isar.bookProgressModels.put(newBookProgressModel);
+        });
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   BookProgressModel getBookProgress(String bookId) {
     var newBookProgressModel =
