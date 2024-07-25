@@ -47,7 +47,7 @@ class CosmosEpub {
           starterChapter: starterChapter,
           chapterListTitle: chapterListTitle,
           onPageFlip: onPageFlip,
-    //      onLastPage: onLastPage,
+          onLastPage: onLastPage,
           accentColor: accentColor);
     } catch (e) {
       print('Error occurred: $e');
@@ -58,12 +58,12 @@ class CosmosEpub {
             return Directionality(
               textDirection: TextDirection.rtl,
               child: AlertDialog(
-                title:const Text('خطا'),
+                title: const Text('خطا'),
                 content: Text(
                     'فایل epub مشکل دارد لطفا با پشتیبانی تماس بگیرید: $e'),
                 actions: [
                   TextButton(
-                    child:const Text('تایید'),
+                    child: const Text('تایید'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -93,9 +93,7 @@ class CosmosEpub {
 
       final bytes = byteData.buffer.asUint8List();
       print('File data converted to Uint8List');
-   
 
-      
       print('.///////////////////');
       print(bytes);
       print('File data converted to Uint8List');
@@ -115,7 +113,7 @@ class CosmosEpub {
           starterChapter: starterChapter,
           chapterListTitle: chapterListTitle,
           onPageFlip: onPageFlip,
-        //  onLastPage: onLastPage,
+          //  onLastPage: onLastPage,
           accentColor: accentColor);
     } catch (e) {
       print('Error occurred: $e');
@@ -152,14 +150,13 @@ class CosmosEpub {
       required int starterChapter,
       required String chapterListTitle,
       Function(int currentPage, int totalPages)? onPageFlip,
-    //  Function(int lastPageIndex)? onLastPage
-      }) async {
+      Function(int lastPageIndex)? onLastPage}) async {
     _checkInitialization();
 
     ///Set starter chapter as current
     if (starterChapter != -1) {
       await bookProgress.setCurrentChapterIndex(bookId, starterChapter);
-    //  await bookProgress.setCurrentPageIndex(bookId, 0);
+      //  await bookProgress.setCurrentPageIndex(bookId, 0);
     }
 
     var route = MaterialPageRoute(
@@ -174,7 +171,7 @@ class CosmosEpub {
           accentColor: accentColor,
           chapterListTitle: chapterListTitle,
           onPageFlip: onPageFlip,
-         // onLastPage: onLastPage,
+          onLastPage: onLastPage,
         );
       },
     );

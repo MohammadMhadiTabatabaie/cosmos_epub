@@ -54,7 +54,7 @@ class ShowEpub extends StatefulWidget {
   final String chapterListTitle;
 
   final Function(int currentPage, int totalPages)? onPageFlip;
-  // final Function(int lastPageIndex)? onLastPage;
+   final Function(int lastPageIndex)? onLastPage;
   final Color accentColor;
   bool isloading = false;
   ShowEpub({
@@ -67,7 +67,7 @@ class ShowEpub extends StatefulWidget {
     required this.chapterListTitle,
     this.onPageFlip,
 
-    // this.onLastPage,
+     this.onLastPage,
   });
 
   @override
@@ -246,7 +246,7 @@ class ShowEpubState extends State<ShowEpub> {
     controllerPaging.paginate();
 
     setupNavButtons();
-    if (chapterIndex == 0) {
+   // if () {
       // // تنظیم شاخص فصل فعلی
       await bookProgress.setCurrentChapterIndex(bookId, chapterIndex);
 
@@ -280,7 +280,7 @@ class ShowEpubState extends State<ShowEpub> {
       controllerPaging.paginate();
 
       setupNavButtons();
-    }
+    //}
   }
 
   bool isHTML(String str) {
@@ -625,7 +625,7 @@ class ShowEpubState extends State<ShowEpub> {
     ///Set page to initial
     await bookProgress.setCurrentPageIndex(bookId, 0);
 
-    var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
+    var index = bookProgress.getBookProgress(bookId).currentChapterIndex!;
 
     if (index != chaptersList.length - 1) {
       reLoadChapter(index: index + 1);
@@ -657,13 +657,7 @@ class ShowEpubState extends State<ShowEpub> {
         onPopInvoked: (didPop) {
           backPress();
         },
-        // onPopInvoked: (bool didPop) {
-        //   Navigator.of(context).pop();
-        //   if (didPop) {
-        //     Navigator.of(context).pop();
-        //     print('exit for epub');
-        //   }
-        // },
+      
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: SafeArea(
@@ -735,11 +729,11 @@ class ShowEpubState extends State<ShowEpub> {
                                         }
 
                                         if (currentPage == totalPages - 1) {
-                                          // bookProgress.setCurrentPageIndex(
-                                          //     bookId, 0);
+                                          bookProgress.setCurrentPageIndex(
+                                              bookId, 0);
                                         } else {
-                                          // bookProgress.setCurrentPageIndex(
-                                          //     bookId, currentPage);
+                                          bookProgress.setCurrentPageIndex(
+                                              bookId, currentPage);
                                         }
 
                                         if (isLastPage) {
@@ -751,19 +745,19 @@ class ShowEpubState extends State<ShowEpub> {
                                         isLastPage = false;
                                         updateUI();
 
-                                        // if (currentPage == 0) {
-                                        //   prevSwipe++;
-                                        //   if (prevSwipe > 1) {
-                                        //     prevChapter();
-                                        //   }
-                                        // } else {
-                                        //   prevSwipe = 0;
-                                        // }
+                                        if (currentPage == 0) {
+                                          prevSwipe++;
+                                          if (prevSwipe > 1) {
+                                            prevChapter();
+                                          }
+                                        } else {
+                                          prevSwipe = 0;
+                                        }
                                       },
                                       onLastPage: (index, totalPages) async {
-                                        // if (widget.onLastPage != null) {
-                                        //   widget.onLastPage!(index);
-                                        // }
+                                        if (widget.onLastPage != null) {
+                                          widget.onLastPage!(index);
+                                        }
 
                                         if (totalPages > 1) {
                                           lastSwipe++;
@@ -772,7 +766,7 @@ class ShowEpubState extends State<ShowEpub> {
                                         }
 
                                         if (lastSwipe > 1) {
-                                          //  nextChapter();
+                                          nextChapter();
                                         }
 
                                         isLastPage = true;
@@ -864,77 +858,77 @@ class ShowEpubState extends State<ShowEpub> {
                         // )
                       ],
                     )),
-                    // AnimatedContainer(
-                    //   height: showHeader ? 40.h : 0,
-                    //   duration: const Duration(milliseconds: 100),
-                    //   color: backColor,
-                    //   child: Container(
-                    //     height: 40.h,
-                    //     alignment: Alignment.center,
-                    //     decoration: BoxDecoration(
-                    //       color: backColor,
-                    //       border: Border(
-                    //         top: BorderSide(
-                    //             width: 3.w, color: widget.accentColor),
-                    //       ),
-                    //     ),
-                    //     child: Row(
-                    //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    //       children: [
-                    //         SizedBox(
-                    //           width: 5.w,
-                    //         ),
-                    //         // Visibility(
-                    //         //   visible: showPrevious,
-                    //         //   child: IconButton(
-                    //         //       onPressed: () {
-                    //         //         prevChapter();
-                    //         //       },
-                    //         //       icon: Icon(
-                    //         //         Icons.arrow_back_ios,
-                    //         //         size: 15.h,
-                    //         //         color: fontColor,
-                    //         //       )),
-                    //         // ),
-                    //         SizedBox(
-                    //           width: 5.w,
-                    //         ),
-                    //         Expanded(
-                    //           flex: 10,
-                    //           child: Text(
-                    //             'sfsaf',
-                    //             maxLines: 1,
-                    //             textAlign: TextAlign.center,
-                    //             style: TextStyle(
-                    //                 fontSize: 13.sp,
-                    //                 overflow: TextOverflow.ellipsis,
-                    //                 fontFamily: selectedTextStyle,
-                    //                 package: 'cosmos_epub',
-                    //                 fontWeight: FontWeight.bold,
-                    //                 color: fontColor),
-                    //           ),
-                    //         ),
-                    //         SizedBox(
-                    //           width: 5.w,
-                    //         ),
-                    //         // Visibility(
-                    //         //     visible: showNext,
-                    //         //     child: IconButton(
-                    //         //         onPressed: () {
-                    //         //           nextChapter();
-                    //         //         },
-                    //         //         icon: Icon(
-                    //         //           Icons.arrow_forward_ios_rounded,
-                    //         //           size: 15.h,
-                    //         //           color: fontColor,
-                    //         //         ))),
-                    //         SizedBox(
-                    //           width: 5.w,
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
+                    AnimatedContainer(
+                      height: showHeader ? 40.h : 0,
+                      duration: const Duration(milliseconds: 100),
+                      color: backColor,
+                      child: Container(
+                        height: 40.h,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: backColor,
+                          border: Border(
+                            top: BorderSide(
+                                width: 3.w, color: widget.accentColor),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Visibility(
+                              visible: showPrevious,
+                              child: IconButton(
+                                  onPressed: () {
+                                    prevChapter();
+                                  },
+                                  icon: Icon(
+                                    Icons.arrow_back_ios,
+                                    size: 15.h,
+                                    color: fontColor,
+                                  )),
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Expanded(
+                              flex: 10,
+                              child: Text(
+                                bookTitle,
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 13.sp,
+                                    overflow: TextOverflow.ellipsis,
+                                    fontFamily: selectedTextStyle,
+                                    package: 'cosmos_epub',
+                                    fontWeight: FontWeight.bold,
+                                    color: fontColor),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Visibility(
+                                visible: showNext,
+                                child: IconButton(
+                                    onPressed: () {
+                                      nextChapter();
+                                    },
+                                    icon: Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 15.h,
+                                      color: fontColor,
+                                    ))),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 AnimatedContainer(

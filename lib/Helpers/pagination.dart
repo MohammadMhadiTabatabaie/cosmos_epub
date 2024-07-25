@@ -127,7 +127,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     // if (widget.style.fontSize != oldWidget.style.fontSize) {
     //   //     totalPages = await _calculateTotalPages();
     // }
-  totalPages = await _calculateTotalPagesnumbers();
+    totalPages = await _calculateTotalPagesnumbers();
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
@@ -191,7 +191,8 @@ class _PagingWidgetState extends State<PagingWidget> {
     print('_calculateTotalPages end');
     return newPages;
   }
-Future<int> _calculateTotalPagesnumbers() async {
+
+  Future<int> _calculateTotalPagesnumbers() async {
     _pageTexts.clear();
 
     List<String> newPages = [];
@@ -238,7 +239,6 @@ Future<int> _calculateTotalPagesnumbers() async {
     print('_calculateTotalPages end');
     return newPages.length;
   }
-  
 
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
     print('_buildPageWidgets called');
@@ -318,13 +318,14 @@ Future<int> _calculateTotalPagesnumbers() async {
                               _currentPageIndex = index;
                             });
                             print('onPageFlip called');
-
+                            if (_currentPageIndex == pages.length - 1) {
+                              widget.onLastPage(index, pages.length);
+                              print('onLastPage called');
+                            }
                             //   didUpdateWidget(widget);
                             widget.onPageFlip(index, pages.length);
 
-                            // if (_currentPageIndex == pages.length - 1) {
-                            // //  widget.onLastPage(index, pages.length);
-                            // }
+                           
                             if (_currentPageIndex == pages.length - 5) {
                               // _loadMorePages(initialLoad: false);
                             }
