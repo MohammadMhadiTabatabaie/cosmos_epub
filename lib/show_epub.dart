@@ -54,7 +54,7 @@ class ShowEpub extends StatefulWidget {
   final String chapterListTitle;
 
   final Function(int currentPage, int totalPages)? onPageFlip;
-   final Function(int lastPageIndex)? onLastPage;
+  final Function(int lastPageIndex)? onLastPage;
   final Color accentColor;
   bool isloading = false;
   ShowEpub({
@@ -66,8 +66,7 @@ class ShowEpub extends StatefulWidget {
     required this.bookId,
     required this.chapterListTitle,
     this.onPageFlip,
-
-     this.onLastPage,
+    this.onLastPage,
   });
 
   @override
@@ -162,7 +161,8 @@ class ShowEpubState extends State<ShowEpub> {
     }
   }
 
-  reLoadChapter({bool init = false, int index = -1}) async {
+  reLoadChapter({bool init = false, int index = -0}) async {
+    print('reLoadChapter $index');
     int currentIndex =
         bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
 
@@ -176,7 +176,7 @@ class ShowEpubState extends State<ShowEpub> {
     });
   }
 
-  loadChapter({int index = -1}) async {
+  loadChapter({int index = -1}) async {  
     print('loadChapter $index');
     chaptersList = [];
 
@@ -246,40 +246,40 @@ class ShowEpubState extends State<ShowEpub> {
     controllerPaging.paginate();
 
     setupNavButtons();
-   // if () {
-      // // تنظیم شاخص فصل فعلی
-      await bookProgress.setCurrentChapterIndex(bookId, chapterIndex);
+    // if () {
+    // // تنظیم شاخص فصل فعلی
+    // await bookProgress.setCurrentChapterIndex(bookId, chapterIndex);
 
-      // دریافت محتوای کامل از همه فصل‌ها و زیرفصل‌ها
-      String fullContent = '';
+    // // دریافت محتوای کامل از همه فصل‌ها و زیرفصل‌ها
+    // String fullContent = '';
 
-      await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
-        String chapterContent = chapter.HtmlContent ?? '';
+    // await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
+    //   String chapterContent = chapter.HtmlContent ?? '';
 
-        // اضافه کردن محتوای زیرفصل‌ها
-        List<EpubChapter>? subChapters = chapter.SubChapters;
-        if (subChapters != null && subChapters.isNotEmpty) {
-          for (var subChapter in subChapters) {
-            chapterContent += subChapter.HtmlContent ?? '';
-          }
-        }
+    //   // اضافه کردن محتوای زیرفصل‌ها
+    //   List<EpubChapter>? subChapters = chapter.SubChapters;
+    //   if (subChapters != null && subChapters.isNotEmpty) {
+    //     for (var subChapter in subChapters) {
+    //       chapterContent += subChapter.HtmlContent ?? '';
+    //     }
+    //   }
 
-        // ترکیب محتوای فصل و زیرفصل‌ها
-        fullContent += chapterContent;
-      }));
+    //   // ترکیب محتوای فصل و زیرفصل‌ها
+    //   fullContent += chapterContent;
+    // }));
 
-      setState(() {
-        textContentnumber = parse(fullContent).documentElement!.text;
+    // setState(() {
+    //   textContentnumber = parse(fullContent).documentElement!.text;
 
-        if (isHTML(textContentnumber)) {
-          innerHtmlContent = textContentnumber;
-        }
-      });
+    //   if (isHTML(textContentnumber)) {
+    //     innerHtmlContent = textContentnumber;
+    //   }
+    // });
 
-      // به روزرسانی تعداد صفحات
-      controllerPaging.paginate();
+    // // به روزرسانی تعداد صفحات
+    // controllerPaging.paginate();
 
-      setupNavButtons();
+    // setupNavButtons();
     //}
   }
 
@@ -657,7 +657,7 @@ class ShowEpubState extends State<ShowEpub> {
         onPopInvoked: (didPop) {
           backPress();
         },
-      
+
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: SafeArea(
@@ -675,11 +675,28 @@ class ShowEpubState extends State<ShowEpub> {
                                 case ConnectionState.waiting:
                                   {
                                     // Otherwise, display a loading indicator.
+                                    // return Center(
+                                    //     child: CupertinoActivityIndicator(
+                                    //   color: Theme.of(context).primaryColor,
+                                    //   radius: 30.r,
+                                    // ));
                                     return Center(
-                                        child: CupertinoActivityIndicator(
-                                      color: Theme.of(context).primaryColor,
-                                      radius: 30.r,
-                                    ));
+                                        child: Container(
+                                      height: 100,
+                                      width: MediaQuery.sizeOf(context).width /
+                                          1.5,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(16),
+                                        color: Colors.white,
+                                      ),
+                                      child: const Center(
+                                          child: Text(
+                                        'کتاب در حال اماده سازی میباشد ',
+                                        style: TextStyle(
+                                            fontSize: 16, color: Colors.black),
+                                      )),
+                                    ) // CircularProgressIndicator(),
+                                        );
                                   }
                                 default:
                                   {
@@ -896,7 +913,13 @@ class ShowEpubState extends State<ShowEpub> {
                             Expanded(
                               flex: 10,
                               child: Text(
-                                bookTitle,
+                              chaptersList.isNotEmpty
+                                    ? chaptersList[bookProgress
+                                                .getBookProgress(bookId)
+                                                .currentChapterIndex ??
+                                            0]
+                                        .chapter
+                                    : 'Loading...',
                                 maxLines: 1,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(

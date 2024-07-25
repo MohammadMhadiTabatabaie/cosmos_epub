@@ -2,6 +2,7 @@
 
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_html_reborn/flutter_html_reborn.dart';
 
 class PagingTextHandler {
@@ -75,7 +76,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       );
       _loadMorePages(initialLoad: true);
       print('initState');
-      totalPages = await _calculateTotalPagesnumbers();
+     // totalPages = await _calculateTotalPagesnumbers();
     });
   }
 
@@ -90,7 +91,10 @@ class _PagingWidgetState extends State<PagingWidget> {
     // });
     // final newPages = await paginateFuture;
     // final newPages = await _paginate(_pageTexts.length + 10);
-    final newPages = await _calculateTotalPages();
+    setState(() {
+      paginateFuture = _calculateTotalPages();
+    });
+    final newPages = await paginateFuture;
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
@@ -127,7 +131,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     // if (widget.style.fontSize != oldWidget.style.fontSize) {
     //   //     totalPages = await _calculateTotalPages();
     // }
-    totalPages = await _calculateTotalPagesnumbers();
+    //totalPages = await _calculateTotalPagesnumbers();
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
@@ -196,19 +200,19 @@ class _PagingWidgetState extends State<PagingWidget> {
     _pageTexts.clear();
 
     List<String> newPages = [];
-    print('_calculateTotalPages start');
+    print('numbers start');
     final textSpan = TextSpan(
       text: widget.textContentnumber,
       style: widget.style,
     );
 
     textPainter.text = textSpan;
-    print('_calculateTotalPages textPainter');
+    print('numbers textPainter');
     textPainter.layout(
       minWidth: 0,
       maxWidth: MediaQuery.of(context).size.width - 20.0,
     );
-    print('_calculateTotalPages mid');
+    print('numbers mid');
     final lines = textPainter.computeLineMetrics();
     int currentLine = 0;
     while (currentLine < lines.length) {
@@ -236,7 +240,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       newPages.add(pageContent);
       currentLine = endLine;
     }
-    print('_calculateTotalPages end');
+    print('numbers end');
     return newPages.length;
   }
 
@@ -294,9 +298,21 @@ class _PagingWidgetState extends State<PagingWidget> {
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return Center(
+                child: Container(
+              height: 100,
+              width: MediaQuery.sizeOf(context).width / 1.5,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+              ),
+              child: Center(
+                  child: Text(
+                'کتاب در حال اماده سازی میباشد ',
+                style: TextStyle(fontSize: 16, color: Colors.black),
+              )),
+            ) // CircularProgressIndicator(),
+                );
           default:
             return Stack(
               children: [
@@ -325,7 +341,6 @@ class _PagingWidgetState extends State<PagingWidget> {
                             //   didUpdateWidget(widget);
                             widget.onPageFlip(index, pages.length);
 
-                           
                             if (_currentPageIndex == pages.length - 5) {
                               // _loadMorePages(initialLoad: false);
                             }
