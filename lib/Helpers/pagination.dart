@@ -1,5 +1,7 @@
 /// epub  که 10 صفحه 10 صفحه لود می کند و سرعتش لود کردنش بالاس و تغییرات سریع اعمال میشود
 
+// ignore_for_file: avoid_print
+
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -12,7 +14,7 @@ class PagingTextHandler {
 }
 
 class PagingWidget extends StatefulWidget {
-  final List<String> textContents;
+  // final List<String> textContents;
 
   final String textContent;
   final String textContentnumber;
@@ -27,27 +29,30 @@ class PagingWidget extends StatefulWidget {
   final Function(int, int) onLastPage;
   final Widget? lastWidget;
   final Color backColor;
+  final int indexpage;
+  final int totolepage;
+  final List<List<String>> textContents; // اضافه شده: لیست صفحات فصول
+  final List<int> chaptercount; // اضافه شده: لیست صفحات فصول
 
-  PagingWidget(
-    this.textContent,
-    this.textContentnumber,
-    this.innerHtmlContent, {
-    super.key,
-    this.style = const TextStyle(
-      color: Colors.black,
-      fontSize: 30,
-    ),
-    required this.handlerCallback(PagingTextHandler handler),
-    required this.onTextTap,
-    required this.onPageFlip,
-    required this.onLastPage,
-    this.starterPageIndex = 0,
-    required this.chapterTitle,
-    required this.totalChapters,
-    this.lastWidget,
-    required this.backColor,
-    required this.textContents,
-  });
+  PagingWidget(this.textContent, this.textContentnumber, this.innerHtmlContent,
+      {super.key,
+      this.style = const TextStyle(
+        color: Colors.black,
+        fontSize: 30,
+      ),
+      required this.handlerCallback(PagingTextHandler handler),
+      required this.onTextTap,
+      required this.onPageFlip,
+      required this.onLastPage,
+      this.starterPageIndex = 0,
+      required this.chapterTitle,
+      required this.totalChapters,
+      this.lastWidget,
+      required this.backColor,
+      required this.textContents,
+      required this.indexpage,
+      required this.totolepage,
+      required this.chaptercount});
 
   @override
   _PagingWidgetState createState() => _PagingWidgetState();
@@ -64,6 +69,8 @@ class _PagingWidgetState extends State<PagingWidget> {
   final _pageKey = GlobalKey();
   final _pageController = GlobalKey<PageFlipWidgetState>();
   int totalPages = 0;
+  List<int> chapterPages = [];
+  int totalPageCount = 0; // مجموع کل صفحات
 
   @override
   void initState() {
@@ -76,7 +83,6 @@ class _PagingWidgetState extends State<PagingWidget> {
       );
       _loadMorePages(initialLoad: true);
       print('initState');
-     // totalPages = await _calculateTotalPagesnumbers();
     });
   }
 
@@ -86,6 +92,14 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   void _loadMorePages({required bool initialLoad}) async {
+    print('chpter count  ${widget.chaptercount}');
+    print('chpter count  ${chapterPages}');
+    int startPage = 1;
+    for (int j = 0; j < widget.chaptercount.length; j++) {
+      startPage += widget.chaptercount[j];
+    }
+    print('sss ${widget.chaptercount}');
+    print('fff ${startPage}');
     // setState(() {
     //   paginateFuture = _paginate(_pageTexts.length + 10);
     // });
@@ -95,11 +109,15 @@ class _PagingWidgetState extends State<PagingWidget> {
       paginateFuture = _calculateTotalPages();
     });
     final newPages = await paginateFuture;
+    totalPages = await _calculateTotalPagesnumbers();
+
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
+      chapterPages.add(newPages.length); // اضافه کردن تعداد صفحات فصل جدید
+      print('newPages.length${newPages.length}');
     });
-
+    print('chapterPages ${chapterPages}');
     // setState(() {
     //   _pageTexts.addAll(newPages);
     //   pages = _buildPageWidgets(_pageTexts);
@@ -154,7 +172,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     List<String> newPages = [];
     print('_calculateTotalPages start');
     final textSpan = TextSpan(
-      text: widget.textContent,
+      text: widget.textContentnumber,
       style: widget.style,
     );
 
@@ -188,7 +206,7 @@ class _PagingWidgetState extends State<PagingWidget> {
           .getPositionForOffset(Offset(
               0, lines[endLine - 1].baseline + lines[endLine - 1].height))
           .offset;
-      final pageContent = widget.textContent.substring(start, end);
+      final pageContent = widget.textContentnumber.substring(start, end);
       newPages.add(pageContent);
       currentLine = endLine;
     }
@@ -284,10 +302,17 @@ class _PagingWidgetState extends State<PagingWidget> {
     }).toList();
   }
 
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  // }
+  int _calculateCurrentPage() {
+    int currentPage = _currentPageIndex + 1;
+    for (int i = 0; i < widget.chaptercount.length; i++) {
+      if (_currentPageIndex <
+          widget.chaptercount.sublist(0, i + 1).reduce((a, b) => a + b)) {
+        break;
+      }
+      currentPage += widget.chaptercount[i];
+    }
+    return currentPage;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -327,6 +352,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                           key: _pageController,
                           isRightSwipe: true,
                           initialIndex: widget.starterPageIndex,
+                          // initialIndex: initialPageIndex,
                           children: pages,
                           backgroundColor: widget.backColor,
                           onPageFlip: (index) {
@@ -360,10 +386,20 @@ class _PagingWidgetState extends State<PagingWidget> {
                       child: Center(
                           child: Padding(
                         padding: const EdgeInsets.all(0.0),
-                        child: Text(
-                            '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
-                            //    '${_currentPageIndex + 1}  از ${totalPages}',
-                            style: widget.style.copyWith(fontSize: 12)),
+                        child: Column(
+                          children: [
+                            Text(
+                                '${_currentPageIndex + 1} از ${_pageTexts.length} /// از ${totalPages}',
+                                //    '${_currentPageIndex + 1}  از ${totalPages}',
+                                style: widget.style.copyWith(fontSize: 12)),
+                            Text(
+                                '${_calculateCurrentPage()} از ${totalPageCount}',
+
+                                // '${_currentPageIndex + 1 + (widget.chapterCount > 1 ? chapterPages.sublist(0, widget.chapterCount - 1).fold(0, (sum, len) => sum + len) : 0)} از ${totalPageCount}',
+                                // '${_currentPageIndex + 1+ chapterPages.first}  از ${totalPages}',
+                                style: widget.style.copyWith(fontSize: 12)),
+                          ],
+                        ),
                       )),
                     )),
               ],
@@ -373,16 +409,6 @@ class _PagingWidgetState extends State<PagingWidget> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
 
 /*
 Future<List<String>> _paginate(int pagesToLoad) async {

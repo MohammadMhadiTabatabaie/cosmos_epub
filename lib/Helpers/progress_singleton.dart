@@ -6,7 +6,7 @@ class BookProgressSingleton {
 
   BookProgressSingleton({required this.isar});
 
-  Future<bool> setCurrentChapterIndex(String bookId, int chapterIndex) async {
+  Future<bool> setCurrentChapterIndex(String bookId, int chapterIndex,int currentPageIndex) async {
     try {
       BookProgressModel? oldBookProgressModel = await isar.bookProgressModels
           .where()
@@ -21,7 +21,7 @@ class BookProgressSingleton {
         });
       } else {
         var newBookProgressModel = BookProgressModel(
-            currentPageIndex: 0,
+            currentPageIndex: currentPageIndex,
             currentChapterIndex: chapterIndex,
             bookId: bookId);
         await isar.writeTxn(() async {

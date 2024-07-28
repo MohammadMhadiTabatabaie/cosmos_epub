@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -11,17 +13,29 @@ class ChaptersList extends StatelessWidget {
   final Widget? leadingIcon;
   final Color accentColor;
   final String chapterListTitle;
-
+  final List<int> chapterPages;
   ChaptersList(
       {super.key,
       required this.chapters,
       required this.bookId,
       this.leadingIcon,
       required this.accentColor,
-      required this.chapterListTitle});
+      required this.chapterListTitle,
+      required this.chapterPages});
 
   @override
   Widget build(BuildContext context) {
+    int cumulativePages = 0;
+    // if (chapters.length == chapterPages.length) {
+    //   return Scaffold(
+    //     appBar: AppBar(
+    //       title: Text('Error'),
+    //     ),
+    //     body: Center(
+    //       child: Text('Mismatch between chapters and pages count'),
+    //     ),
+    //   );
+    // }
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -51,9 +65,16 @@ class ChaptersList extends StatelessWidget {
             color: backColor,
             padding: EdgeInsets.all(10.h),
             child: ListView.builder(
-                itemCount: chapters.length,
-                physics: BouncingScrollPhysics(),
+                itemCount: chapterPages.length,
+                physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, i) {
+                 
+                  int startPage = 1;
+                  for (int j = 0; j < i; j++) {
+                    startPage += chapterPages[j];
+                  }
+                  print('object');
+                  print(startPage);
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,10 +82,14 @@ class ChaptersList extends StatelessWidget {
                       ListTile(
                         onTap: () async {
                           print('bookId $bookId  i $i');
-                           
-                          await bookProgress.setCurrentChapterIndex(bookId, i);
+
+                          await bookProgress.setCurrentChapterIndex(bookId, i,startPage);
                           Navigator.of(context).pop(true);
                         },
+                        subtitle: Text(
+                          'شروع از صفحه: $startPage',
+                          style: TextStyle(color: Colors.black),
+                        ),
                         leading: leadingIcon,
                         minLeadingWidth: 20.w,
                         title: Padding(

@@ -155,7 +155,7 @@ class CosmosEpub {
 
     ///Set starter chapter as current
     if (starterChapter != -1) {
-      await bookProgress.setCurrentChapterIndex(bookId, starterChapter);
+      await bookProgress.setCurrentChapterIndex(bookId, starterChapter,0);
       //  await bookProgress.setCurrentPageIndex(bookId, 0);
     }
 
@@ -222,7 +222,7 @@ class CosmosEpub {
   }
 
   static Future<bool> setCurrentChapterIndex(String bookId, int index) async {
-    return await bookProgress.setCurrentChapterIndex(bookId, index);
+    return await bookProgress.setCurrentChapterIndex(bookId, index,0);
   }
 
   static BookProgressModel getBookProgress(String bookId) {
