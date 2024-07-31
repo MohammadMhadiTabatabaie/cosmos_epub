@@ -68,22 +68,23 @@ class ChaptersList extends StatelessWidget {
                 itemCount: chapterPages.length,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, i) {
-                 
                   int startPage = 1;
                   for (int j = 0; j < i; j++) {
                     startPage += chapterPages[j];
                   }
-                  print('object');
-                  print(startPage);
+
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
                         onTap: () async {
-                          print('bookId $bookId  i $i');
+                          print('bookId $bookId  i $i  startPage $startPage  ');
 
-                          await bookProgress.setCurrentChapterIndex(bookId, i,startPage);
+                          await bookProgress.setCurrentChapterIndex(
+                              bookId, i, startPage);
+                          await bookProgress.setCurrentPageIndex(
+                              bookId, startPage);
                           Navigator.of(context).pop(true);
                         },
                         subtitle: Text(
