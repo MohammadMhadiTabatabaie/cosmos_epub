@@ -171,6 +171,7 @@ class ShowEpubState extends State<ShowEpub> {
     print('reLoadChapter $index');
     int currentIndex =
         bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
+    var pagess = bookProgress.getBookProgress(bookId).currentPageIndex ?? 0;
     if (init) {
       setState(() {
         loadChapterFuture = loadChapter(
@@ -181,7 +182,9 @@ class ShowEpubState extends State<ShowEpub> {
                     : index);
       });
     } else {
-      loadChapterFuture = bookProgress.setCurrentPageIndex(bookId, page);
+      setState(() {
+        loadChapterFuture = bookProgress.setCurrentPageIndex(bookId, pagess);
+      });
     }
   }
 
@@ -927,7 +930,7 @@ class ShowEpubState extends State<ShowEpub> {
                                         if (currentPage == 0) {
                                           prevSwipe++;
                                           if (prevSwipe > 1) {
-                                            prevChapter();
+                                            //  prevChapter();
                                           }
                                         } else {
                                           prevSwipe = 0;
@@ -943,7 +946,7 @@ class ShowEpubState extends State<ShowEpub> {
                                           lastSwipe = 1;
                                         }
                                         if (lastSwipe > 1) {
-                                          nextChapter();
+                                          // nextChapter();
                                         }
                                         isLastPage = true;
                                         updateUI();
