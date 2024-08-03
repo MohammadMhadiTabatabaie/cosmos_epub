@@ -99,7 +99,7 @@ class ShowEpubState extends State<ShowEpub> {
 
   // Initialize with the first font in the list
   late String selectedTextStyle;
-
+  final List<String> _pageTexts = [];
   bool showHeader = true;
   bool isLastPage = false;
   int lastSwipe = 0;
@@ -113,10 +113,28 @@ class ShowEpubState extends State<ShowEpub> {
   GetStorage gs = GetStorage();
 
   PagingTextHandler controllerPaging = PagingTextHandler(paginate: () {});
-  double maxWidth = 372;
-  double maxHeight = 709;
+  late TextPainter textPainter;
+  late double maxWidth;
+  late double maxHeight;
+
   @override
   void initState() {
+    print('textPainter');
+    super.initState();
+    // textPainter = TextPainter(
+    //   textDirection: TextDirection.rtl,
+    // );
+    // maxHeight = MediaQuery.of(context).size.height - 50;
+    // maxWidth = MediaQuery.of(context).size.width - 20.0;
+
+    // setState(() {
+    // maxHeight = MediaQuery.of(context).size.height - 50;
+    // maxWidth = MediaQuery.of(context).size.width - 20.0;
+    // textPainter = TextPainter(
+    //   textDirection: TextDirection.rtl,
+    // );
+    // });
+
     loadThemeSettings();
 
     bookId = widget.bookId;
@@ -130,12 +148,33 @@ class ShowEpubState extends State<ShowEpub> {
       (element) => element == selectedFont,
       orElse: () => 'BNazanin',
     );
+    textPainter = TextPainter(
+      textDirection: TextDirection.rtl,
+    );
     //  maxWidth = MediaQuery.sizeOf(context).width;
     //    maxHeight = MediaQuery.sizeOf(context).height;
+//didChangeDependencies();
+    // getTitleFromXhtml();
+
+    // reLoadChapter(init: true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // استفاده از MediaQuery در didChangeDependencies
+    maxHeight = MediaQuery.sizeOf(context).height - 50;
+    maxWidth = MediaQuery.of(context).size.width - 20.0;
+
+    // این قسمت را در setState قرار می‌دهیم تا مطمئن شویم که مقادیر به درستی تنظیم شده‌اند
+    //  setState(() {
+
+    //  });
+
+    // پس از مقداردهی به maxWidth، maxHeight و textPainter، می‌توانید متدهای دیگر را فراخوانی کنید
     getTitleFromXhtml();
     reLoadChapter(init: true);
-
-    super.initState();
   }
 
   loadThemeSettings() {
@@ -231,33 +270,35 @@ class ShowEpubState extends State<ShowEpub> {
     print('loadChapter $index');
     print('loadChapter $index');
     chaptersList = [];
-    chapterPages = [];
 
     await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
       String? chapterTitle = chapter.Title;
       List<LocalChapterModel> subChapters = [];
-      for (var element in chapter.SubChapters!) {
+      for (var element in chapter.SubChapters ?? []) {
         subChapters.add(
             LocalChapterModel(chapter: element.Title!, isSubChapter: true));
       }
 
+      // اضافه کردن فصل و زیرفصل‌ها به chaptersList
       chaptersList.add(LocalChapterModel(
           chapter: chapterTitle ?? '...', isSubChapter: false));
-      chaptersList += subChapters;
+      chaptersList.addAll(subChapters);
 
-      // محاسبه تعداد صفحات هر فصل
-      String chapterContent = chapter.HtmlContent!;
-      for (var subChapter in chapter.SubChapters!) {
-        chapterContent += subChapter.HtmlContent!;
-      }
-      int pages =
-          await _calculateTotalPages(chapterContent, maxWidth, maxHeight);
-      //textContentnumber = chapterContent;
-      print('page $pages');
-      chapterPages.add(pages);
-      print('chapterPages $chapterPages');
-    }).toList());
+      // // ترکیب محتوای فصل و زیرفصل‌ها
+      // String chapterContent = chapter.HtmlContent ?? '';
+      // for (var subChapter in chapter.SubChapters ?? []) {
+      //   chapterContent += subChapter.HtmlContent ?? '';
+      // }
 
+      // // چاپ محتویات فصل برای اشکال‌زدایی
+      // print('Chapter Content: $chapterContent');
+
+      // // محاسبه تعداد صفحات برای فصل
+    }));
+
+    // chapterPages = removeDuplicates(chapterPages);
+
+    // print('Unique chapterPages: $chapterPages');
     //Choose initial chapter
     if (widget.starterChapter >= 0 &&
         widget.starterChapter < chaptersList.length) {
@@ -349,6 +390,7 @@ class ShowEpubState extends State<ShowEpub> {
 
     // دریافت محتوای کامل از همه فصل‌ها و زیرفصل‌ها
     String fullContent = '';
+    String textchapter = '';
 
     await Future.wait(epubBook.Chapters!.map((EpubChapter chapter) async {
       String chapterContent = chapter.HtmlContent ?? '';
@@ -360,12 +402,21 @@ class ShowEpubState extends State<ShowEpub> {
           chapterContent += subChapter.HtmlContent ?? '';
         }
       }
+      print('chapterrrrrrrrrrrrrr');
 
-      // ترکیب محتوای فصل و زیرفصل‌ها
       fullContent += chapterContent;
+
+     // setState(() async {
+        textchapter = parse(chapterContent).documentElement!.text;
+   //   });
+      var pageCount = await _calculateTotalPages(textchapter);
+
+      print('Chapter "$chapterTitle" has $pageCount pages.');
+      chapterPages.add(pageCount);
+      // ترکیب محتوای فصل و زیرفصل‌ها
     }));
 
-    setState(() {
+    setState(() async {
       textContentnumber = parse(fullContent).documentElement!.text;
 
       if (isHTML(textContentnumber)) {
@@ -752,16 +803,27 @@ class ShowEpubState extends State<ShowEpub> {
   }
 
   Future<int> _calculateTotalPages(
-      String chapterContent, double maxWidth, double maxHeight) async {
+    String chapterContent,
+  ) async {
+    print('_fontSize');
+    print(_fontSize);
+    print('maxHeight');
+    print(maxHeight);
+    print(maxWidth);
+    _pageTexts.clear();
+
+    List<String> newPages = [];
     final textSpan = TextSpan(
       text: chapterContent,
-      // style: widget.style,
+      style: TextStyle(
+          backgroundColor: backColor,
+          fontSize: 15.70909090909091,
+          fontFamily: selectedTextStyle,
+          package: 'cosmos_epub',
+          color: fontColor),
     );
 
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
+    textPainter.text = textSpan;
 
     textPainter.layout(
         minWidth: 0,
@@ -770,17 +832,79 @@ class ShowEpubState extends State<ShowEpub> {
 
     final lines = textPainter.computeLineMetrics();
     int currentLine = 0;
-    int totalPages = 0;
     while (currentLine < lines.length) {
+      int start = textPainter
+          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+          .offset;
       int endLine = currentLine;
+
       while (endLine < lines.length &&
-          lines[endLine].baseline < lines[currentLine].baseline + maxHeight) {
+          lines[endLine].baseline <
+              lines[currentLine].baseline + maxHeight - 320) {
         endLine++;
       }
-      totalPages++;
+      int end = textPainter
+          .getPositionForOffset(Offset(
+              0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+          .offset;
+      final pageContent = chapterContent.substring(start, end);
+      newPages.add(pageContent);
       currentLine = endLine;
     }
-    return totalPages;
+    print('numbers end');
+    return newPages.length;
+    // final textSpan = TextSpan(
+    //   text: chapterContent,
+    //   style: TextStyle(
+    //       backgroundColor: backColor,
+    //       fontSize: _fontSize,
+    //       fontFamily: selectedTextStyle,
+    //       package: 'cosmos_epub',
+    //       color: fontColor),
+    // );
+
+    // final textPainter = TextPainter(
+    //   text: textSpan,
+    //   textDirection: TextDirection.rtl,
+    // );
+
+    // textPainter.layout(
+    //     minWidth: 0,
+    //     maxWidth: maxWidth //MediaQuery.of(context).size.width - 20.0,
+    //     );
+
+    // final lines = textPainter.computeLineMetrics();
+    // int currentLine = 0;
+    // int totalPages = 0;
+    // while (currentLine < lines.length) {
+    //   int endLine = currentLine;
+    //   while (endLine < lines.length &&
+    //       lines[endLine].baseline <
+    //           lines[currentLine].baseline + maxHeight -400) {
+    //     endLine++;
+    //   }
+    //   totalPages++;
+    //   currentLine = endLine;
+    // }
+    // return totalPages;
+    // }
+  }
+
+  List<int> removeDuplicates(List<int> chapterPages) {
+    if (chapterPages.isEmpty) {
+      return chapterPages;
+    }
+
+    List<int> uniquePages = [];
+    uniquePages.add(chapterPages[0]);
+
+    for (int i = 1; i < chapterPages.length; i++) {
+      if (chapterPages[i] != chapterPages[i - 1]) {
+        uniquePages.add(chapterPages[i]);
+      }
+    }
+
+    return uniquePages;
   }
 
   nextChapter() async {
@@ -951,11 +1075,12 @@ class ShowEpubState extends State<ShowEpub> {
                                         isLastPage = true;
                                         updateUI();
                                       },
-                                      chapterTitle: chaptersList[bookProgress
-                                                  .getBookProgress(bookId)
-                                                  .currentChapterIndex ??
-                                              0]
-                                          .chapter,
+                                      // chapterTitle: chaptersList[bookProgress
+                                      //             .getBookProgress(bookId)
+                                      //             .currentChapterIndex ??
+                                      //         0]
+                                      //     .chapter,
+                                      chapterTitle: '',
                                       totalChapters: chaptersList.length,
                                       backColor: backColor,
                                       indexpage: 0,

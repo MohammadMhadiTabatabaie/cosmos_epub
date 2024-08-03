@@ -64,7 +64,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   List<Widget> pages = [];
   int _currentPageIndex = 0;
   late double _pageHeight;
- // late double _pagewidth;
+  late double _pagewidth;
   late TextPainter textPainter;
   final _pageKey = GlobalKey();
   final _pageController = GlobalKey<PageFlipWidgetState>();
@@ -76,7 +76,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _pageHeight = MediaQuery.sizeOf(context).height - 50;
-     // _pagewidth = MediaQuery.of(context).size.width - 20.0;
+      _pagewidth = MediaQuery.of(context).size.width - 20.0;
       textPainter = TextPainter(
         textDirection: TextDirection.rtl,
       );
@@ -100,12 +100,12 @@ class _PagingWidgetState extends State<PagingWidget> {
       paginateFuture = _calculateTotalPages();
     });
     final newPages = await paginateFuture;
-    totalPages = await _calculateTotalPagesnumbers();
+    totalPages = await _calculateTotalPagess(widget.textContentnumber);
 
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
-     // chapterPages.add(newPages.length); // اضافه کردن تعداد صفحات فصل جدید
+      // chapterPages.add(newPages.length); // اضافه کردن تعداد صفحات فصل جدید
     });
     // setState(() {
     //   _pageTexts.addAll(newPages);
@@ -131,33 +131,20 @@ class _PagingWidgetState extends State<PagingWidget> {
     print('_loadPages');
 
     setState(() {
-      // paginateFuture = _paginate(_pageTexts.length + 1);
       paginateFuture = _calculateTotalPages();
     });
     final newPages = await paginateFuture;
-    // if (widget.style.fontSize != oldWidget.style.fontSize) {
-    //   //     totalPages = await _calculateTotalPages();
-    // }
-    //totalPages = await _calculateTotalPagesnumbers();
+
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
     });
-    // final newPages = await _paginate(_pageTexts.length + 1);
-    // // if (widget.style.fontSize != oldWidget.style.fontSize) {
-    // //   totalPages = await _calculateTotalPages();
-    // // }
-
-    // setState(() {
-    //   paginateFuture = _paginate(_pageTexts.length + 1);
-    //   _pageTexts.addAll(newPages);
-    //   pages = _buildPageWidgets(_pageTexts);
-    // });
   }
 
   Future<List<String>> _calculateTotalPages() async {
     _pageTexts.clear();
-
+    print('ffffffffff');
+    print(widget.style.fontSize);
     List<String> newPages = [];
     print('_calculateTotalPages start');
     final textSpan = TextSpan(
@@ -181,16 +168,10 @@ class _PagingWidgetState extends State<PagingWidget> {
       int endLine = currentLine;
 
       while (endLine < lines.length &&
-          lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
+          lines[endLine].baseline < lines[currentLine].baseline + _pageHeight- 320) {
         endLine++;
       }
 
-      // int end = textPainter
-      //     .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
-      //     .offset;
-      // final pageContent = widget.textContent.substring(start, end);
-      // newPages.add(pageContent);
-      // currentLine = endLine;
       int end = textPainter
           .getPositionForOffset(Offset(
               0, lines[endLine - 1].baseline + lines[endLine - 1].height))
@@ -202,24 +183,25 @@ class _PagingWidgetState extends State<PagingWidget> {
     print('_calculateTotalPages end');
     return newPages;
   }
-
-  Future<int> _calculateTotalPagesnumbers() async {
+  Future<int> _calculateTotalPagess(
+    String chapterContent,
+  ) async {
+   
     _pageTexts.clear();
 
     List<String> newPages = [];
-    print('numbers start');
     final textSpan = TextSpan(
-      text: widget.textContentnumber,
-      style: widget.style,
+      text: chapterContent,
+    style: widget.style,
     );
 
     textPainter.text = textSpan;
-    print('numbers textPainter');
+
     textPainter.layout(
-      minWidth: 0,
-      maxWidth: MediaQuery.of(context).size.width - 20.0,
-    );
-    print('numbers mid');
+        minWidth: 0,
+        maxWidth: MediaQuery.of(context).size.width - 20.0,
+        );
+
     final lines = textPainter.computeLineMetrics();
     int currentLine = 0;
     while (currentLine < lines.length) {
@@ -229,28 +211,22 @@ class _PagingWidgetState extends State<PagingWidget> {
       int endLine = currentLine;
 
       while (endLine < lines.length &&
-          lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
+          lines[endLine].baseline <
+              lines[currentLine].baseline + _pageHeight - 320) {
         endLine++;
       }
-
-      // int end = textPainter
-      //     .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
-      //     .offset;
-      // final pageContent = widget.textContent.substring(start, end);
-      // newPages.add(pageContent);
-      // currentLine = endLine;
       int end = textPainter
           .getPositionForOffset(Offset(
               0, lines[endLine - 1].baseline + lines[endLine - 1].height))
           .offset;
-      final pageContent = widget.textContentnumber.substring(start, end);
+      final pageContent = chapterContent.substring(start, end);
       newPages.add(pageContent);
       currentLine = endLine;
     }
     print('numbers end');
     return newPages.length;
+    
   }
-
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
     print('_buildPageWidgets called');
 
@@ -258,8 +234,8 @@ class _PagingWidgetState extends State<PagingWidget> {
       return GestureDetector(
         onTap: widget.onTextTap,
         child: Container(
-          // color: Colors.red[30],
-          // height: _pageHeight - 20,
+           color: Colors.red[30],
+        //height: _pageHeight - 400,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           margin: const EdgeInsets.only(
             top: 40,
@@ -289,18 +265,6 @@ class _PagingWidgetState extends State<PagingWidget> {
         ),
       );
     }).toList();
-  }
-
-  int _calculateCurrentPage() {
-    int currentPage = _currentPageIndex + 1;
-    for (int i = 0; i < widget.chaptercount.length; i++) {
-      if (_currentPageIndex <
-          widget.chaptercount.sublist(0, i + 1).reduce((a, b) => a + b)) {
-        break;
-      }
-      currentPage += widget.chaptercount[i];
-    }
-    return currentPage;
   }
 
   @override
@@ -336,11 +300,12 @@ class _PagingWidgetState extends State<PagingWidget> {
                       child: SizedBox(
                         key: _pageKey,
                         //  color: widget.backColor,
-                        //  height: _pageHeight,
+                     //   height: _pageHeight,
                         child: PageFlipWidget(
                           key: _pageController,
+
                           isRightSwipe: true,
-                           initialIndex: widget.starterPageIndex,
+                          initialIndex: widget.starterPageIndex,
                           // initialIndex: initialPageIndex,
                           children: pages,
                           backgroundColor: widget.backColor,
@@ -465,5 +430,54 @@ Future<List<String>> _paginate(int pagesToLoad) async {
     }
     print('_paginate end');
     return newPages;
+  }
+*/
+
+
+/*
+Future<int> _calculateTotalPagesnumbers() async {
+    print('_pageHeight');
+     print(_pageHeight);
+  print(_pagewidth);
+   print('ffffffffff');
+    print( widget.style.fontSize);
+    _pageTexts.clear();
+
+    List<String> newPages = [];
+    print('numbers start');
+    final textSpan = TextSpan(
+      text: widget.textContentnumber,
+      style: widget.style,
+    );
+
+    textPainter.text = textSpan;
+    print('numbers textPainter');
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: MediaQuery.of(context).size.width - 20.0,
+    );
+    print('numbers mid');
+    final lines = textPainter.computeLineMetrics();
+    int currentLine = 0;
+    while (currentLine < lines.length) {
+      int start = textPainter
+          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+          .offset;
+      int endLine = currentLine;
+
+      while (endLine < lines.length &&
+          lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
+        endLine++;
+      }
+      int end = textPainter
+          .getPositionForOffset(Offset(
+              0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+          .offset;
+      final pageContent = widget.textContentnumber.substring(start, end);
+      newPages.add(pageContent);
+      currentLine = endLine;
+    }
+    print('numbers end');
+    return newPages.length;
   }
 */

@@ -25,6 +25,19 @@ class ChaptersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<int> removeDuplicates(List<int> chapterPages) {
+      List<int> uniquePages = [];
+      //   uniquePages.add(chapterPages[0]);
+
+      for (int i = 1; i < chapterPages.length; i++) {
+        if (chapterPages[i] != chapterPages[i - 1]) {
+          uniquePages.add(chapterPages[i]);
+        }
+      }
+
+      return uniquePages;
+    }
+
     int cumulativePages = 0;
     // if (chapters.length == chapterPages.length) {
     //   return Scaffold(
@@ -68,6 +81,7 @@ class ChaptersList extends StatelessWidget {
                 itemCount: chapterPages.length,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, i) {
+                
                   int startPage = 1;
                   for (int j = 0; j < i; j++) {
                     startPage += chapterPages[j];
@@ -95,24 +109,28 @@ class ChaptersList extends StatelessWidget {
                         minLeadingWidth: 20.w,
                         title: Padding(
                           padding: EdgeInsets.only(
-                              left: chapters[i].isSubChapter ? 15.w : 0),
-                          child: Text(chapters[i].chapter,
-                              style: TextStyle(
-                                  color: bookProgress
-                                              .getBookProgress(bookId)
-                                              .currentChapterIndex ==
-                                          i
-                                      ? accentColor
-                                      : fontColor,
-                                  // fontFamily: fontNames
-                                  //     .where((element) => element == selectedFont)
-                                  //     .first,
+                              left: chapters[i].isSubChapter ? 15.w :0
+                              ),
+                          child: Text(
+                            chapters[i].chapter,
+                            style: TextStyle(
+                                color: bookProgress
+                                            .getBookProgress(bookId)
+                                            .currentChapterIndex ==
+                                        i
+                                    ? accentColor
+                                    : fontColor,
+                                // fontFamily: fontNames
+                                //     .where((element) => element == selectedFont)
+                                //     .first,
 
-                                  package: 'cosmos_epub',
-                                  fontSize: 15.sp,
-                                  fontWeight: chapters[i].isSubChapter
-                                      ? FontWeight.w400
-                                      : FontWeight.w600)),
+                                package: 'cosmos_epub',
+                                fontSize: 15.sp,
+                                // fontWeight: chapters[i].isSubChapter
+                                //     ? FontWeight.w400
+                                //     : FontWeight.w600
+                                    ),
+                          ),
                         ),
                         dense: true,
                       ),
