@@ -38,7 +38,7 @@ class ChaptersList extends StatelessWidget {
       return uniquePages;
     }
 
-    int cumulativePages = 0;
+   // int cumulativePages = 0;
     // if (chapters.length == chapterPages.length) {
     //   return Scaffold(
     //     appBar: AppBar(
@@ -49,6 +49,7 @@ class ChaptersList extends StatelessWidget {
     //     ),
     //   );
     // }
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -78,7 +79,7 @@ class ChaptersList extends StatelessWidget {
             color: backColor,
             padding: EdgeInsets.all(10.h),
             child: ListView.builder(
-                itemCount: chapterPages.length,
+                itemCount: chapters.length,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, i) {
                 

@@ -168,7 +168,8 @@ class _PagingWidgetState extends State<PagingWidget> {
       int endLine = currentLine;
 
       while (endLine < lines.length &&
-          lines[endLine].baseline < lines[currentLine].baseline + _pageHeight- 320) {
+          lines[endLine].baseline <
+              lines[currentLine].baseline + _pageHeight - 320) {
         endLine++;
       }
 
@@ -183,24 +184,24 @@ class _PagingWidgetState extends State<PagingWidget> {
     print('_calculateTotalPages end');
     return newPages;
   }
+
   Future<int> _calculateTotalPagess(
     String chapterContent,
   ) async {
-   
     _pageTexts.clear();
 
     List<String> newPages = [];
     final textSpan = TextSpan(
       text: chapterContent,
-    style: widget.style,
+      style: widget.style,
     );
 
     textPainter.text = textSpan;
 
     textPainter.layout(
-        minWidth: 0,
-        maxWidth: MediaQuery.of(context).size.width - 20.0,
-        );
+      minWidth: 0,
+      maxWidth: MediaQuery.of(context).size.width - 20.0,
+    );
 
     final lines = textPainter.computeLineMetrics();
     int currentLine = 0;
@@ -225,8 +226,8 @@ class _PagingWidgetState extends State<PagingWidget> {
     }
     print('numbers end');
     return newPages.length;
-    
   }
+
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
     print('_buildPageWidgets called');
 
@@ -234,8 +235,8 @@ class _PagingWidgetState extends State<PagingWidget> {
       return GestureDetector(
         onTap: widget.onTextTap,
         child: Container(
-           color: Colors.red[30],
-        //height: _pageHeight - 400,
+          //   color: Colors.red[30],
+          //height: _pageHeight - 400,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           margin: const EdgeInsets.only(
             top: 40,
@@ -300,7 +301,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                       child: SizedBox(
                         key: _pageKey,
                         //  color: widget.backColor,
-                     //   height: _pageHeight,
+                        //   height: _pageHeight,
                         child: PageFlipWidget(
                           key: _pageController,
 
