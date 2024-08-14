@@ -1,11 +1,10 @@
-/// epub  که 10 صفحه 10 صفحه لود می کند و سرعتش لود کردنش بالاس و تغییرات سریع اعمال میشود
-
-// ignore_for_file: avoid_print
+import 'dart:typed_data';
 
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
+import 'package:epubx/epubx.dart' as epubx;
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_html_reborn/flutter_html_reborn.dart';
+import 'package:html/parser.dart' as html_parser;
 
 class PagingTextHandler {
   final Function paginate;
@@ -15,7 +14,7 @@ class PagingTextHandler {
 
 class PagingWidget extends StatefulWidget {
   // final List<String> textContents;
-
+  final epubx.EpubBook document;
   final String textContent;
   final String textContentnumber;
   final String? innerHtmlContent;
@@ -40,6 +39,7 @@ class PagingWidget extends StatefulWidget {
         color: Colors.black,
         fontSize: 30,
       ),
+      required this.document,
       required this.handlerCallback(PagingTextHandler handler),
       required this.onTextTap,
       required this.onPageFlip,
@@ -91,27 +91,17 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   void _loadMorePages({required bool initialLoad}) async {
-    // setState(() {
-    //   paginateFuture = _paginate(_pageTexts.length + 10);
-    // });
-    // final newPages = await paginateFuture;
-    // final newPages = await _paginate(_pageTexts.length + 10);
     setState(() {
       paginateFuture = _calculateTotalPages();
     });
     final newPages = await paginateFuture;
-    totalPages = await _calculateTotalPagess(widget.textContentnumber);
+    //   totalPages = await _calculateTotalPagess(widget.textContentnumber);
 
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
       // chapterPages.add(newPages.length); // اضافه کردن تعداد صفحات فصل جدید
     });
-    // setState(() {
-    //   _pageTexts.addAll(newPages);
-    //   pages = _buildPageWidgets(_pageTexts);
-    //
-    // });
   }
 
   @override
@@ -142,90 +132,74 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   Future<List<String>> _calculateTotalPages() async {
-    _pageTexts.clear();
-    print('ffffffffff');
-    print(widget.style.fontSize);
+    // _pageTexts.clear();
+    // print('ffffffffff');
+    // print(widget.style.fontSize);
+    // List<String> newPages = [];
+    // print('_calculateTotalPages start');
+    // final textSpan = TextSpan(
+    //   text: widget.textContentnumber,
+    //   style: widget.style,
+    // );
+
+    // textPainter.text = textSpan;
+    // print('_calculateTotalPages textPainter');
+    // textPainter.layout(
+    //   minWidth: 0,
+    //   maxWidth: MediaQuery.of(context).size.width - 20.0,
+    // );
+    // print('_calculateTotalPages mid');
+    // final lines = textPainter.computeLineMetrics();
+    // int currentLine = 0;
+    // while (currentLine < lines.length) {
+    //   int start = textPainter
+    //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+    //       .offset;
+    //   int endLine = currentLine;
+
+    //   while (endLine < lines.length &&
+    //       lines[endLine].baseline <
+    //           lines[currentLine].baseline + _pageHeight - 320) {
+    //     endLine++;
+    //   }
+    //   print('_calculateTotalPages mid 22');
+    //   int end = textPainter
+    //       .getPositionForOffset(Offset(
+    //           0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+    //       .offset;
+    //   final pageContent = widget.textContentnumber.substring(start, end);
+    //   newPages.add(pageContent);
+    //   currentLine = endLine;
+    // }
+    // print('_calculateTotalPages end');
+    // return newPages;
     List<String> newPages = [];
-    print('_calculateTotalPages start');
-    final textSpan = TextSpan(
-      text: widget.textContentnumber,
-      style: widget.style,
-    );
+    double currentHeight = 0.0;
+    String currentPageContent = '';
 
-    textPainter.text = textSpan;
-    print('_calculateTotalPages textPainter');
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: MediaQuery.of(context).size.width - 20.0,
-    );
-    print('_calculateTotalPages mid');
-    final lines = textPainter.computeLineMetrics();
-    int currentLine = 0;
-    while (currentLine < lines.length) {
-      int start = textPainter
-          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-          .offset;
-      int endLine = currentLine;
+    var document = html_parser.parse(widget.innerHtmlContent);
+    var body = document.body!;
+    var elements = body.children;
 
-      while (endLine < lines.length &&
-          lines[endLine].baseline <
-              lines[currentLine].baseline + _pageHeight - 320) {
-        endLine++;
+    for (var element in elements) {
+      String elementHtml = element.outerHtml;
+      double elementHeight = 500;
+
+      if (currentHeight + elementHeight > _pageHeight) {
+        newPages.add(currentPageContent);
+        currentPageContent = '';
+        currentHeight = 0.0;
       }
 
-      int end = textPainter
-          .getPositionForOffset(Offset(
-              0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-          .offset;
-      final pageContent = widget.textContentnumber.substring(start, end);
-      newPages.add(pageContent);
-      currentLine = endLine;
+      currentPageContent += elementHtml;
+      currentHeight += elementHeight;
     }
-    print('_calculateTotalPages end');
+
+    if (currentPageContent.isNotEmpty) {
+      newPages.add(currentPageContent);
+    }
+
     return newPages;
-  }
-
-  Future<int> _calculateTotalPagess(
-    String chapterContent,
-  ) async {
-    _pageTexts.clear();
-
-    List<String> newPages = [];
-    final textSpan = TextSpan(
-      text: chapterContent,
-      style: widget.style,
-    );
-
-    textPainter.text = textSpan;
-
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: MediaQuery.of(context).size.width - 20.0,
-    );
-
-    final lines = textPainter.computeLineMetrics();
-    int currentLine = 0;
-    while (currentLine < lines.length) {
-      int start = textPainter
-          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-          .offset;
-      int endLine = currentLine;
-
-      while (endLine < lines.length &&
-          lines[endLine].baseline <
-              lines[currentLine].baseline + _pageHeight - 320) {
-        endLine++;
-      }
-      int end = textPainter
-          .getPositionForOffset(Offset(
-              0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-          .offset;
-      final pageContent = chapterContent.substring(start, end);
-      newPages.add(pageContent);
-      currentLine = endLine;
-    }
-    print('numbers end');
-    return newPages.length;
   }
 
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
@@ -245,6 +219,48 @@ class _PagingWidgetState extends State<PagingWidget> {
             child: widget.innerHtmlContent != null
                 ? Html(
                     data: text,
+                    // "<p>This is a sample text with an image.</p><img class='_idGenObjectAttribute-1' src='https://via.placeholder.com/150' alt='' />",
+                    extensions: [
+                      //TagExtension(
+                      //   tagsToExtend: {"img"},
+                      //   builder: (extensionContext) {
+                      //     final attrs = extensionContext.attributes;
+                      //     final src = attrs['src'] ?? '';
+                      //     //   Decode the base64 string to bytes
+                      //     // final base64Str = src.split(',').last;
+                      //     // final bytes = Base64Decoder().convert(base64Str);
+                      //     final imagePath = imagePaths[src];
+                      //     return GestureDetector(
+                      //       onTap: () {
+                      //         // Handle image tap if needed
+                      //         print('Image tapped: $src');
+                      //       },
+                      //       child: Image.file(
+                      //         imagePath,
+                      //         errorBuilder: (context, error, stackTrace) {
+                      //           return Text('Image not found');
+                      //         },
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
+                      TagExtension(
+                        tagsToExtend: {"img"},
+                        builder: (imageContext) {
+                          final url = imageContext.attributes['src']!
+                              .replaceAll('../', '');
+                          print(url);
+                          // print(widget.document.Content!.Images![url]!.Content!);
+                          print(widget.document.Content!.Images!
+                              .containsKey(url));
+                        
+                          var content = Uint8List.fromList(
+                              widget.document.Content!.Images![url]!.Content!);
+
+                          return Image.memory(content);
+                        },
+                      ),
+                    ],
                     style: {
                       "*": Style(
                           textAlign: TextAlign.justify,
@@ -256,7 +272,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                 : Container(
                     //color: widget.backColor,
                     child: Text(
-                      text,
+                      'not  html $text',
                       style: widget.style
                           .copyWith(backgroundColor: widget.backColor),
                       textAlign: TextAlign.justify,
@@ -482,3 +498,48 @@ Future<int> _calculateTotalPagesnumbers() async {
     return newPages.length;
   }
 */
+
+
+
+// Future<int> _calculateTotalPagess(
+  //   String chapterContent,
+  // ) async {
+  //   _pageTexts.clear();
+
+  //   List<String> newPages = [];
+  //   final textSpan = TextSpan(
+  //     text: chapterContent,
+  //     style: widget.style,
+  //   );
+
+  //   textPainter.text = textSpan;
+
+  //   textPainter.layout(
+  //     minWidth: 0,
+  //     maxWidth: MediaQuery.of(context).size.width - 20.0,
+  //   );
+
+  //   final lines = textPainter.computeLineMetrics();
+  //   int currentLine = 0;
+  //   while (currentLine < lines.length) {
+  //     int start = textPainter
+  //         .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+  //         .offset;
+  //     int endLine = currentLine;
+
+  //     while (endLine < lines.length &&
+  //         lines[endLine].baseline <
+  //             lines[currentLine].baseline + _pageHeight - 320) {
+  //       endLine++;
+  //     }
+  //     int end = textPainter
+  //         .getPositionForOffset(Offset(
+  //             0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+  //         .offset;
+  //     final pageContent = chapterContent.substring(start, end);
+  //     newPages.add(pageContent);
+  //     currentLine = endLine;
+  //   }
+  //   print('numbers end');
+  //   return newPages.length;
+  // }

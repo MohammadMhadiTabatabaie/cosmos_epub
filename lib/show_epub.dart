@@ -16,6 +16,9 @@ import 'Helpers/custom_toast.dart';
 import 'Helpers/pagination.dart';
 import 'Helpers/progress_singleton.dart';
 import 'Model/chapter_model.dart';
+import 'package:html/parser.dart' show parse;
+import 'package:html/parser.dart' as html_parser;
+import 'package:html/dom.dart' as dom;
 
 late BookProgressSingleton bookProgress;
 
@@ -273,22 +276,20 @@ class ShowEpubState extends State<ShowEpub> {
       fullContent += chapterContent;
 
       textchapter = parse(chapterContent).documentElement!.text;
-      // if (isHTML(textchapter)) {
-      //   innerHtmlContent = textchapter;
-      // }
 
       var pageCount = await _calculateTotalPages(textchapter);
 
       print('Chapter "${chapterTitle.characters}" has $pageCount pages.');
       chapterPages.add(pageCount);
     }));
+    textContentnumber =parse(fullContent).documentElement!.text;
+    print(textContentnumber);
     if (isHTML(fullContent)) {
-      innerHtmlContent = textContentnumber;
+      innerHtmlContent = fullContent;
     } else {
       textContentnumber = textContentnumber.replaceAll('Unknown', '').trim();
     }
-    textContentnumber = parse(fullContent).documentElement!.text;
-
+    print(innerHtmlContent);
     controllerPaging.paginate();
     setupNavButtons();
   }
@@ -676,23 +677,6 @@ class ShowEpubState extends State<ShowEpub> {
     return newPages.length;
   }
 
-  List<int> removeDuplicates(List<int> chapterPages) {
-    if (chapterPages.isEmpty) {
-      return chapterPages;
-    }
-
-    List<int> uniquePages = [];
-    uniquePages.add(chapterPages[0]);
-
-    for (int i = 1; i < chapterPages.length; i++) {
-      if (chapterPages[i] != chapterPages[i - 1]) {
-        uniquePages.add(chapterPages[i]);
-      }
-    }
-
-    return uniquePages;
-  }
-
   nextChapter() async {
     ///Set page to initial
     await bookProgress.setCurrentPageIndex(bookId, 0);
@@ -781,6 +765,7 @@ class ShowEpubState extends State<ShowEpub> {
                                           0,
                                     );
                                     return PagingWidget(
+                                      document: epubBook,
                                       chaptercount: chapterPages,
                                       textContents: [],
                                       textContent,

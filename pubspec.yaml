@@ -25,6 +25,7 @@ dependencies:
   fading_edge_scrollview: ^4.1.1
   path_provider: ^2.1.3
   flutter_html_reborn: ^3.0.0
+  flutter_html: ^3.0.0-beta.2
 
 dev_dependencies:
   flutter_test:
