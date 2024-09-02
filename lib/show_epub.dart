@@ -271,25 +271,26 @@ class ShowEpubState extends State<ShowEpub> {
         for (var subChapter in subChapters) {
           chapterContent += subChapter.HtmlContent!;
         }
+         
       }
 
       fullContent += chapterContent;
 
       textchapter = parse(chapterContent).documentElement!.text;
 
-      var pageCount = await _calculateTotalPages(textchapter);
+      var pageCount = await _calculateTotalPages(chapterContent);
 
       print('Chapter "${chapterTitle.characters}" has $pageCount pages.');
       chapterPages.add(pageCount);
+    
     }));
-    textContentnumber =parse(fullContent).documentElement!.text;
-    print(textContentnumber);
+    textContentnumber = parse(fullContent).documentElement!.text;
     if (isHTML(fullContent)) {
       innerHtmlContent = fullContent;
     } else {
       textContentnumber = textContentnumber.replaceAll('Unknown', '').trim();
     }
-    print(innerHtmlContent);
+
     controllerPaging.paginate();
     setupNavButtons();
   }
@@ -635,48 +636,157 @@ class ShowEpubState extends State<ShowEpub> {
   Future<int> _calculateTotalPages(
     String chapterContent,
   ) async {
-    _pageTexts.clear();
+    // _pageTexts.clear();
 
+    // List<String> newPages = [];
+    // final textSpan = TextSpan(
+    //   text: chapterContent,
+    //   style: TextStyle(
+    //       backgroundColor: backColor,
+    //       fontSize: _fontSize,
+    //       fontFamily: selectedTextStyle,
+    //       package: 'cosmos_epub',
+    //       color: fontColor),
+    // );
+
+    // textPainter.text = textSpan;
+
+    // textPainter.layout(minWidth: 0, maxWidth: maxWidth);
+
+    // final lines = textPainter.computeLineMetrics();
+    // int currentLine = 0;
+    // while (currentLine < lines.length) {
+    //   int start = textPainter
+    //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+    //       .offset;
+    //   int endLine = currentLine;
+
+    //   while (endLine < lines.length &&
+    //       lines[endLine].baseline <
+    //           lines[currentLine].baseline + maxHeight - 320) {
+    //     endLine++;
+    //   }
+    //   int end = textPainter
+    //       .getPositionForOffset(Offset(
+    //           0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+    //       .offset;
+    //   final pageContent = chapterContent.substring(start, end);
+    //   newPages.add(pageContent);
+    //   currentLine = endLine;
+    // }
+    // print('numbers maxHeight');
+     double currentHeight = 0.0;
+    String currentPageContent = '';
     List<String> newPages = [];
-    final textSpan = TextSpan(
-      text: chapterContent,
-      style: TextStyle(
+    double maxPageHeight = maxHeight - 320;
+    _pageTexts.clear();
+    var document = html_parser.parse(chapterContent);
+    var body = document.body!;
+    var elements = body.children;
+
+    for (var element in elements) {
+      //  if (element.localName=='div') {
+      processDivElement(element, 
+      (String imageSrc) {
+        // برای هر تصویر
+        double imageHeight = maxHeight ; // ارتفاع فرضی برای هر تصویر
+          currentPageContent += '<img src="$imageSrc" />';
+     //   currentPageContent += '<p >ssssssssssssssssssssssssss</p>';
+        currentHeight += imageHeight;
+
+        if (currentHeight > maxPageHeight) {
+          newPages.add(currentPageContent);
+          currentPageContent = '';
+          currentHeight = 0.0;
+        }
+      }, (String text) {
+        final textSpan = TextSpan(
+          text: text,
+              style: TextStyle(
           backgroundColor: backColor,
           fontSize: _fontSize,
           fontFamily: selectedTextStyle,
           package: 'cosmos_epub',
           color: fontColor),
-    );
+        );
+        textPainter.text = textSpan;
+        textPainter.layout(
+          minWidth: 0,
+          maxWidth: maxWidth,
+        );
 
-    textPainter.text = textSpan;
+        final lines = textPainter.computeLineMetrics();
+        int currentLine = 0;
+        while (currentLine < lines.length) {
+          int start = textPainter
+              .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+              .offset;
+          int endLine = currentLine;
 
-    textPainter.layout(minWidth: 0, maxWidth: maxWidth);
+          while (endLine < lines.length &&
+              lines[endLine].baseline <
+                  lines[currentLine].baseline + maxPageHeight) {
+            endLine++;
+          }
+          int end = textPainter
+              .getPositionForOffset(Offset(
+                  0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+              .offset;
+         // final pageContent = text.substring(start, end);
+          final pageContent = text;
 
-    final lines = textPainter.computeLineMetrics();
-    int currentLine = 0;
-    while (currentLine < lines.length) {
-      int start = textPainter
-          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-          .offset;
-      int endLine = currentLine;
+          currentPageContent += pageContent;
+          currentHeight += textPainter.size.height;
 
-      while (endLine < lines.length &&
-          lines[endLine].baseline <
-              lines[currentLine].baseline + maxHeight - 320) {
-        endLine++;
-      }
-      int end = textPainter
-          .getPositionForOffset(Offset(
-              0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-          .offset;
-      final pageContent = chapterContent.substring(start, end);
-      newPages.add(pageContent);
-      currentLine = endLine;
+          if (currentHeight > maxPageHeight) {
+            newPages.add(currentPageContent);
+            currentPageContent = '';
+            currentHeight = 0.0;
+          }
+
+          currentLine = endLine;
+        }
+      });
     }
-    print('numbers maxHeight');
+
+    if (currentPageContent.isNotEmpty) {
+      newPages.add(currentPageContent);
+    }
+
     return newPages.length;
   }
+ void processDivElement(
+      divElement,
+      void Function(String imageSrc) onImageFound,
+      void Function(
+        String text,
+      ) onTextFound) {
+    var children = divElement.children;
 
+    for (var child in children) {
+      if (child.localName == 'img') {
+        print(child.localName);
+        // پردازش تگ img
+        String? src = child.attributes['src'];
+        if (src != null) {
+          onImageFound(src);
+        }
+      } else
+      if (child.localName == 'p' || child.localName == 'span'
+      ) 
+       {
+        String text = child.text;
+       
+        //  if (text.isNotEmpty) {
+         onTextFound(text+'<br />');
+        //}
+      }
+      if (child.children.isNotEmpty) {
+      
+     //   processDivElement(child, onImageFound, onTextFound);
+      }
+    }
+  }
   nextChapter() async {
     ///Set page to initial
     await bookProgress.setCurrentPageIndex(bookId, 0);
