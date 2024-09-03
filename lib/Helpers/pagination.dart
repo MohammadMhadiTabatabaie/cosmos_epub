@@ -349,17 +349,17 @@ class _PagingWidgetState extends State<PagingWidget> {
           onImageFound(src);
         }
       } else if (child.localName == 'p' ||
-          child.localName == 'span' ||
+         // child.localName == 'span' ||
           child.localName == 'title') {
         String text = child.text;
 
-        //  if (text.isNotEmpty) {
-        onTextFound(text + '<br />');
-        //}
+         if (text.isNotEmpty) {
+        onTextFound(text+'<br/>' );
+        }
       }
       if (child.children.isNotEmpty) {
         print('///////////');
-        // processDivElement(child, onImageFound, onTextFound);
+         processDivElement(child, onImageFound, onTextFound);
       }
     }
   }
