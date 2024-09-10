@@ -486,11 +486,11 @@ class PageFlipWidget extends StatefulWidget {
     this.cutoffPrevious = 0.1,
     this.backgroundColor = Colors.transparent,
     required this.children,
-    this.initialIndex = 0,
+    required this.initialIndex,
     this.lastPage,
     required this.isRightSwipe,
     required this.onPageFlip,
-  })  : assert( initialIndex < children.length,
+  })  : assert(initialIndex < children.length,
             'initialIndex cannot be greater than children length'),
         super(key: key);
 
@@ -514,7 +514,8 @@ class PageFlipWidgetState extends State<PageFlipWidget>
   List<Widget> pages = [];
   final List<AnimationController> _controllers = [];
   bool? _isForward;
-  bool _isDraggingHorizontally = false;  // New variable to track horizontal dragging
+  bool _isDraggingHorizontally =
+      false; // New variable to track horizontal dragging
   @override
   void didUpdateWidget(PageFlipWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -541,7 +542,7 @@ class PageFlipWidgetState extends State<PageFlipWidget>
     _setUp();
   }
 
-  void _setUp({bool isRefresh = false}) {
+  void _setUp({bool isRefresh = false}) async {
     _controllers.clear();
     pages.clear();
     if (widget.lastPage != null) {
@@ -567,8 +568,11 @@ class PageFlipWidgetState extends State<PageFlipWidget>
     pages = pages.reversed.toList();
     if (isRefresh) {
       goToPage(pageNumber);
+      // goToPage(widget.initialIndex);
     } else {
+      //goToPage(widget.initialIndex-1);
       pageNumber = widget.initialIndex;
+      await goToPage(widget.initialIndex-1);
     }
   }
 
@@ -576,7 +580,7 @@ class PageFlipWidgetState extends State<PageFlipWidget>
   bool get _isFirstPage => pageNumber == 0;
 
   void _turnPage(DragUpdateDetails details, BoxConstraints dimens) {
-      if (!_isDraggingHorizontally) return; 
+    if (!_isDraggingHorizontally) return;
     currentPage.value = pageNumber;
     currentWidget.value = Container();
     final ratio = details.delta.dx / dimens.maxWidth;
@@ -667,9 +671,12 @@ class PageFlipWidgetState extends State<PageFlipWidget>
   Future goToPage(int index) async {
     if (mounted) {
       setState(() {
-        pageNumber = index;
+        pageNumber == index;
+
+     
       });
     }
+    print('object');
     for (var i = 0; i < _controllers.length; i++) {
       if (i == index) {
         _controllers[i].forward();
@@ -681,9 +688,10 @@ class PageFlipWidgetState extends State<PageFlipWidget>
         }
       }
     }
+    print('object2');
     currentPageIndex.value = pageNumber;
     currentWidget.value = pages[pageNumber];
-    currentPage.value = pageNumber;
+    //currentPage.value = pageNumber;
   }
 
   @override
@@ -696,7 +704,7 @@ class PageFlipWidgetState extends State<PageFlipWidget>
         },
         onHorizontalDragUpdate: (details) => _turnPage(details, dimens),
         onHorizontalDragEnd: (details) => _onDragFinish(),
-          onVerticalDragStart: (details) {
+        onVerticalDragStart: (details) {
           _isDraggingHorizontally = false;
         },
         child: Stack(

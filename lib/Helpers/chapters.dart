@@ -25,31 +25,8 @@ class ChaptersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<int> removeDuplicates(List<int> chapterPages) {
-      List<int> uniquePages = [];
-      //   uniquePages.add(chapterPages[0]);
+  
 
-      for (int i = 1; i < chapterPages.length; i++) {
-        if (chapterPages[i] != chapterPages[i - 1]) {
-          uniquePages.add(chapterPages[i]);
-        }
-      }
-
-      return uniquePages;
-    }
-
-   // int cumulativePages = 0;
-    // if (chapters.length == chapterPages.length) {
-    //   return Scaffold(
-    //     appBar: AppBar(
-    //       title: Text('Error'),
-    //     ),
-    //     body: Center(
-    //       child: Text('Mismatch between chapters and pages count'),
-    //     ),
-    //   );
-    // }
-    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -82,55 +59,54 @@ class ChaptersList extends StatelessWidget {
                 itemCount: chapters.length,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, i) {
-                
                   int startPage = 1;
-                  for (int j = 0; j < i; j++) {
-                    startPage += chapterPages[j];
-                  }
-
+                  // for (int j = 0; j < i; j++) {
+                  //   startPage = chapterPages[j];
+                  // }
+                  startPage = chapterPages[i];
+                  print('فصل ${i + 1} از صفحه $startPage شروع می‌شود');
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ListTile(
                         onTap: () async {
-                          print('bookId $bookId  i $i  startPage $startPage  ');
+                        //  print('bookId $bookId  i $i  startPage $startPage  ');
 
                           await bookProgress.setCurrentChapterIndex(
                               bookId, i, startPage);
                           await bookProgress.setCurrentPageIndex(
-                              bookId, startPage);
+                              bookId, startPage-1);
                           Navigator.of(context).pop(true);
                         },
                         subtitle: Text(
                           'شروع از صفحه: $startPage',
-                          style: TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.black),
                         ),
                         leading: leadingIcon,
                         minLeadingWidth: 20.w,
                         title: Padding(
                           padding: EdgeInsets.only(
-                              left: chapters[i].isSubChapter ? 15.w :0
-                              ),
+                              left: chapters[i].isSubChapter ? 15.w : 0),
                           child: Text(
                             chapters[i].chapter,
                             style: TextStyle(
-                                color: bookProgress
-                                            .getBookProgress(bookId)
-                                            .currentChapterIndex ==
-                                        i
-                                    ? accentColor
-                                    : fontColor,
-                                // fontFamily: fontNames
-                                //     .where((element) => element == selectedFont)
-                                //     .first,
+                              color: bookProgress
+                                          .getBookProgress(bookId)
+                                          .currentChapterIndex ==
+                                      i
+                                  ? accentColor
+                                  : fontColor,
+                              // fontFamily: fontNames
+                              //     .where((element) => element == selectedFont)
+                              //     .first,
 
-                                package: 'cosmos_epub',
-                                fontSize: 15.sp,
-                                // fontWeight: chapters[i].isSubChapter
-                                //     ? FontWeight.w400
-                                //     : FontWeight.w600
-                                    ),
+                              package: 'cosmos_epub',
+                              fontSize: 15.sp,
+                              // fontWeight: chapters[i].isSubChapter
+                              //     ? FontWeight.w400
+                              //     : FontWeight.w600
+                            ),
                           ),
                         ),
                         dense: true,

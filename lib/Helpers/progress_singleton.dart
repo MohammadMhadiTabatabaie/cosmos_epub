@@ -21,7 +21,7 @@ class BookProgressSingleton {
         });
       } else {
         var newBookProgressModel = BookProgressModel(
-            currentPageIndex: currentPageIndex,
+            currentPageIndex: 0,
             currentChapterIndex: chapterIndex,
             bookId: bookId);
         await isar.writeTxn(() async {
