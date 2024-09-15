@@ -102,7 +102,7 @@ class _PageFlipImageState extends State<PageFlipImage> {
     if (_imageInfo != null) {
       return CustomPaint(
         painter: PageFlipEffect(
-          amount: AlwaysStoppedAnimation(1.0),//widget.amount,
+          amount: const AlwaysStoppedAnimation(1.0), //widget.amount,
           image: _imageInfo!.image,
           backgroundColor: widget.backgroundColor,
           isRightSwipe: widget.isRightSwipe,

@@ -25,8 +25,6 @@ class ChaptersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -60,10 +58,10 @@ class ChaptersList extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, i) {
                   int startPage = 1;
-                  // for (int j = 0; j < i; j++) {
-                  //   startPage = chapterPages[j];
-                  // }
-                  startPage = chapterPages[i];
+                  for (int j = 0; j < i; j++) {
+                    startPage = chapterPages[j];
+                  }
+                  //startPage = chapterPages[i];
                   print('فصل ${i + 1} از صفحه $startPage شروع می‌شود');
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -71,12 +69,12 @@ class ChaptersList extends StatelessWidget {
                     children: [
                       ListTile(
                         onTap: () async {
-                        //  print('bookId $bookId  i $i  startPage $startPage  ');
+                          //  print('bookId $bookId  i $i  startPage $startPage  ');
 
                           await bookProgress.setCurrentChapterIndex(
                               bookId, i, startPage);
                           await bookProgress.setCurrentPageIndex(
-                              bookId, startPage-1);
+                              bookId, startPage - 1);
                           Navigator.of(context).pop(true);
                         },
                         subtitle: Text(

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:cosmos_epub/Helpers/chapters.dart';
 import 'package:cosmos_epub/Model/chapter_model.dart';
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:epubx/epubx.dart' as epubx;
@@ -70,6 +69,8 @@ class _PagingWidgetState extends State<PagingWidget> {
   late double _pageHeight;
   late double _pagewidth;
   late TextPainter textPainter;
+  late RenderBox _initializedRenderBox;
+
   final _pageKey = GlobalKey();
   final _pageController = GlobalKey<PageFlipWidgetState>();
   int totalPages = 0;
@@ -83,6 +84,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       _pagewidth = MediaQuery.of(context).size.width - 20.0;
       textPainter = TextPainter(
         textDirection: TextDirection.rtl,
+        textAlign: TextAlign.right,
       );
       _loadMorePages(initialLoad: true);
       // print('initState');
@@ -106,6 +108,16 @@ class _PagingWidgetState extends State<PagingWidget> {
     });
   }
 
+  rePaginate() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _initializedRenderBox = context.findRenderObject() as RenderBox;
+        paginateFuture = _paginate();
+      });
+    });
+  }
+
   @override
   void didUpdateWidget(covariant PagingWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -114,6 +126,23 @@ class _PagingWidgetState extends State<PagingWidget> {
         oldWidget.textContent != widget.textContent) {
       _loadPages(initialLoad: false, oldWidget: oldWidget);
       // print('didUpdateWidget');
+    }
+  }
+
+  int findLastHtmlTagIndex(String input) {
+    // Regular expression pattern to match HTML tags
+    RegExp regex = RegExp(r'<[^>]');
+
+    // Find all matches
+    Iterable<Match> matches = regex.allMatches(input);
+
+    // If matches are found
+    if (matches.isNotEmpty) {
+      // Return the end index of the last match
+      return matches.last.end;
+    } else {
+      // If no match is found, return -1
+      return -1;
     }
   }
 
@@ -166,7 +195,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     double currentHeight = 0.0;
     String currentPageContent = '';
     List<String> newPages = [];
-    double maxPageHeight = _pageHeight - 320;
+    //double maxPageHeight = _pageHeight - 320;
     int currentPage = 1;
     _pageTexts.clear();
     var document = html_parser.parse(widget.innerHtmlContent);
@@ -177,14 +206,14 @@ class _PagingWidgetState extends State<PagingWidget> {
     var allElements = [...headElements, ...bodyElements];
     titlePageNumbers.clear();
 
-    for (var element in allElements) {
+    for (var element in elements) {
       if (element.localName == 'title') {
         String centeredTitle = '''
         <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: row;">
           <h1 style="font-size: 2em;">${element.text}</h1>
         </div>
       ''';
-        newPages.add('</br>' + centeredTitle);
+        newPages.add('</br>$centeredTitle');
         titlePageNumbers.add(currentPage);
         currentPage++;
         currentPageContent = '';
@@ -192,48 +221,49 @@ class _PagingWidgetState extends State<PagingWidget> {
       }
       processDivElement(element, (String imageSrc) {
         currentPageContent += '<img src="$imageSrc" />';
-        currentHeight += _pageHeight;
+        currentHeight += 200;
 
-        if (currentHeight > maxPageHeight) {
+        if (currentHeight > _pageHeight) {
           newPages.add(currentPageContent);
           currentPage++;
           currentPageContent = '';
-          currentHeight = 0.0;
+          //currentHeight = 0.0;
         }
-      }, (String text) {
-        final textSpan = TextSpan(
-          text: text,
-          style: widget.style,
-        );
-        textPainter.text = textSpan;
-        textPainter.layout(
-          maxWidth: _pagewidth,
-        );
+      }, (String text) async {
+        // پردازش متن
+        final textSpan = TextSpan(text: text, style: widget.style);
 
+        textPainter.text = textSpan;
+        textPainter.layout(minWidth: 0, maxWidth: _pagewidth);
         final lines = textPainter.computeLineMetrics();
         int currentLine = 0;
         while (currentLine < lines.length) {
+          // int start = textPainter
+          //     .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+          //     .offset;
+          int start = currentLine;
           int endLine = currentLine;
 
-          // while (endLine < lines.length &&
-          //     lines[endLine].baseline <
-          //         lines[currentLine].baseline + maxPageHeight) {
-          //   endLine++;
-
-          // }
-
-          final pageContent = text;
+          while (endLine < lines.length &&
+              lines[endLine].baseline <
+                  lines[currentLine].baseline + _pageHeight) {
+            endLine++;
+          }
+          int end = textPainter
+              .getPositionForOffset(Offset(
+                  0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+              .offset;
+          final pageContent = text.substring(start, end);
+          // final pageContent = text;
 
           currentPageContent += pageContent;
           currentHeight += textPainter.size.height;
 
-          if (currentHeight > maxPageHeight) {
-            print('ttttt');
+          if (currentHeight > _pageHeight) {
             newPages.add(currentPageContent);
             currentPage++;
             currentPageContent = '';
             currentHeight = 0.0;
-            print(currentPage);
           }
 
           currentLine = endLine;
@@ -241,24 +271,19 @@ class _PagingWidgetState extends State<PagingWidget> {
       });
     }
 
+    // افزودن محتوای باقی‌مانده صفحه آخر
     if (currentPageContent.isNotEmpty) {
       newPages.add(currentPageContent);
       currentPage++;
     }
-    print('pppp');
 
-    print(titlePageNumbers);
+    // بهینه‌سازی صفحات برای جلوگیری از صفحات خالی
+
+    print('Pages generated: ${newPages.length}');
+    print('Title page numbers: $titlePageNumbers');
     return newPages;
   }
 
-  // int start = textPainter
-  //     .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-  //     .offset;
-  // int end = textPainter
-  //     .getPositionForOffset(Offset(
-  //         0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-  //     .offset;
-  //    final pageContent = text.substring(start, end);
   void processDivElement(
       divElement,
       void Function(String imageSrc) onImageFound,
@@ -273,21 +298,94 @@ class _PagingWidgetState extends State<PagingWidget> {
         if (src != null) {
           onImageFound(src);
         }
-      } else if (child.localName == 'p'
-          // ||
-          // child.localName == 'span' ||
+      } else if (child.localName == 'p' //|| child.localName == 'span'
+          //  ||
           // child.localName == 'title'
           ) {
         String text = child.text;
 
         if (text.isNotEmpty) {
-          onTextFound(text + '<br/>');
+          //onTextFound('$text\n ');
+          //  onTextFound(text);
+          //onTextFound('$text ss');
+
+          onTextFound(text + '\n <br>');
         }
       }
       if (child.children.isNotEmpty) {
         processDivElement(child, onImageFound, onTextFound);
       }
     }
+  }
+
+  Future<void> _paginate() async {
+    final pageSize = _initializedRenderBox.size;
+
+    _pageTexts.clear();
+
+    final textSpan = TextSpan(
+      text: widget.textContent,
+      style: widget.style,
+    );
+
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: pageSize.width,
+    );
+
+    // https://medium.com/swlh/flutter-line-metrics-fd98ab180a64
+    List<LineMetrics> lines = textPainter.computeLineMetrics();
+    double currentPageBottom = pageSize.height;
+    int currentPageStartIndex = 0;
+    int currentPageEndIndex = 0;
+
+    await Future.wait(lines.map((line) async {
+      final left = line.left;
+      final top = line.baseline - line.ascent;
+      final bottom = line.baseline + line.descent;
+
+      var innerHtml = widget.innerHtmlContent;
+
+      // Current line overflow page
+      if (currentPageBottom < bottom) {
+        currentPageEndIndex = textPainter
+            .getPositionForOffset(
+                Offset(left, top - (innerHtml != null ? 0 : 100)))
+            .offset;
+
+        var pageText = widget.textContent
+            .substring(currentPageStartIndex, currentPageEndIndex);
+
+        var index = findLastHtmlTagIndex(pageText) + currentPageStartIndex;
+
+        /// Offset to the left from last HTML tag
+        if (index != -1) {
+          int difference = currentPageEndIndex - index;
+          if (difference < 4) {
+            currentPageEndIndex = index - 2;
+          }
+
+          pageText = widget.textContent
+              .substring(currentPageStartIndex, currentPageEndIndex);
+          // print('start : $currentPageStartIndex');
+          // print('end : $currentPageEndIndex');
+          // print('last html tag : $index');
+        }
+
+        _pageTexts.add(pageText);
+
+        currentPageStartIndex = currentPageEndIndex;
+        currentPageBottom =
+            top + pageSize.height - (innerHtml != null ? 120 : 150);
+      }
+    }));
+
+    final lastPageText = widget.textContent.substring(currentPageStartIndex);
+    _pageTexts.add(lastPageText);
   }
 
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
@@ -297,7 +395,7 @@ class _PagingWidgetState extends State<PagingWidget> {
         onTap: widget.onTextTap,
         child: Container(
           //   color: Colors.red[30],
-          height: _pageHeight,
+          // height: _pageHeight,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           margin: const EdgeInsets.only(
             top: 40,
@@ -320,7 +418,11 @@ class _PagingWidgetState extends State<PagingWidget> {
                       imageContext.attributes['src']!.replaceAll('../', '');
                   var content = Uint8List.fromList(
                       widget.document.Content!.Images![url]!.Content!);
-                  return Image.memory(content);
+                  return Image.memory(
+                    content,
+                    width: 200,
+                    height: 200,
+                  );
                 },
               ),
             ],
@@ -352,8 +454,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                 'کتاب در حال اماده سازی میباشد ',
                 style: TextStyle(fontSize: 16, color: Colors.black),
               )),
-            ) // CircularProgressIndicator(),
-                );
+            ));
           default:
             return Stack(
               children: [
@@ -383,8 +484,8 @@ class _PagingWidgetState extends State<PagingWidget> {
                             if (_currentPageIndex == pages.length - 1) {
                               widget.onLastPage(index, pages.length);
                             }
-                            // widget.onPageFlip(index, pages.length);
-                            // if (_currentPageIndex == pages.length - 5) {}
+                            widget.onPageFlip(index, pages.length);
+                            if (_currentPageIndex == pages.length - 5) {}
                           }, //widget.starterPageIndex,
                           //initialIndex: initialPageIndex,
                           children: pages,
@@ -760,7 +861,16 @@ Future<List<String>> _calculateTotalPages() async {
     return 'null';
   }
   */
-
+/*
+ // int start = textPainter
+  //     .getPositionForOffset(Offset(0, lines[currentLine].baseline))
+  //     .offset;
+  // int end = textPainter
+  //     .getPositionForOffset(Offset(
+  //         0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+  //     .offset;
+  //    final pageContent = text.substring(start, end);*/
+  
   /**
    *    // double currentHeight = 0.0;
     // String currentPageContent = '';

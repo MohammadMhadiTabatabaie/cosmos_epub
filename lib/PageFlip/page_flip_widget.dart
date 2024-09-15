@@ -479,7 +479,7 @@ import 'builders/builder.dart';
 //   }
 // }
 class PageFlipWidget extends StatefulWidget {
-  PageFlipWidget({
+  const PageFlipWidget({
     Key? key,
     this.duration = const Duration(milliseconds: 100),
     this.cutoffForward = 0.8,
@@ -542,7 +542,7 @@ class PageFlipWidgetState extends State<PageFlipWidget>
     _setUp();
   }
 
-  void _setUp({bool isRefresh = false}) async {
+  void _setUp({bool isRefresh = false}) {
     _controllers.clear();
     pages.clear();
     if (widget.lastPage != null) {
@@ -572,7 +572,7 @@ class PageFlipWidgetState extends State<PageFlipWidget>
     } else {
       //goToPage(widget.initialIndex-1);
       pageNumber = widget.initialIndex;
-      await goToPage(widget.initialIndex-1);
+      // await goToPage(widget.initialIndex - 1);
     }
   }
 
@@ -672,8 +672,6 @@ class PageFlipWidgetState extends State<PageFlipWidget>
     if (mounted) {
       setState(() {
         pageNumber == index;
-
-     
       });
     }
     print('object');
@@ -691,7 +689,7 @@ class PageFlipWidgetState extends State<PageFlipWidget>
     print('object2');
     currentPageIndex.value = pageNumber;
     currentWidget.value = pages[pageNumber];
-    //currentPage.value = pageNumber;
+    currentPage.value = pageNumber;
   }
 
   @override

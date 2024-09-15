@@ -124,12 +124,12 @@ class CosmosEpub {
             return Directionality(
               textDirection: TextDirection.rtl,
               child: AlertDialog(
-                title: Text('خطا'),
+                title: const Text('خطا'),
                 content: Text(
                     'فایل epub مشکل دارد لطفا با پشتیبانی تماس بگیرید: $e'),
                 actions: [
                   TextButton(
-                    child: Text('تایید'),
+                    child: const Text('تایید'),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -155,7 +155,7 @@ class CosmosEpub {
 
     ///Set starter chapter as current
     if (starterChapter != -1) {
-      await bookProgress.setCurrentChapterIndex(bookId, starterChapter,0);
+      await bookProgress.setCurrentChapterIndex(bookId, starterChapter, 0);
       //  await bookProgress.setCurrentPageIndex(bookId, 0);
     }
 
@@ -222,7 +222,7 @@ class CosmosEpub {
   }
 
   static Future<bool> setCurrentChapterIndex(String bookId, int index) async {
-    return await bookProgress.setCurrentChapterIndex(bookId, index,0);
+    return await bookProgress.setCurrentChapterIndex(bookId, index, 0);
   }
 
   static BookProgressModel getBookProgress(String bookId) {

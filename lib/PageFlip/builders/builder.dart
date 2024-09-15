@@ -16,7 +16,7 @@ class PageFlipBuilder extends StatefulWidget {
     this.backgroundColor,
     required this.child,
     required this.pageIndex,
-     this.isRightSwipe=false,
+    this.isRightSwipe = false,
   }) : super(key: key);
 
   final Animation<double> amount;
@@ -51,15 +51,15 @@ class PageFlipBuilderState extends State<PageFlipBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(textDirection: TextDirection.rtl,
+    return Directionality(
+      textDirection: TextDirection.rtl,
       child: ValueListenableBuilder(
         valueListenable: currentPage,
         builder: (context, value, child) {
           if (imageData[widget.pageIndex] != null && value >= 0) {
             return CustomPaint(
-         
               painter: PageFlipEffect(
-                amount: AlwaysStoppedAnimation(1.0),//widget.amount,
+                amount: const AlwaysStoppedAnimation(1.0), //widget.amount,
                 image: imageData[widget.pageIndex]!,
                 backgroundColor: widget.backgroundColor,
                 isRightSwipe: widget.isRightSwipe,
@@ -67,7 +67,8 @@ class PageFlipBuilderState extends State<PageFlipBuilder> {
               size: Size.infinite,
             );
           } else {
-            if (value == widget.pageIndex || (value == (widget.pageIndex + 1))) {
+            if (value == widget.pageIndex ||
+                (value == (widget.pageIndex + 1))) {
               WidgetsBinding.instance.addPostFrameCallback(
                 (timeStamp) => _captureImage(timeStamp, currentPageIndex.value),
               );

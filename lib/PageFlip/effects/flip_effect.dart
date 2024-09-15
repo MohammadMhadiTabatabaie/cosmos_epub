@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -75,7 +74,7 @@ class PageFlipEffect extends CustomPainter {
   //   final c = canvas;
   //   final pos = isRightSwipe ? amount.value : 1.0 - amount.value;
   //   final offset = pos * w;
-    
+
   //   // Draw the background if provided
   //   if (backgroundColor != null) {
   //     c.drawRect(Rect.fromLTWH(0.0, 0.0, w, h), Paint()..color = backgroundColor!);
@@ -85,29 +84,30 @@ class PageFlipEffect extends CustomPainter {
   //   final rect = isRightSwipe
   //       ? Rect.fromLTWH(offset, 0, w - offset, h)
   //       : Rect.fromLTWH(0, 0, w - offset, h);
-    
+
   //   c.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), rect, paint);
 
   //   final clippedRect = isRightSwipe
   //       ? Rect.fromLTWH(0, 0, offset, h)
   //       : Rect.fromLTWH(w - offset, 0, offset, h);
-    
+
   //   c.save();
   //   c.clipRect(clippedRect);
   //   c.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), Rect.fromLTWH(0, 0, w, h), paint);
   //   c.restore();
   // }
-   @override
+  @override
   void paint(ui.Canvas canvas, ui.Size size) {
     final w = size.width.toDouble();
     final h = size.height.toDouble();
     final c = canvas;
     final pos = isRightSwipe ? amount.value : 1.0 - amount.value;
     final offset = pos * w;
-    
+
     // Draw the background if provided
     if (backgroundColor != null) {
-      c.drawRect(Rect.fromLTWH(0.0, 0.0, w, h), Paint()..color = backgroundColor!);
+      c.drawRect(
+          Rect.fromLTWH(0.0, 0.0, w, h), Paint()..color = backgroundColor!);
     }
 
     // Draw a blank page during the flip
@@ -117,6 +117,7 @@ class PageFlipEffect extends CustomPainter {
 
     c.drawRect(blankRect, Paint()..color = Colors.white);
   }
+
   @override
   bool shouldRepaint(PageFlipEffect oldDelegate) {
     return //oldDelegate.image != image ||
