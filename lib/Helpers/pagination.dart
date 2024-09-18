@@ -76,6 +76,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   int totalPages = 0;
   int totalPageCount = 0; // مجموع کل صفحات
   List<int> titlePageNumbers = [];
+
   @override
   void initState() {
     super.initState();
@@ -105,16 +106,6 @@ class _PagingWidgetState extends State<PagingWidget> {
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
-    });
-  }
-
-  rePaginate() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      setState(() {
-        _initializedRenderBox = context.findRenderObject() as RenderBox;
-        paginateFuture = _paginate();
-      });
     });
   }
 
@@ -207,80 +198,93 @@ class _PagingWidgetState extends State<PagingWidget> {
     titlePageNumbers.clear();
 
     for (var element in elements) {
-      if (element.localName == 'title') {
-        String centeredTitle = '''
-        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: row;">
-          <h1 style="font-size: 2em;">${element.text}</h1>
-        </div>
-      ''';
-        newPages.add('</br>$centeredTitle');
-        titlePageNumbers.add(currentPage);
-        currentPage++;
-        currentPageContent = '';
-        currentHeight = 0.0;
-      }
+      // if (element.localName == 'title') {
+      //   String centeredTitle = '''
+      //   <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: row;">
+      //     <h1 style="font-size: 2em;">${element.text}</h1>
+      //   </div>
+      // ''';
+      //   // currentHeight = 200;
+      //   // if (currentHeight < _pageHeight) {
+      //   newPages.add('</br>$centeredTitle');
+      //   titlePageNumbers.add(currentPage);
+      //   currentPage++;
+      //   //  currentPageContent = '';
+      //   // currentHeight = 0.0;
+      //   //}
+      // }
+
+      //   currentPageContent = 'wwwww <br>';
+
+      //  currentPageContent = 'fffff <br>';
+
       processDivElement(element, (String imageSrc) {
         currentPageContent += '<img src="$imageSrc" />';
         currentHeight += 200;
 
-        if (currentHeight > _pageHeight) {
+        if (currentHeight > _pageHeight - 300) {
           newPages.add(currentPageContent);
           currentPage++;
           currentPageContent = '';
-          //currentHeight = 0.0;
+          currentHeight = 0.0;
         }
       }, (String text) async {
         // پردازش متن
         final textSpan = TextSpan(text: text, style: widget.style);
-
         textPainter.text = textSpan;
         textPainter.layout(minWidth: 0, maxWidth: _pagewidth);
         final lines = textPainter.computeLineMetrics();
         int currentLine = 0;
+
         while (currentLine < lines.length) {
-          // int start = textPainter
-          //     .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-          //     .offset;
           int start = currentLine;
           int endLine = currentLine;
 
+          // محاسبه خطوط تا جایی که به ارتفاع صفحه برسیم
+          double totalHeight = 0.0;
           while (endLine < lines.length &&
-              lines[endLine].baseline <
-                  lines[currentLine].baseline + _pageHeight) {
+              totalHeight + lines[endLine].height <= _pageHeight) {
+            totalHeight += lines[endLine].height;
             endLine++;
           }
+
+          // محاسبه نقطه پایان متن برای این صفحه
           int end = textPainter
               .getPositionForOffset(Offset(
                   0, lines[endLine - 1].baseline + lines[endLine - 1].height))
               .offset;
+
+          // متن مربوط به این صفحه را بگیرید
           final pageContent = text.substring(start, end);
-          // final pageContent = text;
 
+          // اضافه کردن متن به محتوای صفحه فعلی
           currentPageContent += pageContent;
-          currentHeight += textPainter.size.height;
+          currentHeight += totalHeight;
 
-          if (currentHeight > _pageHeight) {
+          // اگر ارتفاع فعلی بیشتر از ارتفاع صفحه شد، صفحه جدید ایجاد کنید
+          if (currentHeight >= _pageHeight - 300) {
             newPages.add(currentPageContent);
             currentPage++;
             currentPageContent = '';
             currentHeight = 0.0;
           }
-
+          // به خط بعدی بروید
           currentLine = endLine;
         }
       });
     }
-
-    // افزودن محتوای باقی‌مانده صفحه آخر
+    ;
+// افزودن محتوای باقی‌مانده صفحه آخر
     if (currentPageContent.isNotEmpty) {
       newPages.add(currentPageContent);
       currentPage++;
+      currentPageContent = '';
+      currentHeight = 0.0;
     }
-
-    // بهینه‌سازی صفحات برای جلوگیری از صفحات خالی
 
     print('Pages generated: ${newPages.length}');
     print('Title page numbers: $titlePageNumbers');
+
     return newPages;
   }
 
@@ -318,115 +322,58 @@ class _PagingWidgetState extends State<PagingWidget> {
     }
   }
 
-  Future<void> _paginate() async {
-    final pageSize = _initializedRenderBox.size;
-
-    _pageTexts.clear();
-
-    final textSpan = TextSpan(
-      text: widget.textContent,
-      style: widget.style,
-    );
-
-    final textPainter = TextPainter(
-      text: textSpan,
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: pageSize.width,
-    );
-
-    // https://medium.com/swlh/flutter-line-metrics-fd98ab180a64
-    List<LineMetrics> lines = textPainter.computeLineMetrics();
-    double currentPageBottom = pageSize.height;
-    int currentPageStartIndex = 0;
-    int currentPageEndIndex = 0;
-
-    await Future.wait(lines.map((line) async {
-      final left = line.left;
-      final top = line.baseline - line.ascent;
-      final bottom = line.baseline + line.descent;
-
-      var innerHtml = widget.innerHtmlContent;
-
-      // Current line overflow page
-      if (currentPageBottom < bottom) {
-        currentPageEndIndex = textPainter
-            .getPositionForOffset(
-                Offset(left, top - (innerHtml != null ? 0 : 100)))
-            .offset;
-
-        var pageText = widget.textContent
-            .substring(currentPageStartIndex, currentPageEndIndex);
-
-        var index = findLastHtmlTagIndex(pageText) + currentPageStartIndex;
-
-        /// Offset to the left from last HTML tag
-        if (index != -1) {
-          int difference = currentPageEndIndex - index;
-          if (difference < 4) {
-            currentPageEndIndex = index - 2;
-          }
-
-          pageText = widget.textContent
-              .substring(currentPageStartIndex, currentPageEndIndex);
-          // print('start : $currentPageStartIndex');
-          // print('end : $currentPageEndIndex');
-          // print('last html tag : $index');
-        }
-
-        _pageTexts.add(pageText);
-
-        currentPageStartIndex = currentPageEndIndex;
-        currentPageBottom =
-            top + pageSize.height - (innerHtml != null ? 120 : 150);
-      }
-    }));
-
-    final lastPageText = widget.textContent.substring(currentPageStartIndex);
-    _pageTexts.add(lastPageText);
-  }
-
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
-    // print('_buildPageWidgets called');
     return pageTexts.map((text) {
+      // ScrollController برای هر صفحه مجزا
+      final ScrollController _pageScrollController = ScrollController();
+
       return GestureDetector(
         onTap: widget.onTextTap,
         child: Container(
-          //   color: Colors.red[30],
-          // height: _pageHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          margin: const EdgeInsets.only(
-            top: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          margin: const EdgeInsets.only(top: 40),
+          child: Scrollbar(
+            scrollbarOrientation: ScrollbarOrientation.right,
+            // thickness: 10,
+            interactive: true,
+            controller:
+                _pageScrollController, // استفاده از ScrollController مجزا برای هر صفحه
+            thumbVisibility: true, // همیشه نمایش دادن Scrollbar
+            child: ListView(
+              controller:
+                  _pageScrollController, // استفاده از ScrollController برای ListView
+              primary: false, // جلوگیری از استفاده از PrimaryScrollController
+              shrinkWrap: true, // تنظیم اندازه بر اساس محتوا بدون اسکرول داخلی
+              children: [
+                Html(
+                  data: text,
+                  style: {
+                    '*': Style(
+                        textAlign: TextAlign.justify,
+                        fontSize: FontSize(widget.style.fontSize!),
+                        fontFamily: widget.style.fontFamily,
+                        color: widget.style.color),
+                  },
+                  extensions: [
+                    TagExtension(
+                      tagsToExtend: {"img"},
+                      builder: (imageContext) {
+                        final url = imageContext.attributes['src']!
+                            .replaceAll('../', '');
+                        var content = Uint8List.fromList(
+                            widget.document.Content!.Images![url]!.Content!);
+                        return Image.memory(
+                          content,
+                          width: 200,
+                          height: 200,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          child: SingleChildScrollView(
-              child: Html(
-            data: text,
-            style: {
-              '*': Style(
-                  textAlign: TextAlign.justify,
-                  fontSize: FontSize(widget.style.fontSize!),
-                  fontFamily: widget.style.fontFamily,
-                  color: widget.style.color),
-            },
-            extensions: [
-              TagExtension(
-                tagsToExtend: {"img"},
-                builder: (imageContext) {
-                  final url =
-                      imageContext.attributes['src']!.replaceAll('../', '');
-                  var content = Uint8List.fromList(
-                      widget.document.Content!.Images![url]!.Content!);
-                  return Image.memory(
-                    content,
-                    width: 200,
-                    height: 200,
-                  );
-                },
-              ),
-            ],
-          )),
         ),
       );
     }).toList();

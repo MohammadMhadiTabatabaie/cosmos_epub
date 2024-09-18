@@ -643,25 +643,36 @@ class ShowEpubState extends State<ShowEpub> {
     var bodyElements = document.body?.children ?? [];
     var allElements = [...headElements, ...bodyElements];
     titlePageNumbers.clear();
-    for (var element in allElements) {
+    for (var element in elements) {
       if (element.localName == 'title') {
-        String centeredTitle = '''
-        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: row;">
-          <h1 style="font-size: 2em;">${element.text}</h1>
-        </div>
-      ''';
-        newPages.add('</br>$centeredTitle');
+        // قبل از شروع فصل جدید، یک صفحه خالی اضافه کن
+        if (currentPageContent.isNotEmpty) {
+          newPages.add(currentPageContent); // اضافه کردن محتوای صفحه فعلی
+          currentPage++; // انتقال به صفحه جدید
+        }
 
+        // // افزودن صفحه خالی
+        // newPages.add(''); // یک صفحه خالی اضافه می‌کنیم
+        // currentPage++;
+
+        // اضافه کردن عنوان فصل به صفحه جدید
+        String centeredTitle = '''
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: row;">
+      <h1 style="font-size: 2em;">${element.text}</h1>
+    </div>
+    ''';
+        newPages.add(centeredTitle); // عنوان فصل را اضافه می‌کنیم
         titlePageNumbers.add(currentPage);
         currentPage++;
+        currentPageContent = '';
         currentHeight = 0.0;
       }
       processDivElement(element, (String imageSrc) {
         currentPageContent += '<img src="$imageSrc" />';
 
-        currentHeight += maxHeight;
+        currentHeight += 200;
 
-        if (currentHeight > maxPageHeight) {
+        if (currentHeight > maxHeight - 300) {
           newPages.add(currentPageContent);
           currentPage++;
           currentPageContent = '';
@@ -685,41 +696,47 @@ class ShowEpubState extends State<ShowEpub> {
         final lines = textPainter.computeLineMetrics();
         int currentLine = 0;
         while (currentLine < lines.length) {
-          // int start = textPainter
-          //     .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-          //     .offset;
+          int start = currentLine;
           int endLine = currentLine;
 
+          // محاسبه خطوط تا جایی که به ارتفاع صفحه برسیم
+          double totalHeight = 0.0;
           while (endLine < lines.length &&
-              lines[endLine].baseline <
-                  lines[currentLine].baseline + maxPageHeight) {
+              totalHeight + lines[endLine].height <= maxHeight) {
+            totalHeight += lines[endLine].height;
             endLine++;
           }
-          // int end = textPainter
-          //     .getPositionForOffset(Offset(
-          //         0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-          //     .offset;
-          // final pageContent = text.substring(start, end);
-          final pageContent = text;
+          int end = textPainter
+              .getPositionForOffset(Offset(
+                  0, lines[endLine - 1].baseline + lines[endLine - 1].height))
+              .offset;
 
+          // متن مربوط به این صفحه را بگیرید
+          final pageContent = text.substring(start, end);
+
+          // اضافه کردن متن به محتوای صفحه فعلی
           currentPageContent += pageContent;
-          currentHeight += textPainter.size.height;
+          currentHeight += totalHeight;
 
-          if (currentHeight > maxPageHeight) {
+          // اگر ارتفاع فعلی بیشتر از ارتفاع صفحه شد، صفحه جدید ایجاد کنید
+          if (currentHeight >= maxHeight - 300) {
             newPages.add(currentPageContent);
             currentPage++;
             currentPageContent = '';
             currentHeight = 0.0;
           }
-
+          // به خط بعدی بروید
           currentLine = endLine;
         }
       });
     }
+    ;
 
     if (currentPageContent.isNotEmpty) {
       newPages.add(currentPageContent);
       currentPage++;
+      currentPageContent = '';
+      currentHeight = 0.0;
     }
     print('wwwww');
     print(titlePageNumbers);
@@ -740,12 +757,18 @@ class ShowEpubState extends State<ShowEpub> {
         if (src != null) {
           onImageFound(src);
         }
-      } else if (child.localName == 'p'
-          //  || child.localName == 'span'
+      } else if (child.localName == 'p' //|| child.localName == 'span'
+          //  ||
+          // child.localName == 'title'
           ) {
         String text = child.text;
+
         if (text.isNotEmpty) {
-          onTextFound('$text<br />');
+          //onTextFound('$text\n ');
+          //  onTextFound(text);
+          //onTextFound('$text ss');
+
+          onTextFound(text + '\n <br>');
         }
       }
       if (child.children.isNotEmpty) {
