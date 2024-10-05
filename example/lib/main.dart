@@ -29,6 +29,11 @@ class MyApp extends StatelessWidget {
       title: '',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
+        textSelectionTheme: TextSelectionThemeData(
+          selectionColor: Colors.blue, // رنگ انتخاب متن
+          selectionHandleColor: Colors.blue, // رنگ دسته‌های انتخاب
+          cursorColor: Colors.green, // رنگ کرسر
+        ),
         appBarTheme: AppBarTheme(
           backgroundColor: Color(0xff0a0e21),
         ),
@@ -49,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _openEpubReader(BuildContext context) async {
     await CosmosEpub.openAssetBook(
-        assetPath: 'assets/dasdad.epub',
+        assetPath: 'assets/maxTest10 (3).epub',
         context: context,
         bookId: '123',
         onPageFlip: (int currentPage, int totalPages) {

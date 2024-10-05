@@ -932,6 +932,10 @@ class ShowEpubState extends State<ShowEpub> {
                                       backColor: backColor,
                                       indexpage: 5,
                                       totolepage: 0,
+                                      onHighlightTap: (selectedTextModel) {
+                                        debugPrint(
+                                            'Highlighted Text: $selectedTextModel');
+                                      },
                                     );
                                   }
                               }

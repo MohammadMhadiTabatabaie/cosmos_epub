@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:cosmos_epub/Helpers/html_stylist.dart';
 import 'package:cosmos_epub/Model/chapter_model.dart';
+import 'package:cosmos_epub/Model/selection_model.dart';
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
 import 'package:epubx/epubx.dart' as epubx;
 import 'package:flutter/material.dart';
-import 'package:flutter_html_reborn/flutter_html_reborn.dart';
 import 'package:html/parser.dart' as html_parser;
+import 'package:flutter_html/flutter_html.dart';
 
 class PagingTextHandler {
   final Function paginate;
@@ -19,7 +22,7 @@ class PagingWidget extends StatefulWidget {
   final epubx.EpubBook document;
   final String textContent;
   final String textContentnumber;
-  final String? innerHtmlContent;
+  String? innerHtmlContent;
   final String chapterTitle;
   final int totalChapters;
   final int starterPageIndex;
@@ -35,27 +38,34 @@ class PagingWidget extends StatefulWidget {
   final List<List<String>> textContents; // اضافه شده: لیست صفحات فصول
   final List<int> chaptercount; // اضافه شده: لیست صفحات فصول
   List<LocalChapterModel> chapters = [];
-  PagingWidget(this.textContent, this.textContentnumber, this.innerHtmlContent,
-      {super.key,
-      this.style = const TextStyle(
-        color: Colors.black,
-        fontSize: 30,
-      ),
-      required this.document,
-      required this.handlerCallback(PagingTextHandler handler),
-      required this.onTextTap,
-      required this.onPageFlip,
-      required this.onLastPage,
-      this.starterPageIndex = 0,
-      required this.chapterTitle,
-      required this.totalChapters,
-      this.lastWidget,
-      required this.backColor,
-      required this.textContents,
-      required this.indexpage,
-      required this.totolepage,
-      required this.chaptercount,
-      required this.chapters});
+  final Function(SelectedTextModel selectedTextModel)? onHighlightTap;
+
+  PagingWidget(
+    this.textContent,
+    this.textContentnumber,
+    this.innerHtmlContent, {
+    super.key,
+    this.style = const TextStyle(
+      color: Colors.black,
+      fontSize: 30,
+    ),
+    required this.document,
+    required this.handlerCallback(PagingTextHandler handler),
+    required this.onTextTap,
+    required this.onPageFlip,
+    required this.onLastPage,
+    this.starterPageIndex = 0,
+    required this.chapterTitle,
+    required this.totalChapters,
+    this.lastWidget,
+    required this.backColor,
+    required this.textContents,
+    required this.indexpage,
+    required this.totolepage,
+    required this.chaptercount,
+    required this.chapters,
+    this.onHighlightTap,
+  });
 
   @override
   _PagingWidgetState createState() => _PagingWidgetState();
@@ -69,14 +79,20 @@ class _PagingWidgetState extends State<PagingWidget> {
   late double _pageHeight;
   late double _pagewidth;
   late TextPainter textPainter;
-  late RenderBox _initializedRenderBox;
-
   final _pageKey = GlobalKey();
   final _pageController = GlobalKey<PageFlipWidgetState>();
   int totalPages = 0;
   int totalPageCount = 0; // مجموع کل صفحات
   List<int> titlePageNumbers = [];
-
+  // List<SelectedContent> selectedTexts = []; // لیستی از انتخاب‌ها
+  int? selectedStartIndex;
+  int? selectedEndIndex;
+  String selectedText = '';
+  String combinedText = '';
+  static var paragraphList = ValueNotifier<List<String>>([]);
+  static final highlightedStream = ValueNotifier<SelectedTextModel?>(null);
+  EditableTextState? state1;
+  int currentPage = 0;
   @override
   void initState() {
     super.initState();
@@ -87,7 +103,13 @@ class _PagingWidgetState extends State<PagingWidget> {
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.right,
       );
+
       _loadMorePages(initialLoad: true);
+      highlightedStream.addListener(() {
+        if (widget.onHighlightTap != null && highlightedStream.value != null) {
+          widget.onHighlightTap!(highlightedStream.value!);
+        }
+      });
       // print('initState');
     });
   }
@@ -101,45 +123,39 @@ class _PagingWidgetState extends State<PagingWidget> {
     setState(() {
       paginateFuture = _calculateTotalPages();
     });
-    final newPages = await paginateFuture;
+    var newPages = await paginateFuture;
 
     setState(() {
       _pageTexts.addAll(newPages);
       pages = _buildPageWidgets(_pageTexts);
     });
+    paragraphList.value = _pageTexts.map(
+      (e) {
+        return e.trim();
+      },
+    ).toList();
+  }
+
+  @override
+  void dispose() {
+    print('ffwwfakmsfklajslfkjaslfjkklsajf');
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant PagingWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-
+    print('ffwwfakmsfklajslfkjaslfjkklsajf');
     if (oldWidget.style != widget.style ||
         oldWidget.textContent != widget.textContent) {
-      _loadPages(initialLoad: false, oldWidget: oldWidget);
-      // print('didUpdateWidget');
+      // _loadPages(initialLoad: false, oldWidget: oldWidget);
+      _loadPages();
+      print('didUpdateWidget');
     }
   }
 
-  int findLastHtmlTagIndex(String input) {
-    // Regular expression pattern to match HTML tags
-    RegExp regex = RegExp(r'<[^>]');
-
-    // Find all matches
-    Iterable<Match> matches = regex.allMatches(input);
-
-    // If matches are found
-    if (matches.isNotEmpty) {
-      // Return the end index of the last match
-      return matches.last.end;
-    } else {
-      // If no match is found, return -1
-      return -1;
-    }
-  }
-
-  void _loadPages(
-      {required bool initialLoad,
-      required covariant PagingWidget oldWidget}) async {
+  void _loadPages() async {
     setState(() {
       paginateFuture = _calculateTotalPages();
     });
@@ -151,43 +167,31 @@ class _PagingWidgetState extends State<PagingWidget> {
     });
   }
 
-/*
-  // Future<List<String>> _calculateTotalPages() async {
-  //   List<String> newPages = [];
-  //   double currentHeight = 0.0;
-  //   String currentPageContent = '';
+  void _load() async {
+    // paginateFuture = _calculateTotalPages();
+    applyHighlight(
+      state: state1!,
+      index: _currentPageIndex,
+      tag: null,
+    );
+  }
 
-  //   var document = html_parser.parse(widget.innerHtmlContent);
-  //   var body = document.body!;
-  //   var elements = body.children;
+  void update() async {
+    paginateFuture = _calculateTotalPages();
+    final newPages = await paginateFuture;
 
-  //   for (var element in elements) {
-  //     String elementHtml = element.outerHtml;
-  //     double elementHeight =200;
+    setState(() {
+      _pageTexts.addAll(newPages);
+      pages = _buildPageWidgets(_pageTexts);
+    });
+  }
 
-  //     if (currentHeight + elementHeight > _pageHeight) {
-  //       newPages.add(currentPageContent);
-  //       currentPageContent = '';
-  //       currentHeight = 0.0;
-  //     }
-
-  //     currentPageContent += elementHtml;
-  //     currentHeight += elementHeight;
-  //   }
-
-  //   if (currentPageContent.isNotEmpty) {
-  //     newPages.add(currentPageContent);
-  //   }
-
-  //   return newPages;
-  // }
-  */
   Future<List<String>> _calculateTotalPages() async {
     double currentHeight = 0.0;
     String currentPageContent = '';
     List<String> newPages = [];
     //double maxPageHeight = _pageHeight - 320;
-    int currentPage = 1;
+
     _pageTexts.clear();
     var document = html_parser.parse(widget.innerHtmlContent);
     var body = document.body!;
@@ -198,29 +202,25 @@ class _PagingWidgetState extends State<PagingWidget> {
     titlePageNumbers.clear();
 
     for (var element in elements) {
-      // if (element.localName == 'title') {
-      //   String centeredTitle = '''
-      //   <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: row;">
-      //     <h1 style="font-size: 2em;">${element.text}</h1>
-      //   </div>
-      // ''';
-      //   // currentHeight = 200;
-      //   // if (currentHeight < _pageHeight) {
-      //   newPages.add('</br>$centeredTitle');
-      //   titlePageNumbers.add(currentPage);
-      //   currentPage++;
-      //   //  currentPageContent = '';
-      //   // currentHeight = 0.0;
-      //   //}
-      // }
-
-      //   currentPageContent = 'wwwww <br>';
-
-      //  currentPageContent = 'fffff <br>';
+      if (element.localName == 'title') {
+        String centeredTitle = '''
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: row;">
+          <h1 style="font-size: 2em;">${element.text}</h1>
+        </div>
+      ''';
+        currentHeight = 200;
+        if (currentHeight < _pageHeight) {
+          newPages.add('</br>$centeredTitle');
+          titlePageNumbers.add(currentPage);
+          currentPage++;
+          currentPageContent = '';
+          currentHeight = 0.0;
+        }
+      }
 
       processDivElement(element, (String imageSrc) {
         currentPageContent += '<img src="$imageSrc" />';
-        currentHeight += 200;
+        currentHeight += _pageHeight;
 
         if (currentHeight > _pageHeight - 300) {
           newPages.add(currentPageContent);
@@ -282,9 +282,6 @@ class _PagingWidgetState extends State<PagingWidget> {
       currentHeight = 0.0;
     }
 
-    print('Pages generated: ${newPages.length}');
-    print('Title page numbers: $titlePageNumbers');
-
     return newPages;
   }
 
@@ -313,7 +310,8 @@ class _PagingWidgetState extends State<PagingWidget> {
           //  onTextFound(text);
           //onTextFound('$text ss');
 
-          onTextFound(text + '\n <br>');
+          //       onTextFound(text + '\n<br>');
+          onTextFound(text + '\n');
         }
       }
       if (child.children.isNotEmpty) {
@@ -323,85 +321,458 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   List<Widget> _buildPageWidgets(List<String> pageTexts) {
+    // paragraphList.value = _pageTexts.toList();
     return pageTexts.map((text) {
+      final hasText = text.isNotEmpty;
+      final hasImage = text.contains('<img');
+      String? lastDisplayedText;
+      setState(() {});
       // ScrollController برای هر صفحه مجزا
       final ScrollController _pageScrollController = ScrollController();
-
       return GestureDetector(
-        onTap: widget.onTextTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          margin: const EdgeInsets.only(top: 40),
-          child: Scrollbar(
-            scrollbarOrientation: ScrollbarOrientation.right,
-            // thickness: 10,
-            interactive: true,
-            controller:
-                _pageScrollController, // استفاده از ScrollController مجزا برای هر صفحه
-            thumbVisibility: true, // همیشه نمایش دادن Scrollbar
-            child: ListView(
-              controller:
-                  _pageScrollController, // استفاده از ScrollController برای ListView
-              primary: false, // جلوگیری از استفاده از PrimaryScrollController
-              shrinkWrap: true, // تنظیم اندازه بر اساس محتوا بدون اسکرول داخلی
-              children: [
-                Html(
-                  data: text,
-                  style: {
-                    '*': Style(
-                        textAlign: TextAlign.justify,
-                        fontSize: FontSize(widget.style.fontSize!),
-                        fontFamily: widget.style.fontFamily,
-                        color: widget.style.color),
-                  },
-                  extensions: [
-                    TagExtension(
-                      tagsToExtend: {"img"},
-                      builder: (imageContext) {
-                        final url = imageContext.attributes['src']!
-                            .replaceAll('../', '');
-                        var content = Uint8List.fromList(
-                            widget.document.Content!.Images![url]!.Content!);
-                        return Image.memory(
-                          content,
-                          width: 200,
-                          height: 200,
-                        );
-                      },
-                    ),
-                  ],
+        onTap: () {
+          setState(() {});
+        },
+        //   onTap: widget.onTextTap,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                margin: const EdgeInsets.only(top: 40),
+                child: Scrollbar(
+                  scrollbarOrientation: ScrollbarOrientation.right,
+                  interactive: true,
+                  controller: _pageScrollController,
+                  thumbVisibility: true,
+                  child: ListView(
+                    controller: _pageScrollController,
+                    primary: false,
+                    shrinkWrap: true,
+                    children: [
+                      //   if (hasText && !hasImage)
+                      ValueListenableBuilder(
+                          valueListenable: paragraphList,
+                          builder: (context, value, child) {
+                            print('////////////////');
+
+                            String currentText =
+                                value.elementAt(_currentPageIndex);
+                            print(currentText);
+
+                            var htmlText =
+                                HTML.toRichText(context, currentText);
+
+                            return SelectableText.rich(
+                              textAlign: TextAlign.justify,
+                              TextSpan(
+                                children: [htmlText.text],
+                                style: TextStyle(
+                                  leadingDistribution:
+                                      TextLeadingDistribution.proportional,
+                                  fontSize: widget.style.fontSize,
+                                  fontFamily: widget.style.fontFamily,
+                                  color: widget.style.color,
+                                ),
+                              ),
+                              contextMenuBuilder: (_, EditableTextState state) {
+                                state1 = state;
+                                return AdaptiveTextSelectionToolbar(
+                                  anchors: state.contextMenuAnchors,
+                                  children: (!state.textEditingValue.selection
+                                          .isCollapsed)
+                                      ? toolbarSelectionActions(state, colors)
+                                      : _toolbarActions(state),
+                                );
+                              },
+                            );
+                          })
+
+                      // else
+                      //   Html(
+                      //     data: paragraphList.value[_currentPageIndex],
+                      //     style: {
+                      //       'html': Style(
+                      //         textAlign: TextAlign.justify,
+                      //         fontSize: FontSize(widget.style.fontSize!),
+                      //         fontFamily: widget.style.fontFamily,
+                      //         color: widget.style.color,
+                      //       ),
+                      //     },
+                      //     extensions: [
+                      //       TagExtension(
+                      //         tagsToExtend: {"img"},
+                      //         builder: (imageContext) {
+                      //           final url = imageContext.attributes['src']!
+                      //               .replaceAll('../', '');
+                      //           var content = Uint8List.fromList(widget
+                      //               .document.Content!.Images![url]!.Content!);
+                      //           return Image.memory(
+                      //             content,
+                      //           );
+                      //         },
+                      //       ),
+                      //     ],
+                      //   ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: 20),
+            ],
           ),
         ),
       );
     }).toList();
   }
 
+  List<Color> colors = [
+    Color(0xFFFFFF00),
+    Color(0xFF00FFFF),
+    Color(0xFFFF69B4),
+    Color(0xFF90EE90),
+    Color(0xFFFFA07A),
+    Color(0xFFDDA0DD),
+  ];
+  List<Widget> toolbarSelectionActions(
+      EditableTextState state, List<Color> options) {
+    return [
+      Padding(
+        padding: const EdgeInsets.all(6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Material(
+              borderRadius: BorderRadius.circular(50),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(50),
+                onTap: () {
+                  applyHighlight(
+                    state: state,
+                    index: _currentPageIndex - 1,
+                    tag: 'tgYellow',
+                  );
+                },
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFFF00),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              borderRadius: BorderRadius.circular(50),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(50),
+                onTap: () {
+                  applyHighlight(
+                    state: state,
+                    index: _currentPageIndex,
+                    tag: 'tgCyan',
+                  );
+                },
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF00FFFF),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              borderRadius: BorderRadius.circular(50),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(50),
+                onTap: () {
+                  applyHighlight(
+                    state: state,
+                    index: _currentPageIndex,
+                    tag: 'tgPink',
+                  );
+                },
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFF69B4),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              borderRadius: BorderRadius.circular(50),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(50),
+                onTap: () {
+                  applyHighlight(
+                    state: state,
+                    index: _currentPageIndex,
+                    tag: 'tgGreen',
+                  );
+                },
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF90EE90),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              borderRadius: BorderRadius.circular(50),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(50),
+                onTap: () {
+                  applyHighlight(
+                    state: state,
+                    index: _currentPageIndex,
+                    tag: 'tgOrange',
+                  );
+                },
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFA07A),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              borderRadius: BorderRadius.circular(50),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(50),
+                onTap: () {
+                  applyHighlight(
+                    state: state,
+                    index: _currentPageIndex,
+                    tag: 'tgLilac',
+                  );
+                },
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFDDA0DD),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              borderRadius: BorderRadius.circular(50),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(50),
+                onTap: () {
+                  applyHighlight(
+                    state: state,
+                    index: _currentPageIndex,
+                    tag: null,
+                  );
+                },
+                child: const Icon(Icons.close),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  static List<Widget> _toolbarActions(EditableTextState state) {
+    return [
+      const Material(
+        color: Colors.transparent,
+      ),
+    ];
+  }
+
+  static void applyHighlight({
+    required EditableTextState state,
+    required String? tag,
+    required int index,
+  }) {
+    String paragraphText = paragraphList.value[index];
+    final selectedStartIndex = state.textEditingValue.selection.start;
+    final selectedEndIndex = state.textEditingValue.selection.end;
+
+    final initialTagRegExp = RegExp(r'^<[^>]+>');
+    final lastTagRegExp = RegExp(r'</[^>]+>$');
+
+    final initialTagMatch = initialTagRegExp.firstMatch(paragraphText);
+    final lastTagMatch = lastTagRegExp.firstMatch(paragraphText);
+
+    final initialTag = initialTagMatch != null ? initialTagMatch.group(0)! : '';
+    final lastTag = lastTagMatch != null ? lastTagMatch.group(0)! : '';
+
+    paragraphText =
+        paragraphText.replaceAll(initialTag, '').replaceAll(lastTag, '');
+
+    final spanStartTagRegExp = RegExp(r'^<span [^>]+>');
+    final spanEndTagRegExp = RegExp(r'</span>$');
+
+    final spanStartTagMatch = spanStartTagRegExp.firstMatch(paragraphText);
+    final spanEndTagMatch = spanEndTagRegExp.firstMatch(paragraphText);
+
+    final spanStartTag =
+        spanStartTagMatch != null ? spanStartTagMatch.group(0)! : '';
+    final spanEndTag = spanEndTagMatch != null ? spanEndTagMatch.group(0)! : '';
+
+    paragraphText =
+        paragraphText.replaceAll(spanStartTag, '').replaceAll(spanEndTag, '');
+
+    final htmlStartIndex = mapPlainTextIndexToHtmlIndex(
+      paragraphText,
+      selectedStartIndex,
+    );
+    final htmlEndIndex = mapPlainTextIndexToHtmlIndex(
+      paragraphText,
+      selectedEndIndex,
+    );
+
+    final formattedText = existingColorTagFormat(
+      beforeSelectedText: paragraphText.substring(0, htmlStartIndex),
+      selectedText: paragraphText.substring(htmlStartIndex, htmlEndIndex),
+      afterSelectedText: paragraphText.substring(htmlEndIndex),
+      tag: tag,
+    );
+
+    final formattedParagraph = '$initialTag'
+        '$spanStartTag'
+        '$formattedText'
+        '$spanEndTag'
+        '$lastTag';
+    // if (html_parser.parse(formattedParagraph).outerHtml.isNotEmpty) {
+    paragraphList.value[index] = formattedParagraph;
+
+    // highlightedStream.value = SelectedTextModel(
+    //   paragraphIndex: index,
+    //   tag: tag,
+    //   paragraphText: formattedParagraph,
+    //   selectedText: state.textEditingValue.selection.textInside(
+    //     state.textEditingValue.text,
+    //   ),
+    // );
+    paragraphList.notifyListeners();
+    highlightedStream.notifyListeners();
+    //  }
+  }
+
+  static int mapPlainTextIndexToHtmlIndex(String html, int plainTextIndex) {
+    int plainIndex = 0;
+    int htmlIndex = 0;
+
+    while (htmlIndex < html.length && plainIndex < plainTextIndex) {
+      if (html[htmlIndex] == '<') {
+        while (html[htmlIndex] != '>') {
+          htmlIndex++;
+        }
+        htmlIndex++;
+      } else {
+        plainIndex++;
+        htmlIndex++;
+      }
+    }
+    print('hrml $htmlIndex');
+    return htmlIndex;
+  }
+
+  static String existingColorTagFormat({
+    required String beforeSelectedText,
+    required String selectedText,
+    required String afterSelectedText,
+    required String? tag,
+  }) {
+    String before = beforeSelectedText;
+    String selected = selectedText;
+    String after = afterSelectedText;
+
+    final openTagRegExp =
+        RegExp(r'<(tg(?:Yellow|Cyan|Pink|Green|Orange|Lilac))>');
+    final closeTagRegExp =
+        RegExp(r'</(tg(?:Yellow|Cyan|Pink|Green|Orange|Lilac))>');
+    final fullTagRegExp =
+        RegExp(r'<(tg(?:Yellow|Cyan|Pink|Green|Orange|Lilac))>(.*?)</\1>');
+
+    while (after.startsWith(closeTagRegExp)) {
+      final match = closeTagRegExp.firstMatch(after);
+      if (match != null) {
+        final tag = match.group(1);
+        if (tag != null) {
+          final closingTag = '</$tag>';
+          after = after.substring(closingTag.length);
+          selected = '$selected$closingTag';
+        }
+      }
+    }
+
+    while (fullTagRegExp.hasMatch(selected)) {
+      final match = openTagRegExp.allMatches(selected).toList();
+      for (var element in match) {
+        final tag = element.group(1);
+        if (tag != null) {
+          selected =
+              selected.replaceAll('<$tag>', '').replaceAll('</$tag>', '');
+        }
+      }
+    }
+
+    if (openTagRegExp.hasMatch(selected)) {
+      final match = openTagRegExp.firstMatch(selected);
+      final tag = match?.group(1);
+      if (tag != null) {
+        after = '<$tag>$after';
+        selected = selected.replaceAll(match?.group(0) ?? '', '');
+      }
+    }
+
+    if (closeTagRegExp.hasMatch(selected)) {
+      final match = closeTagRegExp.firstMatch(selected);
+      final tag = match?.group(1);
+      if (tag != null) {
+        before = '$before</$tag>';
+        selected = selected.replaceAll(match?.group(0) ?? '', '');
+      }
+    }
+
+    return tag != null
+        ? '$before<$tag>$selected</$tag>$after'
+        : '$before$selected$after';
+  }
+
   @override
   Widget build(BuildContext context) {
-    // print('FutureBuilder called');
-
     return FutureBuilder(
       future: paginateFuture,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return Center(
-                child: Container(
-              height: 100,
-              width: MediaQuery.sizeOf(context).width / 1.5,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.white,
-              ),
-              child: const Center(
-                  child: Text(
-                'کتاب در حال اماده سازی میباشد ',
-                style: TextStyle(fontSize: 16, color: Colors.black),
-              )),
-            ));
+            return SizedBox();
+          //   return Center(
+          //       child: Container(
+          //     height: 100,
+          //     width: MediaQuery.sizeOf(context).width / 1.5,
+          //     decoration: BoxDecoration(
+          //       borderRadius: BorderRadius.circular(16),
+          //       color: Colors.white,
+          //     ),
+          //     child: const Center(
+          //         child: Text(
+          //       'کتاب در حال اماده سازی میباشد ',
+          //       style: TextStyle(fontSize: 16, color: Colors.black),
+          //     )),
+          //   ));
           default:
             return Stack(
               children: [
@@ -416,26 +787,28 @@ class _PagingWidgetState extends State<PagingWidget> {
                           key: _pageController,
 
                           isRightSwipe: true,
-                          initialIndex: widget.starterPageIndex != 0
-                              ? (pages.isNotEmpty &&
-                                      widget.starterPageIndex < pages.length
-                                  ? widget.starterPageIndex
-                                  : 0)
-                              : widget.starterPageIndex,
-                          backgroundColor: widget.backColor,
+                          // initialIndex: widget.starterPageIndex != 0
+                          //     ? (pages.isNotEmpty &&
+                          //             widget.starterPageIndex < pages.length
+                          //         ? widget.starterPageIndex
+                          //         : 0)
+                          //     : widget.starterPageIndex,
+                          initialIndex: _currentPageIndex,
+                          backgroundColor: widget.backColor, children: pages,
                           onPageFlip: (index) {
                             setState(() {
                               _currentPageIndex = index;
                             });
-
+                            print('_currentPageIndex $_currentPageIndex');
+                            print('index $index');
                             if (_currentPageIndex == pages.length - 1) {
                               widget.onLastPage(index, pages.length);
                             }
                             widget.onPageFlip(index, pages.length);
                             if (_currentPageIndex == pages.length - 5) {}
+                            _load();
                           }, //widget.starterPageIndex,
                           //initialIndex: initialPageIndex,
-                          children: pages,
                         ),
                       ),
                     ),
@@ -467,439 +840,3 @@ class _PagingWidgetState extends State<PagingWidget> {
     );
   }
 }
-
-/*
-Future<List<String>> _paginate(int pagesToLoad) async {
-    _pageTexts.clear();
-    List<String> newPages = [];
-    print('_paginate start');
-    final textSpan = TextSpan(
-      text: widget.textContent,
-      style: widget.style,
-    );
-    textPainter.text = textSpan;
-    print('textPainter');
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: _pagewidth,
-    );
-    print('mid');
-    final lines = textPainter.computeLineMetrics();
-    int currentLine = 0;
-    while (currentLine < lines.length && newPages.length < pagesToLoad) {
-      int start = textPainter
-          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-          .offset;
-      int endLine = currentLine;
-      // while (currentLine < lines.length) {
-      //   int start = textPainter
-      //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-      //       .offset;
-      // int endLine = currentLine;
-      double currentHeight = 0.0;
-      // while (endLine < lines.length &&
-      //     lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
-      //   endLine++;
-      // }
-      // محاسبه ارتفاع خطوط تا زمانی که به ارتفاع صفحه برسد
-      // while (endLine < lines.length &&
-      //     currentHeight + lines[endLine].height <= _pageHeight) {
-      //   currentHeight += lines[endLine].height;
-      //   endLine++;
-      // }
-
-      // تغییر: محاسبه ارتفاع خطوط تا زمانی که به ارتفاع صفحه برسد
-      while (endLine < lines.length &&
-          currentHeight + lines[endLine].height <= _pageHeight) {
-        currentHeight += lines[endLine].height;
-        endLine++;
-      }
-      // int end = textPainter
-      //     .getPositionForOffset(Offset(0, lines[endLine - 1].baseline))
-      //     .offset;
-      // تغییر: پایان هر صفحه را با ارتفاع مناسب محاسبه کنید
-      print('_paginate تغییر');
-      int end = textPainter
-          .getPositionForOffset(Offset(
-              0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-          .offset;
-      final pageContent = widget.textContent.substring(start, end);
-      newPages.add(pageContent);
-      currentLine = endLine;
-      //   int end = textPainter.getPositionForOffset(Offset(0, lines[endLine - 1].baseline + lines[endLine - 1].height)).offset;
-      // final pageContent = widget.textContent.substring(start, end);
-      // newPages.add(pageContent);
-      // currentLine = endLine;
-    }
-    print('_paginate end');
-    return newPages;
-  }
-*/
-
-/*
-Future<int> _calculateTotalPagesnumbers() async {
-    print('_pageHeight');
-     print(_pageHeight);
-  print(_pagewidth);
-   print('ffffffffff');
-    print( widget.style.fontSize);
-    _pageTexts.clear();
-
-    List<String> newPages = [];
-    print('numbers start');
-    final textSpan = TextSpan(
-      text: widget.textContentnumber,
-      style: widget.style,
-    );
-
-    textPainter.text = textSpan;
-    print('numbers textPainter');
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: MediaQuery.of(context).size.width - 20.0,
-    );
-    print('numbers mid');
-    final lines = textPainter.computeLineMetrics();
-    int currentLine = 0;
-    while (currentLine < lines.length) {
-      int start = textPainter
-          .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-          .offset;
-      int endLine = currentLine;
-
-      while (endLine < lines.length &&
-          lines[endLine].baseline < lines[currentLine].baseline + _pageHeight) {
-        endLine++;
-      }
-      int end = textPainter
-          .getPositionForOffset(Offset(
-              0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-          .offset;
-      final pageContent = widget.textContentnumber.substring(start, end);
-      newPages.add(pageContent);
-      currentLine = endLine;
-    }
-    print('numbers end');
-    return newPages.length;
-  }
-*/
-
-// Future<int> _calculateTotalPagess(
-//   String chapterContent,
-// ) async {
-//   _pageTexts.clear();
-
-//   List<String> newPages = [];
-//   final textSpan = TextSpan(
-//     text: chapterContent,
-//     style: widget.style,
-//   );
-
-//   textPainter.text = textSpan;
-
-//   textPainter.layout(
-//     minWidth: 0,
-//     maxWidth: MediaQuery.of(context).size.width - 20.0,
-//   );
-
-//   final lines = textPainter.computeLineMetrics();
-//   int currentLine = 0;
-//   while (currentLine < lines.length) {
-//     int start = textPainter
-//         .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-//         .offset;
-//     int endLine = currentLine;
-
-//     while (endLine < lines.length &&
-//         lines[endLine].baseline <
-//             lines[currentLine].baseline + _pageHeight - 320) {
-//       endLine++;
-//     }
-//     int end = textPainter
-//         .getPositionForOffset(Offset(
-//             0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-//         .offset;
-//     final pageContent = chapterContent.substring(start, end);
-//     newPages.add(pageContent);
-//     currentLine = endLine;
-//   }
-//   print('numbers end');
-//   return newPages.length;
-// }
-
-
-/*
-  // _pageTexts.clear();
-    // print('ffffffffff');
-    // print(widget.style.fontSize);
-    // List<String> newPages = [];
-    // print('_calculateTotalPages start');
-    // final textSpan = TextSpan(
-    //   text: widget.textContentnumber,
-    //   style: widget.style,
-    // );
-
-    // textPainter.text = textSpan;
-    // print('_calculateTotalPages textPainter');
-    // textPainter.layout(
-    //   minWidth: 0,
-    //   maxWidth: MediaQuery.of(context).size.width - 20.0,
-    // );
-    // print('_calculateTotalPages mid');
-    // final lines = textPainter.computeLineMetrics();
-    // int currentLine = 0;
-    // while (currentLine < lines.length) {
-    //   int start = textPainter
-    //       .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-    //       .offset;
-    //   int endLine = currentLine;
-
-    //   while (endLine < lines.length &&
-    //       lines[endLine].baseline <
-    //           lines[currentLine].baseline + _pageHeight - 320) {
-    //     endLine++;
-    //   }
-    //   print('_calculateTotalPages mid 22');
-    //   int end = textPainter
-    //       .getPositionForOffset(Offset(
-    //           0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-    //       .offset;
-    //   final pageContent = widget.textContentnumber.substring(start, end);
-    //   newPages.add(pageContent);
-    //   currentLine = endLine;
-    // }
-    // print('_calculateTotalPages end');
-    // return newPages; */
-
-
-/////
-///
-///   epub سالم صفحه بندی ولی عمس نمیورذ
-/*
-Future<List<String>> _calculateTotalPages() async {
-    _pageTexts.clear();
-    double currentHeight = 0.0;
-    String currentPageContent = '';
-    List<String> newPages = [];
-    double imageHeight = _pageHeight- 320;
-    double textHeight = _pageHeight - 320;
-
-    var document = html_parser.parse(widget.innerHtmlContent);
-    print(widget.innerHtmlContent);
-    var body = document.body!;
-    var elements = body.children;
-
-    for (var element in elements) {
-      print("=================================== start element nodes ======================================");
-      print(element.children);
-      print("=================================== end element nodes ========================================");
-      // var a = element.nodes ; 
-      // print(element.text);
-   if (element.outerHtml.contains('img')) {
-  
-        // print('///////////////////////////////////////');
-        //RegExp regExp = RegExp(r'<img\s+[^>]*src=[\'"]([^\'"]+)[\'"][^>]*>')
-        RegExp regExp = RegExp(
-          r'<img\s+[^>]*src="([^"]+)"[^>]*>',
-        );
-        Iterable<RegExpMatch> matches = regExp.allMatches(element.outerHtml);
-
-        for (var match in matches) {
-          // print(match.group(1));
-
-          currentPageContent +=
-              // '<img src="${element.attributes['src']}" />'; // P
-              '<img src="${match.group(1)}" />'; 
-        }
-        currentHeight += imageHeight;
-        if (currentHeight > _pageHeight) {
-          newPages.add(currentPageContent);
-          currentPageContent = '';
-          currentHeight = 0.0;
-        }
-      } else {
-        var text = element.text;
-        final textSpan = TextSpan(
-          text: text,
-          style: widget.style
-        );
-
-        textPainter.text = textSpan;
-        textPainter.layout(
-          minWidth: 0,
-          maxWidth: MediaQuery.of(context).size.width - 20.0,
-        );
-
-        final lines = textPainter.computeLineMetrics();
-        int currentLine = 0;
-        while (currentLine < lines.length) {
-          int start = textPainter
-              .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-              .offset;
-          int endLine = currentLine;
-
-          while (endLine < lines.length &&
-              lines[endLine].baseline <
-                  lines[currentLine].baseline + _pageHeight - 320) {
-            endLine++;
-          }
-          int end = textPainter
-              .getPositionForOffset(Offset(
-                  0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-              .offset;
-          final pageContent = text.substring(start, end);
-          currentPageContent += pageContent;
-          currentHeight += textHeight;
-
-          if (currentHeight > _pageHeight) {
-            newPages.add(currentPageContent);
-            currentPageContent = '';
-            currentHeight = 0.0;
-          }
-
-          currentLine = endLine;
-        }
-      }
-    }
-
-    // اضافه کردن آخرین صفحه
-    if (currentPageContent.isNotEmpty) {
-      newPages.add(currentPageContent);
-    }
-    return newPages;
-  }*/
-
-
-
-  /*
-
-  List<String> parseElementWithChildren1(element) {
-    List<String> images = [];
-
-    if (element.localName == 'img') {
-      String src = element.attributes['src'] ?? 'No source';
-
-      images.add(src);
-    }
-
-    for (var child in element.children) {
-      images.addAll(parseElementWithChildren1(child));
-    }
-
-    return images;
-  }
-// بررسی تگ ها 
-  String parseElementWithChildren(element, String tagName) {
-    if (element.localName == tagName) {
-      print(tagName);
-      print(element.attributes['src']);
-      String v = element.attributes['src'];
-      return tagName;
-    }
-
-    for (var child in element.children) {
-      var result = parseElementWithChildren(child, tagName);
-      if (result != null) {
-        print(result);
-        return result;
-      }
-    }
-
-    return 'null';
-  }
-  */
-/*
- // int start = textPainter
-  //     .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-  //     .offset;
-  // int end = textPainter
-  //     .getPositionForOffset(Offset(
-  //         0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-  //     .offset;
-  //    final pageContent = text.substring(start, end);*/
-  
-  /**
-   *    // double currentHeight = 0.0;
-    // String currentPageContent = '';
-    // List<String> newPages = [];
-    // double imageHeight = _pageHeight - 320;
-    // double textHeight = _pageHeight - 320;
-
-    // var document = html_parser.parse(widget.innerHtmlContent);
-    // var body = document.body!;
-    // var elements = body.children;
-
-    // for (var element in elements) {
-    //   if (element.localName == 'div') {
-    //     List<String> images = parseElementWithChildren1(element);
-
-    //     if (images.isNotEmpty) {
-    //       for (var imageSrc in images) {
-    //         print('Image information: $imageSrc');
-
-    //         // فرض کنید ارتفاع هر تصویر 200 پیکسل باشد
-    //         double imageHeight = 200;
-
-    //         // اضافه کردن تصویر به محتوای صفحه
-
-    //         // currentPageContent += '<img src="$imageSrc" />';
-    //         currentPageContent += '<p > its here must shoud be image </p>';
-    //         currentHeight += imageHeight;
-    //         // بررسی ارتفاع فعلی و ایجاد صفحه جدید در صورت لزوم
-    //         if (currentHeight > _pageHeight) {
-    //           newPages.add(currentPageContent);
-    //           currentPageContent = '';
-    //           currentHeight = 0.0;
-    //         }
-    //       }
-    //     }
-    //   }
-    //   //else if(true) {
-    //   var text = element.text;
-    //   if (text.isNotEmpty) {
-    //     final textSpan = TextSpan(text: text, style: widget.style);
-
-    //     textPainter.text = textSpan;
-    //     textPainter.layout(
-    //       minWidth: 0,
-    //       maxWidth: MediaQuery.of(context).size.width - 20.0,
-    //     );
-
-    //     final lines = textPainter.computeLineMetrics();
-    //     int currentLine = 0;
-    //     while (currentLine < lines.length) {
-    //       int start = textPainter
-    //           .getPositionForOffset(Offset(0, lines[currentLine].baseline))
-    //           .offset;
-    //       int endLine = currentLine;
-
-    //       while (endLine < lines.length &&
-    //           lines[endLine].baseline <
-    //               lines[currentLine].baseline + _pageHeight - 320) {
-    //         endLine++;
-    //       }
-    //       int end = textPainter
-    //           .getPositionForOffset(Offset(
-    //               0, lines[endLine - 1].baseline + lines[endLine - 1].height))
-    //           .offset;
-    //       final pageContent = text.substring(start, end);
-    //       currentPageContent += pageContent;
-    //       currentHeight += textHeight;
-
-    //       if (currentHeight > _pageHeight) {
-    //         newPages.add(currentPageContent);
-    //         currentPageContent = '';
-    //         currentHeight = 0.0;
-    //       }
-
-    //       currentLine = endLine;
-    //     }
-    //   }
-    // }
-    // // }
-
-    // if (currentPageContent.isNotEmpty) {
-    //   newPages.add(currentPageContent);
-    // }
-    // return newPages;
-   */
