@@ -4,19 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:xml/xml_events.dart' as xmle;
 
 class HTML {
-  static TextSpan toTextSpan(BuildContext context, String htmlContent,
+  static TextSpan toTextSpan(
+      BuildContext context, String htmlContent, Color backcolor,
       {Function linksCallback = defaultLinksCallback}) {
-    Parser p = Parser(context, htmlContent, linksCallback: linksCallback);
-    return TextSpan(text: "", children: p.parse());
+    Parser p =
+        Parser(context, htmlContent, backcolor, linksCallback: linksCallback);
+    return TextSpan(
+      text: "",
+      children: p.parse(),
+    );
   }
 
-  static RichText toRichText(BuildContext context, String htmlContent,
+  static RichText toRichText(
+      BuildContext context, String htmlContent, Color backcolor,
       {Function linksCallback = defaultLinksCallback}) {
     return RichText(
         textAlign: TextAlign.justify,
         text: toTextSpan(
           context,
           htmlContent,
+          backcolor,
           linksCallback: linksCallback,
         ));
   }
@@ -35,17 +42,18 @@ class Parser {
   final _stack = [];
   var _events;
   late Function _linksCallback;
-
-  Parser(BuildContext context, String data,
+  late Color _backcolor;
+  Parser(BuildContext context, String data, Color backcolor,
       {Function linksCallback = defaultLinksCallback}) {
     _events = xmle.parseEvents(data);
     _linksCallback = linksCallback;
+    _backcolor = backcolor;
   }
 
   TextSpan _getTextSpan(text, style) {
     var rules = style.split(";").where((item) => !item.trim().isEmpty);
     TextStyle textStyle = const TextStyle();
-    textStyle = textStyle.apply(color: const Color(0xff000000));
+    textStyle = textStyle.apply(color: _backcolor);
     var isLink = false;
     var link = "";
     rules.forEach((String rule) {

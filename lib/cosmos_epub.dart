@@ -78,7 +78,7 @@ class CosmosEpub {
   static Future<void> openAssetBook({
     required String assetPath,
     required BuildContext context,
-    Color accentColor = Colors.indigoAccent,
+    Color accentColor = Colors.grey,
     Function(int currentPage, int totalPages)? onPageFlip,
     Function(int lastPageIndex)? onLastPage,
     required String bookId,

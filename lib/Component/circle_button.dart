@@ -20,21 +20,23 @@ class CircleButton extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(1.h),
       decoration: BoxDecoration(
-          shape: BoxShape.circle,
+          //   shape: BoxShape.circle,
           border: Border.all(
-              width: 2.w,
-              color: staticThemeId == id ? accentColor : Colors.grey)),
+              width: 1,
+              color: staticThemeId == id ? Color(0xffB0276D) : Colors.grey),
+          borderRadius: BorderRadius.circular(8)),
       child: Container(
-        width: 35.w,
-        height: 35.h,
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
-          color: backColor,
-          shape: BoxShape.circle,
-        ),
+            color: backColor, borderRadius: BorderRadius.circular(8)
+            //  shape: BoxShape.circle,
+            ),
         child: Center(
           child: Text(
-            "T",
-            style: TextStyle(color: fontColor),
+            "ب",
+            style: TextStyle(
+                color: fontColor, fontSize: 24, fontWeight: FontWeight.w700),
           ),
         ),
       ),

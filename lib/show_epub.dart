@@ -341,17 +341,30 @@ class ShowEpubState extends State<ShowEpub> {
             child: SingleChildScrollView(
                 child: StatefulBuilder(
                     builder: (BuildContext context, setState) => SizedBox(
-                          height: 170.h,
+                          // height: 170.h,
+                          height: 120.h,
                           child: Column(
                             children: [
                               Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
                                 margin: EdgeInsets.symmetric(
                                     horizontal: 10.h, vertical: 8.w),
                                 height: 45.h,
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
+                                    Text(
+                                      'رنگ پس زمینه ',
+                                      style: TextStyle(
+                                          color: fontColor,
+                                          fontSize: 18,
+                                          fontFamily: 'IRANSans',
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
                                     GestureDetector(
                                       onTap: () {
                                         print('loading on ');
@@ -359,7 +372,7 @@ class ShowEpubState extends State<ShowEpub> {
                                       },
                                       child: CircleButton(
                                         backColor: cVioletishColor,
-                                        fontColor: Colors.red,
+                                        fontColor: Colors.white,
                                         id: 1,
                                         accentColor: widget.accentColor,
                                       ),
@@ -505,7 +518,7 @@ class ShowEpubState extends State<ShowEpub> {
                                         Row(
                                           children: [
                                             Text(
-                                              "Aa",
+                                              "ب",
                                               style: TextStyle(
                                                   fontSize: 15.sp,
                                                   color: fontColor,
@@ -574,7 +587,7 @@ class ShowEpubState extends State<ShowEpub> {
                                               ),
                                             ),
                                             Text(
-                                              "Aa",
+                                              "ب",
                                               style: TextStyle(
                                                   color: fontColor,
                                                   fontSize: 20.sp,
@@ -596,7 +609,7 @@ class ShowEpubState extends State<ShowEpub> {
     staticThemeId = id;
     if (id == 1) {
       backColor = cVioletishColor;
-      fontColor = Colors.black;
+      fontColor = Colors.white;
     } else if (id == 2) {
       backColor = cBluishColor;
       fontColor = Colors.black;
@@ -646,31 +659,25 @@ class ShowEpubState extends State<ShowEpub> {
     for (var element in elements) {
       if (element.localName == 'title') {
         // قبل از شروع فصل جدید، یک صفحه خالی اضافه کن
-        if (currentPageContent.isNotEmpty) {
-          newPages.add(currentPageContent); // اضافه کردن محتوای صفحه فعلی
-          currentPage++; // انتقال به صفحه جدید
-        }
 
-        // // افزودن صفحه خالی
-        // newPages.add(''); // یک صفحه خالی اضافه می‌کنیم
-        // currentPage++;
-
-        // اضافه کردن عنوان فصل به صفحه جدید
         String centeredTitle = '''
     <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: row;">
       <h1 style="font-size: 2em;">${element.text}</h1>
     </div>
     ''';
-        newPages.add(centeredTitle); // عنوان فصل را اضافه می‌کنیم
-        titlePageNumbers.add(currentPage);
-        currentPage++;
-        currentPageContent = '';
-        currentHeight = 0.0;
+        currentHeight = 200;
+        if (currentHeight < maxHeight) {
+          newPages.add('</br>$centeredTitle');
+          titlePageNumbers.add(currentPage);
+          currentPage++;
+          currentPageContent = '';
+          currentHeight = 0.0;
+        }
       }
       processDivElement(element, (String imageSrc) {
         currentPageContent += '<img src="$imageSrc" />';
 
-        currentHeight += 200;
+        currentHeight += maxHeight;
 
         if (currentHeight > maxHeight - 300) {
           newPages.add(currentPageContent);
@@ -689,9 +696,7 @@ class ShowEpubState extends State<ShowEpub> {
               color: fontColor),
         );
         textPainter.text = textSpan;
-        textPainter.layout(
-          maxWidth: maxWidth,
-        );
+        textPainter.layout(maxWidth: maxWidth);
 
         final lines = textPainter.computeLineMetrics();
         int currentLine = 0;
@@ -730,7 +735,6 @@ class ShowEpubState extends State<ShowEpub> {
         }
       });
     }
-    ;
 
     if (currentPageContent.isNotEmpty) {
       newPages.add(currentPageContent);
@@ -768,7 +772,7 @@ class ShowEpubState extends State<ShowEpub> {
           //  onTextFound(text);
           //onTextFound('$text ss');
 
-          onTextFound(text + '\n <br>');
+          onTextFound(text + '\n ');
         }
       }
       if (child.children.isNotEmpty) {
@@ -1092,7 +1096,7 @@ class ShowEpubState extends State<ShowEpub> {
                   ],
                 ),
                 AnimatedContainer(
-                  //   height: showHeader ? 50.h : 0,
+                  // height: showHeader ? 50.h : 0,
                   height: 50,
                   duration: const Duration(milliseconds: 100),
                   color: backColor,
@@ -1125,17 +1129,26 @@ class ShowEpubState extends State<ShowEpub> {
                             onTap: () {
                               updateFontSettings();
                             },
-                            child: Container(
-                              width: 40.w,
-                              alignment: Alignment.center,
-                              child: Text(
-                                "Aa",
-                                style: TextStyle(
-                                    fontSize: 18.sp,
-                                    color: fontColor,
-                                    fontWeight: FontWeight.bold),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(
+                                Icons.settings,
+                                color: fontColor,
+                                size: 25,
                               ),
-                            )),
+                            )
+                            // Container(
+                            //   width: 40.w,
+                            //   alignment: Alignment.center,
+                            //   child: Text(
+                            //     "Aa",
+                            //     style: TextStyle(
+                            //         fontSize: 18.sp,
+                            //         color: fontColor,
+                            //         fontWeight: FontWeight.bold),
+                            //   ),
+                            // )
+                            ),
                         // SizedBox(
                         //   width: 5.w,
                         // ),

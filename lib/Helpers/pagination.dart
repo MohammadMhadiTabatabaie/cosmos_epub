@@ -167,28 +167,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   void _load() async {
-    paginateFuture = _calculateTotalPages();
-    final newPages = await paginateFuture;
-
-    setState(() {
-      _pageTexts.addAll(newPages);
-      pages = _buildPageWidgets(_pageTexts);
-    });
-    contextMenuBuilder:
-    (_, EditableTextState state) {
-      //  state1 = state;
-      return AdaptiveTextSelectionToolbar(
-        anchors: state.contextMenuAnchors,
-        children: (!state.textEditingValue.selection.isCollapsed)
-            ? toolbarSelectionActions(state, colors)
-            : _toolbarActions(state),
-      );
-    };
-    // applyHighlight(
-    //   state: state1!,
-    //   index: _currentPageIndex,
-    //   tag: null,
-    // );
+    paragraphList.notifyListeners();
   }
 
   void update() async {
@@ -288,7 +267,7 @@ class _PagingWidgetState extends State<PagingWidget> {
         }
       });
     }
-    ;
+
 // افزودن محتوای باقی‌مانده صفحه آخر
     if (currentPageContent.isNotEmpty) {
       newPages.add(currentPageContent);
@@ -354,7 +333,7 @@ class _PagingWidgetState extends State<PagingWidget> {
             children: [
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 margin: const EdgeInsets.only(top: 40),
                 child: Scrollbar(
                   scrollbarOrientation: ScrollbarOrientation.right,
@@ -373,8 +352,8 @@ class _PagingWidgetState extends State<PagingWidget> {
                               String currentText =
                                   value.elementAt(_currentPageIndex);
 
-                              var htmlText =
-                                  HTML.toRichText(context, currentText);
+                              var htmlText = HTML.toRichText(
+                                  context, currentText, widget.style.color!);
 
                               return SelectableText.rich(
                                 textAlign: TextAlign.justify,

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
 ///Library theme colors
-const cVioletishColor = Color(0xffe4e4ff);
+const cVioletishColor = Color(0xff3E434B);
 const cBluishColor = Color(0xffE2E5EA);
-const cPinkishColor = Color(0xffffdedb);
+const cPinkishColor = Color(0xffE0DAB6);
