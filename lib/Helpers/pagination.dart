@@ -91,7 +91,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   String combinedText = '';
   static var paragraphList = ValueNotifier<List<String>>([]);
   static final highlightedStream = ValueNotifier<SelectedTextModel?>(null);
-  EditableTextState? state1;
+  //late EditableTextState state1;
   int currentPage = 0;
   @override
   void initState() {
@@ -168,12 +168,28 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   void _load() async {
-    // paginateFuture = _calculateTotalPages();
-    applyHighlight(
-      state: state1!,
-      index: _currentPageIndex,
-      tag: null,
-    );
+    paginateFuture = _calculateTotalPages();
+    final newPages = await paginateFuture;
+
+    setState(() {
+      _pageTexts.addAll(newPages);
+      pages = _buildPageWidgets(_pageTexts);
+    });
+    contextMenuBuilder:
+    (_, EditableTextState state) {
+      //  state1 = state;
+      return AdaptiveTextSelectionToolbar(
+        anchors: state.contextMenuAnchors,
+        children: (!state.textEditingValue.selection.isCollapsed)
+            ? toolbarSelectionActions(state, colors)
+            : _toolbarActions(state),
+      );
+    };
+    // applyHighlight(
+    //   state: state1!,
+    //   index: _currentPageIndex,
+    //   tag: null,
+    // );
   }
 
   void update() async {
@@ -377,7 +393,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                                 ),
                               ),
                               contextMenuBuilder: (_, EditableTextState state) {
-                                state1 = state;
+                                //  state1 = state;
                                 return AdaptiveTextSelectionToolbar(
                                   anchors: state.contextMenuAnchors,
                                   children: (!state.textEditingValue.selection
