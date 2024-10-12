@@ -403,7 +403,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                             })
                       else
                         Html(
-                          data: paragraphList.value[_currentPageIndex],
+                          data: text,
                           style: {
                             'html': Style(
                               textAlign: TextAlign.justify,
