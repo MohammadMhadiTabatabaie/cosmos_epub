@@ -138,7 +138,6 @@ class _PagingWidgetState extends State<PagingWidget> {
 
   @override
   void dispose() {
-    print('ffwwfakmsfklajslfkjaslfjkklsajf');
     // TODO: implement dispose
     super.dispose();
   }
@@ -371,11 +370,8 @@ class _PagingWidgetState extends State<PagingWidget> {
                         ValueListenableBuilder(
                             valueListenable: paragraphList,
                             builder: (context, value, child) {
-                              print('////////////////');
-
                               String currentText =
                                   value.elementAt(_currentPageIndex);
-                              print(currentText);
 
                               var htmlText =
                                   HTML.toRichText(context, currentText);
@@ -700,7 +696,7 @@ class _PagingWidgetState extends State<PagingWidget> {
         htmlIndex++;
       }
     }
-    print('hrml $htmlIndex');
+
     return htmlIndex;
   }
 
@@ -815,8 +811,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                             setState(() {
                               _currentPageIndex = index;
                             });
-                            print('_currentPageIndex $_currentPageIndex');
-                            print('index $index');
+
                             if (_currentPageIndex == pages.length - 1) {
                               widget.onLastPage(index, pages.length);
                             }

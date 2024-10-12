@@ -1183,17 +1183,11 @@ class ShowEpubState extends State<ShowEpub> {
     if (shouldUpdate) {
       var index = bookProgress.getBookProgress(bookId).currentChapterIndex ?? 0;
       var page = bookProgress.getBookProgress(bookId).currentPageIndex ?? 0;
-      print('شماره صفخه و فصل ::');
-      print(page);
-      print(index);
 
       ///Set page to initial and update chapter index with content
       // await bookProgress.setCurrentPageIndex(bookId, page);
       // await bookProgress.setCurrentChapterIndex(bookId, index, 0);
-      print('page number');
-      print(
-        bookProgress.getBookProgress(bookId).currentPageIndex ?? 0,
-      );
+
       reLoadChapter(init: false, index: index, page: page);
     }
   }
