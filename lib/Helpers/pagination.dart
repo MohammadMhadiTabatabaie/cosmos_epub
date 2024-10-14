@@ -345,67 +345,67 @@ class _PagingWidgetState extends State<PagingWidget> {
                     primary: false,
                     shrinkWrap: true,
                     children: [
-                      if (hasText && !hasImage)
-                        ValueListenableBuilder(
-                            valueListenable: paragraphList,
-                            builder: (context, value, child) {
-                              String currentText =
-                                  value.elementAt(_currentPageIndex);
+                      // if (hasText && !hasImage)
+                      //   ValueListenableBuilder(
+                      //       valueListenable: paragraphList,
+                      //       builder: (context, value, child) {
+                      //         String currentText =
+                      //             value.elementAt(_currentPageIndex);
 
-                              var htmlText = HTML.toRichText(
-                                  context, currentText, widget.style.color!);
+                      //         var htmlText = HTML.toRichText(
+                      //             context, currentText, widget.style.color!);
 
-                              return SelectableText.rich(
-                                textAlign: TextAlign.justify,
-                                TextSpan(
-                                  children: [htmlText.text],
-                                  style: TextStyle(
-                                    leadingDistribution:
-                                        TextLeadingDistribution.proportional,
-                                    fontSize: widget.style.fontSize,
-                                    fontFamily: widget.style.fontFamily,
-                                    color: widget.style.color,
-                                  ),
-                                ),
-                                contextMenuBuilder:
-                                    (_, EditableTextState state) {
-                                  //  state1 = state;
-                                  return AdaptiveTextSelectionToolbar(
-                                    anchors: state.contextMenuAnchors,
-                                    children: (!state.textEditingValue.selection
-                                            .isCollapsed)
-                                        ? toolbarSelectionActions(state, colors)
-                                        : _toolbarActions(state),
-                                  );
-                                },
+                      //         return SelectableText.rich(
+                      //           textAlign: TextAlign.justify,
+                      //           TextSpan(
+                      //             children: [htmlText.text],
+                      //             style: TextStyle(
+                      //               leadingDistribution:
+                      //                   TextLeadingDistribution.proportional,
+                      //               fontSize: widget.style.fontSize,
+                      //               fontFamily: widget.style.fontFamily,
+                      //               color: widget.style.color,
+                      //             ),
+                      //           ),
+                      //           contextMenuBuilder:
+                      //               (_, EditableTextState state) {
+                      //             //  state1 = state;
+                      //             return AdaptiveTextSelectionToolbar(
+                      //               anchors: state.contextMenuAnchors,
+                      //               children: (!state.textEditingValue.selection
+                      //                       .isCollapsed)
+                      //                   ? toolbarSelectionActions(state, colors)
+                      //                   : _toolbarActions(state),
+                      //             );
+                      //           },
+                      //         );
+                      //       })
+                      // else
+                      Html(
+                        data: text,
+                        style: {
+                          'html': Style(
+                            textAlign: TextAlign.justify,
+                            fontSize: FontSize(widget.style.fontSize!),
+                            fontFamily: widget.style.fontFamily,
+                            color: widget.style.color,
+                          ),
+                        },
+                        extensions: [
+                          TagExtension(
+                            tagsToExtend: {"img"},
+                            builder: (imageContext) {
+                              final url = imageContext.attributes['src']!
+                                  .replaceAll('../', '');
+                              var content = Uint8List.fromList(widget
+                                  .document.Content!.Images![url]!.Content!);
+                              return Image.memory(
+                                content,
                               );
-                            })
-                      else
-                        Html(
-                          data: text,
-                          style: {
-                            'html': Style(
-                              textAlign: TextAlign.justify,
-                              fontSize: FontSize(widget.style.fontSize!),
-                              fontFamily: widget.style.fontFamily,
-                              color: widget.style.color,
-                            ),
-                          },
-                          extensions: [
-                            TagExtension(
-                              tagsToExtend: {"img"},
-                              builder: (imageContext) {
-                                final url = imageContext.attributes['src']!
-                                    .replaceAll('../', '');
-                                var content = Uint8List.fromList(widget
-                                    .document.Content!.Images![url]!.Content!);
-                                return Image.memory(
-                                  content,
-                                );
-                              },
-                            ),
-                          ],
-                        ),
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

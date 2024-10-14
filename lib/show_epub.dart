@@ -884,11 +884,18 @@ class ShowEpubState extends State<ShowEpub> {
                                         }
 
                                         if (currentPage == totalPages - 1) {
+                                          print(
+                                              'currentPage == totalPages - 1');
+
                                           bookProgress.setCurrentPageIndex(
-                                              bookId, 0);
+                                              bookId, 10);
+                                          print('object');
                                         } else {
                                           bookProgress.setCurrentPageIndex(
                                               bookId, currentPage);
+
+                                          print('object');
+                                          print(currentPage);
                                         }
 
                                         if (isLastPage) {
