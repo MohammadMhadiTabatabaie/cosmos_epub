@@ -856,9 +856,8 @@ class ShowEpubState extends State<ShowEpub> {
 
                                       lastWidget: null,
                                       starterPageIndex: bookProgress
-                                              .getBookProgress(bookId)
-                                              .currentPageIndex ??
-                                          0,
+                                          .getBookProgress(bookId)
+                                          .currentPageIndex!,
 
                                       style: TextStyle(
                                           backgroundColor: backColor,
@@ -878,44 +877,44 @@ class ShowEpubState extends State<ShowEpub> {
                                         updateUI();
                                       },
                                       onPageFlip: (currentPage, totalPages) {
-                                        if (widget.onPageFlip != null) {
-                                          widget.onPageFlip!(
-                                              currentPage, totalPages);
-                                        }
+                                        // if (widget.onPageFlip != null) {
+                                        //   widget.onPageFlip!(
+                                        //       currentPage, totalPages);
+                                        // }
 
-                                        if (currentPage == totalPages - 1) {
-                                          print(
-                                              'currentPage == totalPages - 1');
+                                        // if (currentPage == totalPages - 1) {
+                                        //   print(
+                                        //       'currentPage == totalPages - 1');
 
-                                          bookProgress.setCurrentPageIndex(
-                                              bookId, 10);
-                                          print('object');
-                                        } else {
-                                          bookProgress.setCurrentPageIndex(
-                                              bookId, currentPage);
+                                        //   bookProgress.setCurrentPageIndex(
+                                        //       bookId, 0);
+                                        //   print('object');
+                                        // } else {
+                                        //   bookProgress.setCurrentPageIndex(
+                                        //       bookId, currentPage);
 
-                                          print('object');
-                                          print(currentPage);
-                                        }
+                                        //   print('object');
+                                        //   print(currentPage);
+                                        // }
 
-                                        if (isLastPage) {
-                                          if (isLastPage) {
-                                            showHeader = true;
-                                          } else {
-                                            lastSwipe = 0;
-                                          }
-                                          isLastPage = false;
-                                          updateUI();
-                                        }
+                                        // if (isLastPage) {
+                                        //   if (isLastPage) {
+                                        //     showHeader = true;
+                                        //   } else {
+                                        //     lastSwipe = 0;
+                                        //   }
+                                        //   isLastPage = false;
+                                        //   updateUI();
+                                        // }
 
-                                        if (currentPage == 0) {
-                                          prevSwipe++;
-                                          if (prevSwipe > 1) {
-                                            //  prevChapter();
-                                          }
-                                        } else {
-                                          prevSwipe = 0;
-                                        }
+                                        // if (currentPage == 0) {
+                                        //   prevSwipe++;
+                                        //   if (prevSwipe > 1) {
+                                        //     //  prevChapter();
+                                        //   }
+                                        // } else {
+                                        //   prevSwipe = 0;
+                                        // }
                                       },
                                       onLastPage: (index, totalPages) async {
                                         if (widget.onLastPage != null) {

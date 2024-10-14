@@ -103,14 +103,13 @@ class _PagingWidgetState extends State<PagingWidget> {
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.right,
       );
-
+      _currentPageIndex = widget.starterPageIndex;
       _loadMorePages(initialLoad: true);
       highlightedStream.addListener(() {
         if (widget.onHighlightTap != null && highlightedStream.value != null) {
           widget.onHighlightTap!(highlightedStream.value!);
         }
       });
-      // print('initState');
     });
   }
 
@@ -319,8 +318,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     return pageTexts.map((text) {
       final hasText = text.isNotEmpty;
       final hasImage = text.contains('<img');
-      String? lastDisplayedText;
-      setState(() {});
+
       // ScrollController برای هر صفحه مجزا
       final ScrollController _pageScrollController = ScrollController();
       return GestureDetector(
@@ -349,18 +347,10 @@ class _PagingWidgetState extends State<PagingWidget> {
                         ValueListenableBuilder(
                             valueListenable: paragraphList,
                             builder: (context, value, child) {
-                              String currentText = value.elementAt(
-                                widget.starterPageIndex != 0
-                                    ? (pages.isNotEmpty &&
-                                            widget.starterPageIndex <
-                                                pages.length
-                                        ? widget.starterPageIndex
-                                        : 0)
-                                    : widget.starterPageIndex,
-                              );
-
                               var htmlText = HTML.toRichText(
-                                  context, currentText, widget.style.color!);
+                                  context,
+                                  value[_currentPageIndex],
+                                  widget.style.color!);
 
                               return SelectableText.rich(
                                 textAlign: TextAlign.justify,
@@ -782,30 +772,22 @@ class _PagingWidgetState extends State<PagingWidget> {
                         //  color: widget.backColor,
                         //   height: _pageHeight,
                         child: PageFlipWidget(
+                          children: pages,
                           key: _pageController,
-
                           isRightSwipe: true,
+                          backgroundColor: widget.backColor,
                           initialIndex: widget.starterPageIndex != 0
                               ? (pages.isNotEmpty &&
                                       widget.starterPageIndex < pages.length
                                   ? widget.starterPageIndex
                                   : 0)
                               : widget.starterPageIndex,
-                          // initialIndex: _currentPageIndex,
-                          backgroundColor: widget.backColor, children: pages,
                           onPageFlip: (index) {
+                            _load();
                             setState(() {
                               _currentPageIndex = index;
                             });
-
-                            if (_currentPageIndex == pages.length - 1) {
-                              widget.onLastPage(index, pages.length);
-                            }
-                            widget.onPageFlip(index, pages.length);
-                            if (_currentPageIndex == pages.length - 5) {}
-                            _load();
-                          }, //widget.starterPageIndex,
-                          //initialIndex: initialPageIndex,
+                          },
                         ),
                       ),
                     ),

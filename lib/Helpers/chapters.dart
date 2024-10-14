@@ -98,7 +98,7 @@ class ChaptersList extends StatelessWidget {
                               // fontFamily: fontNames
                               //     .where((element) => element == selectedFont)
                               //     .first,
-
+                              fontFamily: 'IRANSans',
                               package: 'cosmos_epub',
                               fontSize: 15.sp,
                               // fontWeight: chapters[i].isSubChapter
