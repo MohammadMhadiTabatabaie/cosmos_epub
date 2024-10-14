@@ -778,13 +778,13 @@ class _PagingWidgetState extends State<PagingWidget> {
                           key: _pageController,
 
                           isRightSwipe: true,
-                          // initialIndex: widget.starterPageIndex != 0
-                          //     ? (pages.isNotEmpty &&
-                          //             widget.starterPageIndex < pages.length
-                          //         ? widget.starterPageIndex
-                          //         : 0)
-                          //     : widget.starterPageIndex,
-                          initialIndex: _currentPageIndex,
+                          initialIndex: widget.starterPageIndex != 0
+                              ? (pages.isNotEmpty &&
+                                      widget.starterPageIndex < pages.length
+                                  ? widget.starterPageIndex
+                                  : 0)
+                              : widget.starterPageIndex,
+                          // initialIndex: _currentPageIndex,
                           backgroundColor: widget.backColor, children: pages,
                           onPageFlip: (index) {
                             setState(() {
