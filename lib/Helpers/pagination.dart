@@ -349,8 +349,15 @@ class _PagingWidgetState extends State<PagingWidget> {
                         ValueListenableBuilder(
                             valueListenable: paragraphList,
                             builder: (context, value, child) {
-                              String currentText =
-                                  value.elementAt(_currentPageIndex);
+                              String currentText = value.elementAt(
+                                widget.starterPageIndex != 0
+                                    ? (pages.isNotEmpty &&
+                                            widget.starterPageIndex <
+                                                pages.length
+                                        ? widget.starterPageIndex
+                                        : 0)
+                                    : widget.starterPageIndex,
+                              );
 
                               var htmlText = HTML.toRichText(
                                   context, currentText, widget.style.color!);
