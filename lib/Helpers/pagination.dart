@@ -103,7 +103,11 @@ class _PagingWidgetState extends State<PagingWidget> {
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.right,
       );
-      _currentPageIndex = widget.starterPageIndex;
+      _currentPageIndex = widget.starterPageIndex != 0
+          ? (pages.isNotEmpty && widget.starterPageIndex < pages.length
+              ? widget.starterPageIndex
+              : 0)
+          : widget.starterPageIndex;
 
       _loadMorePages(initialLoad: true);
       highlightedStream.addListener(() {
@@ -145,12 +149,10 @@ class _PagingWidgetState extends State<PagingWidget> {
   @override
   void didUpdateWidget(covariant PagingWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print('ffwwfakmsfklajslfkjaslfjkklsajf');
     if (oldWidget.style != widget.style ||
         oldWidget.textContent != widget.textContent) {
       // _loadPages(initialLoad: false, oldWidget: oldWidget);
       _loadPages();
-      print('didUpdateWidget');
     }
   }
 
@@ -788,6 +790,11 @@ class _PagingWidgetState extends State<PagingWidget> {
                             setState(() {
                               _currentPageIndex = index;
                             });
+                            widget.onPageFlip(_currentPageIndex, pages.length);
+                            if (_currentPageIndex == pages.length - 1) {
+                              widget.onLastPage(
+                                  _currentPageIndex, pages.length);
+                            }
                           },
                         ),
                       ),
