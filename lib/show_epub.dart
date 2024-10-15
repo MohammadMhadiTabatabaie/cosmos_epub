@@ -878,25 +878,25 @@ class ShowEpubState extends State<ShowEpub> {
                                         updateUI();
                                       },
                                       onPageFlip: (currentPage, totalPages) {
-                                        // if (widget.onPageFlip != null) {
-                                        //   widget.onPageFlip!(
-                                        //       currentPage, totalPages);
-                                        // }
+                                        if (widget.onPageFlip != null) {
+                                          widget.onPageFlip!(
+                                              currentPage, totalPages);
+                                        }
 
-                                        // if (currentPage == totalPages - 1) {
-                                        //   print(
-                                        //       'currentPage == totalPages - 1');
+                                        if (currentPage == totalPages - 1) {
+                                          print(
+                                              'currentPage == totalPages - 1');
 
-                                        //   bookProgress.setCurrentPageIndex(
-                                        //       bookId, 0);
-                                        //   print('object');
-                                        // } else {
-                                        //   bookProgress.setCurrentPageIndex(
-                                        //       bookId, currentPage);
+                                          bookProgress.setCurrentPageIndex(
+                                              bookId, 0);
+                                          print('object');
+                                        } else {
+                                          bookProgress.setCurrentPageIndex(
+                                              bookId, currentPage);
 
-                                        //   print('object');
-                                        //   print(currentPage);
-                                        // }
+                                          print('object');
+                                          print(currentPage);
+                                        }
 
                                         // if (isLastPage) {
                                         //   if (isLastPage) {
