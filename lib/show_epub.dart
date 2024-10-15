@@ -856,8 +856,9 @@ class ShowEpubState extends State<ShowEpub> {
 
                                       lastWidget: null,
                                       starterPageIndex: bookProgress
-                                          .getBookProgress(bookId)
-                                          .currentPageIndex!,
+                                              .getBookProgress(bookId)
+                                              .currentPageIndex ??
+                                          0,
 
                                       style: TextStyle(
                                           backgroundColor: backColor,

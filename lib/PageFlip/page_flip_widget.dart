@@ -43,12 +43,12 @@ class PageFlipWidgetState extends State<PageFlipWidget>
   void didUpdateWidget(PageFlipWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // if (oldWidget.backgroundColor != widget.backgroundColor ||
-    //     oldWidget.children.length != widget.children.length ||
-    //     oldWidget.lastPage != widget.lastPage ||
-    //     oldWidget.isRightSwipe != widget.isRightSwipe) {
-    //   _setUp(isRefresh: true);
-    // }
+    if (oldWidget.backgroundColor != widget.backgroundColor ||
+        oldWidget.children.length != widget.children.length ||
+        oldWidget.lastPage != widget.lastPage ||
+        oldWidget.isRightSwipe != widget.isRightSwipe) {
+      _setUp(isRefresh: true);
+    }
   }
 
   @override
@@ -67,8 +67,7 @@ class PageFlipWidgetState extends State<PageFlipWidget>
     // currentPage = ValueNotifier(-1);
     // currentWidget = ValueNotifier(Container());
     // currentPageIndex = ValueNotifier(0);
-    currentPageIndex = ValueNotifier(0);
-    pageNumber = widget.initialIndex;
+    // // currentPageIndex = ValueNotifier(0);
 
     _setUp();
   }
@@ -106,8 +105,8 @@ class PageFlipWidgetState extends State<PageFlipWidget>
     }
     // if (widget.initialIndex != 0) {
     //   currentPage = ValueNotifier(pageNumber);
-    currentWidget = ValueNotifier(pages[pageNumber]);
-    currentPageIndex = ValueNotifier(pageNumber);
+    // currentWidget = ValueNotifier(pages[pageNumber]);
+    // currentPageIndex = ValueNotifier(pageNumber);
     //   }
   }
 
