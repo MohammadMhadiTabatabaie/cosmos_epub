@@ -103,11 +103,7 @@ class _PagingWidgetState extends State<PagingWidget> {
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.right,
       );
-      _currentPageIndex = widget.starterPageIndex != 0
-          ? (pages.isNotEmpty && widget.starterPageIndex < pages.length
-              ? widget.starterPageIndex
-              : 0)
-          : widget.starterPageIndex;
+      _currentPageIndex = widget.starterPageIndex;
 
       _loadMorePages(initialLoad: true);
       highlightedStream.addListener(() {
