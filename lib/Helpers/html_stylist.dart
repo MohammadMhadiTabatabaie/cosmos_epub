@@ -162,12 +162,12 @@ class Parser {
                   attribute.value.replaceAll(r":", "__#COLON#__"));
             }
           }
-
+          print(event.name);
           _stack.add(_Tag(event.name, styles));
-        } else {
-          if (event.name == "br") {
-            spans.add(const TextSpan(text: "\n"));
-          }
+        } else {}
+        if (event.name == 'br') {
+          print('spans.add(cons');
+          spans.add(const TextSpan(text: "\n"));
         }
       }
 
@@ -180,6 +180,7 @@ class Parser {
         //   return;
         // }
         if (event.name == "p") {
+          print('pppp');
           spans.add(const TextSpan(text: "\n"));
         }
       }

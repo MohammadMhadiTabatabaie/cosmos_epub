@@ -120,6 +120,20 @@ class BookProgressSingleton {
     }
   }
 
+  Future<void> deleteHighlight(int id) async {
+    try {
+      // حذف رکورد با شناسه id
+      await isar.writeTxn(() async {
+        bool success = await isar.selectedTextModels.delete(id);
+        if (!success) {
+          print('Failed to delete highlight with id $id');
+        }
+      });
+    } catch (e) {
+      print('Error deleting highlight with id $id: $e');
+    }
+  }
+
   BookProgressModel getBookProgress(String bookId) {
     var newBookProgressModel =
         BookProgressModel(currentPageIndex: 0, currentChapterIndex: 0);

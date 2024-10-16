@@ -348,7 +348,7 @@ class _PagingWidgetState extends State<PagingWidget> {
           //onTextFound('$text ss');
 
           //       onTextFound(text + '\n<br>');
-          onTextFound('$text\n');
+          onTextFound('$text <br>');
         }
       }
       if (child.children.isNotEmpty) {
@@ -705,11 +705,12 @@ class _PagingWidgetState extends State<PagingWidget> {
       //     state.textEditingValue.text,
       //   ),
       // );
-
+      print(' dsdad');
+      print(tag);
       bookProgress.setHighlight(
           index,
           bookid,
-          tag!,
+          tag ?? 'null',
           formattedParagraph,
           state.textEditingValue.selection.textInside(
             state.textEditingValue.text,
