@@ -5,7 +5,7 @@ import 'package:flutter/src/foundation/change_notifier.dart';
 class CustomSelectionToolbar extends StatelessWidget {
   final TextSelectionDelegate delegate;
 
-  CustomSelectionToolbar({required this.delegate});
+  const CustomSelectionToolbar({super.key, required this.delegate});
 
   @override
   Widget build(BuildContext context) {

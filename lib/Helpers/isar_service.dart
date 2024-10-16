@@ -1,8 +1,9 @@
 import 'package:cosmos_epub/Model/book_progress_model.dart';
+import 'package:cosmos_epub/Model/selection_model.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
-const SCHEMES = [BookProgressModelSchema];
+const SCHEMES = [BookProgressModelSchema, SelectedTextModelSchema];
 
 class IsarService {
   late final Isar isar;
@@ -16,7 +17,7 @@ class IsarService {
 
     if (isarInstance == null) {
       final isar = await Isar.open(
-        [BookProgressModelSchema],
+        SCHEMES,
         name: 'cosmos_epub',
         directory: dir.path,
       );

@@ -23,7 +23,8 @@ class CircleButton extends StatelessWidget {
           //   shape: BoxShape.circle,
           border: Border.all(
               width: 1,
-              color: staticThemeId == id ? Color(0xffB0276D) : Colors.grey),
+              color:
+                  staticThemeId == id ? const Color(0xffB0276D) : Colors.grey),
           borderRadius: BorderRadius.circular(8)),
       child: Container(
         width: 32,

@@ -6,6 +6,7 @@ import 'package:cosmos_epub/Helpers/html_stylist.dart';
 import 'package:cosmos_epub/Model/chapter_model.dart';
 import 'package:cosmos_epub/Model/selection_model.dart';
 import 'package:cosmos_epub/PageFlip/page_flip_widget.dart';
+import 'package:cosmos_epub/show_epub.dart';
 import 'package:epubx/epubx.dart' as epubx;
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart' as html_parser;
@@ -39,6 +40,7 @@ class PagingWidget extends StatefulWidget {
   final List<int> chaptercount; // اضافه شده: لیست صفحات فصول
   List<LocalChapterModel> chapters = [];
   final Function(SelectedTextModel selectedTextModel)? onHighlightTap;
+  final String bookId;
 
   PagingWidget(
     this.textContent,
@@ -65,6 +67,7 @@ class PagingWidget extends StatefulWidget {
     required this.chaptercount,
     required this.chapters,
     this.onHighlightTap,
+    required this.bookId,
   });
 
   @override
@@ -93,6 +96,7 @@ class _PagingWidgetState extends State<PagingWidget> {
   static final highlightedStream = ValueNotifier<SelectedTextModel?>(null);
   //late EditableTextState state1;
   int currentPage = 0;
+
   @override
   void initState() {
     super.initState();
@@ -112,6 +116,46 @@ class _PagingWidgetState extends State<PagingWidget> {
         }
       });
     });
+  }
+
+  // void displayAllHighlights() async {
+  //   print('نمایش دیتابیس');
+  //   List<SelectedTextModel> highlights =
+  //       await bookProgress.getHighlightsByBook('5');
+
+  //   for (var highlight in highlights) {
+  //     print('Paragraph Index: ${highlight.paragraphIndex}');
+  //     print('Selected Text: ${highlight.selectedText}');
+  //     print('Book ID: ${highlight.bookid}');
+  //     print('paragraphText: ${highlight.paragraphText}');
+  //     print('--------------------------------');
+  //   }
+  // }
+  Future<void> displayAllHighlights() async {
+    try {
+      // فرض کنیم bookid مربوط به کتاب جاری است
+
+      // دریافت هایلایت‌ها از دیتابیس
+      List<SelectedTextModel> highlights =
+          await bookProgress.getHighlightsByBook(widget.bookId);
+
+      // پردازش هایلایت‌ها و اعمال آن‌ها به پاراگراف‌ها
+      for (var highlight in highlights) {
+        int paragraphIndex = highlight.paragraphIndex;
+        String formattedParagraph = highlight.paragraphText;
+
+        // اعمال متن هایلایت‌شده به لیست پاراگراف‌ها
+        if (paragraphIndex < paragraphList.value.length) {
+          paragraphList.value[paragraphIndex] = formattedParagraph;
+        }
+      }
+
+      // نوتیفای کردن تغییرات به لیسنرها
+      paragraphList.notifyListeners();
+      highlightedStream.notifyListeners();
+    } catch (e) {
+      print("Error displaying highlights: $e");
+    }
   }
 
   @override
@@ -134,6 +178,7 @@ class _PagingWidgetState extends State<PagingWidget> {
         return e.trim();
       },
     ).toList();
+    displayAllHighlights();
   }
 
   @override
@@ -303,7 +348,7 @@ class _PagingWidgetState extends State<PagingWidget> {
           //onTextFound('$text ss');
 
           //       onTextFound(text + '\n<br>');
-          onTextFound(text + '\n');
+          onTextFound('$text\n');
         }
       }
       if (child.children.isNotEmpty) {
@@ -319,7 +364,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       final hasImage = text.contains('<img');
 
       // ScrollController برای هر صفحه مجزا
-      final ScrollController _pageScrollController = ScrollController();
+      final ScrollController pageScrollController = ScrollController();
       return GestureDetector(
         onTap: () {
           setState(() {});
@@ -335,10 +380,10 @@ class _PagingWidgetState extends State<PagingWidget> {
                 child: Scrollbar(
                   scrollbarOrientation: ScrollbarOrientation.right,
                   interactive: true,
-                  controller: _pageScrollController,
+                  controller: pageScrollController,
                   thumbVisibility: true,
                   child: ListView(
-                    controller: _pageScrollController,
+                    controller: pageScrollController,
                     primary: false,
                     shrinkWrap: true,
                     children: [
@@ -406,7 +451,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -415,12 +460,12 @@ class _PagingWidgetState extends State<PagingWidget> {
   }
 
   List<Color> colors = [
-    Color(0xFFFFFF00),
-    Color(0xFF00FFFF),
-    Color(0xFFFF69B4),
-    Color(0xFF90EE90),
-    Color(0xFFFFA07A),
-    Color(0xFFDDA0DD),
+    const Color(0xFFFFFF00),
+    const Color(0xFF00FFFF),
+    const Color(0xFFFF69B4),
+    const Color(0xFF90EE90),
+    const Color(0xFFFFA07A),
+    const Color(0xFFDDA0DD),
   ];
   List<Widget> toolbarSelectionActions(
       EditableTextState state, List<Color> options) {
@@ -440,6 +485,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                     state: state,
                     index: _currentPageIndex - 1,
                     tag: 'tgYellow',
+                    bookid: widget.bookId,
                   );
                 },
                 child: Container(
@@ -461,6 +507,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                     state: state,
                     index: _currentPageIndex,
                     tag: 'tgCyan',
+                    bookid: widget.bookId,
                   );
                 },
                 child: Container(
@@ -482,6 +529,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                     state: state,
                     index: _currentPageIndex,
                     tag: 'tgPink',
+                    bookid: widget.bookId,
                   );
                 },
                 child: Container(
@@ -502,6 +550,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                   applyHighlight(
                     state: state,
                     index: _currentPageIndex,
+                    bookid: widget.bookId,
                     tag: 'tgGreen',
                   );
                 },
@@ -523,6 +572,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                   applyHighlight(
                     state: state,
                     index: _currentPageIndex,
+                    bookid: widget.bookId,
                     tag: 'tgOrange',
                   );
                 },
@@ -544,6 +594,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                   applyHighlight(
                     state: state,
                     index: _currentPageIndex,
+                    bookid: widget.bookId,
                     tag: 'tgLilac',
                   );
                 },
@@ -566,6 +617,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                     state: state,
                     index: _currentPageIndex,
                     tag: null,
+                    bookid: widget.bookId,
                   );
                 },
                 child: const Icon(Icons.close),
@@ -589,6 +641,7 @@ class _PagingWidgetState extends State<PagingWidget> {
     required EditableTextState state,
     required String? tag,
     required int index,
+    required String bookid,
   }) {
     String paragraphText = paragraphList.value[index];
     final selectedStartIndex = state.textEditingValue.selection.start;
@@ -640,20 +693,30 @@ class _PagingWidgetState extends State<PagingWidget> {
         '$formattedText'
         '$spanEndTag'
         '$lastTag';
-    // if (html_parser.parse(formattedParagraph).outerHtml.isNotEmpty) {
-    paragraphList.value[index] = formattedParagraph;
+    if (html_parser.parse(formattedParagraph).outerHtml.isNotEmpty) {
+      paragraphList.value[index] = formattedParagraph;
 
-    // highlightedStream.value = SelectedTextModel(
-    //   paragraphIndex: index,
-    //   tag: tag,
-    //   paragraphText: formattedParagraph,
-    //   selectedText: state.textEditingValue.selection.textInside(
-    //     state.textEditingValue.text,
-    //   ),
-    // );
-    paragraphList.notifyListeners();
-    highlightedStream.notifyListeners();
-    //  }
+      // highlightedStream.value = SelectedTextModel(
+      //   paragraphIndex: index,
+      //   bookid: '5',
+      //   tag: tag,
+      //   paragraphText: formattedParagraph,
+      //   selectedText: state.textEditingValue.selection.textInside(
+      //     state.textEditingValue.text,
+      //   ),
+      // );
+
+      bookProgress.setHighlight(
+          index,
+          bookid,
+          tag!,
+          formattedParagraph,
+          state.textEditingValue.selection.textInside(
+            state.textEditingValue.text,
+          ));
+      paragraphList.notifyListeners();
+      highlightedStream.notifyListeners();
+    }
   }
 
   static int mapPlainTextIndexToHtmlIndex(String html, int plainTextIndex) {
@@ -745,7 +808,7 @@ class _PagingWidgetState extends State<PagingWidget> {
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return SizedBox();
+            return const SizedBox();
           //   return Center(
           //       child: Container(
           //     height: 100,
@@ -771,7 +834,6 @@ class _PagingWidgetState extends State<PagingWidget> {
                         //  color: widget.backColor,
                         //   height: _pageHeight,
                         child: PageFlipWidget(
-                          children: pages,
                           key: _pageController,
                           isRightSwipe: true,
                           backgroundColor: widget.backColor,
@@ -792,6 +854,7 @@ class _PagingWidgetState extends State<PagingWidget> {
                                   _currentPageIndex, pages.length);
                             }
                           },
+                          children: pages,
                         ),
                       ),
                     ),

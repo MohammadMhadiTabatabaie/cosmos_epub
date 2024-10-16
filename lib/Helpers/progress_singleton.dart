@@ -1,4 +1,5 @@
 import 'package:cosmos_epub/Model/book_progress_model.dart';
+import 'package:cosmos_epub/Model/selection_model.dart';
 import 'package:isar/isar.dart';
 
 class BookProgressSingleton {
@@ -6,7 +7,8 @@ class BookProgressSingleton {
 
   BookProgressSingleton({required this.isar});
 
-  Future<bool> setCurrentChapterIndex(String bookId, int chapterIndex,int currentPageIndex) async {
+  Future<bool> setCurrentChapterIndex(
+      String bookId, int chapterIndex, int currentPageIndex) async {
     try {
       BookProgressModel? oldBookProgressModel = await isar.bookProgressModels
           .where()
@@ -31,6 +33,62 @@ class BookProgressSingleton {
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<bool> setHighlight(
+    int paragraphIndex,
+    String bookid,
+    String tag,
+    String paragraphText,
+    String selectedText,
+  ) async {
+    try {
+      print('ذخیره سازی در دیتابیس');
+      SelectedTextModel? oldSelectedTextModel = await isar.selectedTextModels
+          .where()
+          .filter()
+          .bookidEqualTo(bookid)
+          .and()
+          .paragraphIndexEqualTo(paragraphIndex)
+          .findFirst();
+
+      if (oldSelectedTextModel != null) {
+        oldSelectedTextModel.bookid = bookid;
+        oldSelectedTextModel.tag = tag;
+        oldSelectedTextModel.selectedText = selectedText;
+        oldSelectedTextModel.paragraphText = paragraphText;
+        await isar.writeTxn(() async {
+          isar.selectedTextModels.put(oldSelectedTextModel);
+        });
+      } else {
+        var newSelectedTextModel = SelectedTextModel(
+            paragraphIndex: paragraphIndex,
+            bookid: bookid,
+            tag: tag,
+            selectedText: selectedText,
+            paragraphText: paragraphText);
+        await isar.writeTxn(() async {
+          isar.selectedTextModels.put(newSelectedTextModel);
+        });
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<List<SelectedTextModel>> getHighlightsByBook(String bookid) async {
+    try {
+      List<SelectedTextModel> highlights = await isar.selectedTextModels
+          .where()
+          .filter()
+          .bookidEqualTo(bookid)
+          .findAll();
+      return highlights;
+    } catch (e) {
+      print('Error fetching highlights for book $bookid: $e');
+      return [];
     }
   }
 

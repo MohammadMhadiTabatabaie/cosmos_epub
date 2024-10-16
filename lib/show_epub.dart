@@ -346,7 +346,8 @@ class ShowEpubState extends State<ShowEpub> {
                           child: Column(
                             children: [
                               Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 margin: EdgeInsets.symmetric(
                                     horizontal: 10.h, vertical: 8.w),
                                 height: 45.h,
@@ -362,7 +363,7 @@ class ShowEpubState extends State<ShowEpub> {
                                           fontFamily: 'IRANSans',
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 20,
                                     ),
                                     GestureDetector(
@@ -772,7 +773,7 @@ class ShowEpubState extends State<ShowEpub> {
           //  onTextFound(text);
           //onTextFound('$text ss');
 
-          onTextFound(text + '\n ');
+          onTextFound('$text\n ');
         }
       }
       if (child.children.isNotEmpty) {
@@ -931,6 +932,7 @@ class ShowEpubState extends State<ShowEpub> {
                                         debugPrint(
                                             'Highlighted Text: $selectedTextModel');
                                       },
+                                      bookId: bookId,
                                     );
                                   }
                               }

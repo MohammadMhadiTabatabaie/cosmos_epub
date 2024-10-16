@@ -1,15 +1,25 @@
+import 'package:isar/isar.dart';
+
+part 'selection_model.g.dart';
+
+@collection
+@Name("SelectedTextModel")
 class SelectedTextModel {
-  const SelectedTextModel({
+  SelectedTextModel({
     required this.paragraphIndex,
+    required this.bookid,
     required this.tag,
     required this.selectedText,
     required this.paragraphText,
   });
 
-  final int paragraphIndex;
-  final String? tag;
-  final String paragraphText;
-  final String selectedText;
+  Id id = Isar.autoIncrement; // ID خودکار
+
+  int paragraphIndex;
+  String bookid;
+  String? tag;
+  String paragraphText;
+  String selectedText;
 
   @override
   String toString() {
