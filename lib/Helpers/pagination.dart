@@ -809,21 +809,21 @@ class _PagingWidgetState extends State<PagingWidget> {
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return const SizedBox();
-          //   return Center(
-          //       child: Container(
-          //     height: 100,
-          //     width: MediaQuery.sizeOf(context).width / 1.5,
-          //     decoration: BoxDecoration(
-          //       borderRadius: BorderRadius.circular(16),
-          //       color: Colors.white,
-          //     ),
-          //     child: const Center(
-          //         child: Text(
-          //       'کتاب در حال اماده سازی میباشد ',
-          //       style: TextStyle(fontSize: 16, color: Colors.black),
-          //     )),
-          //   ));
+            //   return const SizedBox();
+            return Center(
+                child: Container(
+              height: 100,
+              width: MediaQuery.sizeOf(context).width / 1.5,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+              ),
+              child: const Center(
+                  child: Text(
+                'کتاب در حال اماده سازی میباشد ',
+                style: TextStyle(fontSize: 16, color: Colors.black),
+              )),
+            ));
           default:
             return Stack(
               children: [
