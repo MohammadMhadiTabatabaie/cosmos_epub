@@ -370,20 +370,21 @@ class _PagingWidgetState extends State<PagingWidget> {
           setState(() {});
         },
         //   onTap: widget.onTextTap,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                margin: const EdgeInsets.only(top: 40),
-                child: Scrollbar(
-                  scrollbarOrientation: ScrollbarOrientation.right,
-                  interactive: true,
-                  controller: pageScrollController,
-                  thumbVisibility: true,
+        child: Scrollbar(
+          scrollbarOrientation: ScrollbarOrientation.right,
+          interactive: true,
+          controller: pageScrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  margin: const EdgeInsets.only(top: 40),
                   child: ListView(
                     controller: pageScrollController,
+                    //  physics: BouncingScrollPhysics(),
                     primary: false,
                     shrinkWrap: true,
                     children: [
@@ -450,9 +451,9 @@ class _PagingWidgetState extends State<PagingWidget> {
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       );
